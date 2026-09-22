@@ -12,11 +12,11 @@ class Project_Showcase extends Base {
 		$this->start_controls_section( 'query', array( 'label' => 'Projects', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
 		$this->add_control( 'layout', array(
 			'label' => 'Layout', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'grid',
-			'options' => array( 'grid'=>'Grid', 'masonry'=>'Masonry', 'bento'=>'Bento', 'carousel'=>'Carousel', 'horizontal'=>'Horizontal', 'featured'=>'Featured', 'editorial'=>'Editorial' ),
+			'options' => array( 'grid'=>'Grid', 'masonry'=>'Masonry', 'bento'=>'Bento', 'carousel'=>'Carousel', 'horizontal'=>'Horizontal', 'featured'=>'Featured', 'editorial'=>'Editorial', 'mosaic'=>'Mosaic', 'stack'=>'Stacked stories' ),
 		) );
 		$this->add_control( 'preset', array(
 			'label' => 'Card Style', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'modern',
-			'options' => array( 'modern'=>'Modern Editorial', 'luxury'=>'Luxury', 'editorial'=>'Editorial', 'architectural'=>'Architectural', 'cinematic'=>'Cinematic', 'minimal'=>'Minimal', 'classic'=>'Classic', 'dark'=>'Dark', 'light'=>'Light', 'glass'=>'Glass', 'magazine'=>'Magazine', 'overlay'=>'Overlay', 'split'=>'Split', 'bento'=>'Bento', 'floating'=>'Floating', 'monochrome'=>'Monochrome', 'line'=>'Editorial Line', 'asymmetric'=>'Asymmetric', 'fullimage'=>'Full image', 'interactive'=>'Interactive' ),
+			'options' => array( 'modern'=>'Modern Editorial', 'luxury'=>'Luxury', 'editorial'=>'Editorial', 'architectural'=>'Architectural', 'cinematic'=>'Cinematic', 'minimal'=>'Minimal', 'classic'=>'Classic', 'dark'=>'Dark', 'light'=>'Light', 'glass'=>'Glass', 'magazine'=>'Magazine', 'overlay'=>'Overlay', 'split'=>'Split', 'bento'=>'Bento', 'floating'=>'Floating', 'monochrome'=>'Monochrome', 'line'=>'Editorial Line', 'asymmetric'=>'Asymmetric', 'fullimage'=>'Full image', 'interactive'=>'Interactive', 'dossier'=>'Dossier', 'atelier'=>'Atelier', 'courtyard'=>'Courtyard' ),
 		) );
 		$this->add_control( 'animation', array(
 			'label' => 'Animation', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'reveal',

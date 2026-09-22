@@ -21,7 +21,7 @@ class Projects {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		if ( ! $screen ) { return $classes; }
 		$allowed = array( PSS_PROJECT_CPT, PSS_LAYOUT_CPT );
-		if ( in_array( $screen->post_type, $allowed, true ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) || false !== strpos( (string) $screen->id, 'pss-project-settings' ) ) {
+		if ( in_array( $screen->post_type, $allowed, true ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) || false !== strpos( (string) $screen->id, 'pss-project-settings' ) || false !== strpos( (string) $screen->id, 'pss-layouts' ) ) {
 			$classes .= ' pss-admin-screen';
 		}
 		return $classes;
@@ -109,6 +109,9 @@ class Projects {
 	public static function admin_assets( $hook ) {
 		$screen = get_current_screen();
 		if ( ! $screen || PSS_PROJECT_CPT !== $screen->post_type ) {
+			return;
+		}
+		if ( false !== strpos( (string) $screen->id, 'pss-layouts' ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) ) {
 			return;
 		}
 		wp_enqueue_media();
@@ -208,6 +211,9 @@ class Projects {
 			'pss_subtitle' => '_pss_subtitle', 'pss_year' => '_pss_year', 'pss_area' => '_pss_area', 'pss_duration' => '_pss_duration',
 			'pss_designer' => '_pss_designer', 'pss_architect' => '_pss_architect', 'pss_client' => '_pss_client', 'pss_team' => '_pss_team',
 			'pss_services' => '_pss_services', 'pss_materials' => '_pss_materials', 'pss_colors' => '_pss_colors', 'pss_features' => '_pss_features',
+			'pss_contractor' => '_pss_contractor', 'pss_contractor_company' => '_pss_contractor_company', 'pss_status' => '_pss_status',
+			'pss_budget' => '_pss_budget', 'pss_completion' => '_pss_completion', 'pss_photographer' => '_pss_photographer',
+			'pss_consultant' => '_pss_consultant', 'pss_engineer' => '_pss_engineer',
 			'pss_video' => '_pss_video', 'pss_before' => '_pss_before', 'pss_after' => '_pss_after', 'pss_floor_plan' => '_pss_floor_plan',
 		);
 		foreach ( $map as $input => $meta ) {

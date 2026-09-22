@@ -273,6 +273,14 @@
     const list=document.getElementById('pss-field-list'); if(!list)return;
     document.querySelectorAll('.pss-field-builder').forEach(b=>{b.querySelector('.pss-field-type')?.addEventListener('change',()=>refreshDefinition(b));});
     document.getElementById('pss-add-field')?.addEventListener('click',()=>{const idx=list.children.length;const d=document.createElement('div');d.className='pss-field-builder';d.dataset.index=idx;d.innerHTML=`<div class="pss-field-builder__head"><strong>Field</strong><button type="button" class="button-link-delete pss-remove-field">Remove</button></div><div class="pss-grid-3"><label>Label<input type="text" name="fields[${idx}][label]"></label><label>Key<input type="text" name="fields[${idx}][key]"></label><label>Type<select class="pss-field-type" name="fields[${idx}][type]">${optionHtml('text')}</select></label></div><label>Description<input type="text" name="fields[${idx}][description]"></label><label><input type="checkbox" name="fields[${idx}][required]" value="1"> Required</label><div class="pss-field-type-options"></div>`;list.appendChild(d);d.querySelector('.pss-field-type')?.addEventListener('change',()=>refreshDefinition(d));});
+    const search=document.getElementById('pss-field-library-search');
+    search?.addEventListener('input',()=>{
+      const term=(search.value||'').toLowerCase().trim();
+      list.querySelectorAll('.pss-field-builder').forEach(row=>{
+        const text=(row.textContent||'').toLowerCase();
+        row.style.display=!term||text.includes(term)?'':'none';
+      });
+    });
     list.addEventListener('click',e=>{if(e.target.classList.contains('pss-remove-field'))e.target.closest('.pss-field-builder')?.remove();if(e.target.classList.contains('pss-add-subfield')){const b=e.target.closest('.pss-field-builder');const box=b?.querySelector('.pss-subfields-builder');const type=b?.querySelector('.pss-field-type')?.value||'text';box?.querySelector('.pss-subfields-list')?.insertAdjacentHTML('beforeend',fieldLibrarySubfieldRow(type));syncDefinition(b);}});
   }
 

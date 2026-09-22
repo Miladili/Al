@@ -43,7 +43,7 @@ class Ajax {
 
 class RenderCards {
 	private static function overlay_presets() {
-		return array( 'modern', 'luxury', 'cinematic', 'overlay', 'dark', 'glass', 'magazine', 'floating', 'architectural', 'monochrome', 'fullimage', 'interactive' );
+		return array( 'modern', 'luxury', 'cinematic', 'overlay', 'dark', 'glass', 'magazine', 'floating', 'architectural', 'monochrome', 'fullimage', 'interactive', 'dossier', 'atelier' );
 	}
 
 	private static function meta_placement( $settings ) {

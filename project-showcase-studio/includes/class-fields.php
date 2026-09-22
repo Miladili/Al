@@ -15,7 +15,7 @@ class Fields {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		if ( ! $screen ) { return $classes; }
 		$allowed = array( PSS_PROJECT_CPT, PSS_LAYOUT_CPT );
-		if ( in_array( $screen->post_type, $allowed, true ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) || false !== strpos( (string) $screen->id, 'pss-project-settings' ) ) {
+		if ( in_array( $screen->post_type, $allowed, true ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) || false !== strpos( (string) $screen->id, 'pss-project-settings' ) || false !== strpos( (string) $screen->id, 'pss-layouts' ) ) {
 			$classes .= ' pss-admin-screen';
 		}
 		return $classes;
@@ -46,6 +46,7 @@ class Fields {
 		<div class="wrap pss-fields-admin">
 			<h1>Project Fields</h1>
 			<p class="description">Create reusable fields for Projects. These fields are filled in the Project editor and can be displayed from Elementor.</p>
+			<p><input type="search" id="pss-field-library-search" class="regular-text" placeholder="Search field library…"></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="pss_save_field_definitions">
 				<?php wp_nonce_field( 'pss_fields_save', 'pss_fields_nonce' ); ?>
@@ -334,12 +335,7 @@ class Fields {
 
 	private static function render_card_field_picker( $project_id, $defs ) {
 		$selected = get_project_card_fields( $project_id );
-		$core = array(
-			'core:title' => 'Title', 'core:subtitle' => 'Subtitle', 'core:style' => 'Style', 'core:location' => 'Location', 'core:type' => 'Project Type',
-			'core:category' => 'Category', 'core:year' => 'Year', 'core:area' => 'Area', 'core:duration' => 'Duration', 'core:designer' => 'Designer', 'core:architect' => 'Architect', 'core:client' => 'Client',
-		);
-		$available = array();
-		foreach ( $core as $key => $label ) $available[ $key ] = $label;
+		$available = get_project_core_card_labels();
 		foreach ( $defs as $field ) {
 			$key = sanitize_key( $field['key'] ?? '' );
 			if ( $key ) $available[ $key ] = (string) ( $field['label'] ?? $key );
@@ -571,7 +567,7 @@ class Fields {
 		update_post_meta( $post_id, '_pss_local_field_values', $local_values );
 
 		$card_fields = isset( $_POST['pss_card_fields'] ) ? (array) wp_unslash( $_POST['pss_card_fields'] ) : array();
-		$allowed = array( 'core:title', 'core:subtitle', 'core:style', 'core:location', 'core:type', 'core:category', 'core:year', 'core:area', 'core:duration', 'core:designer', 'core:architect', 'core:client' );
+		$allowed = array_keys( get_project_core_card_labels() );
 		foreach ( get_field_definitions( $post_id ) as $field ) {
 			$key = sanitize_key( $field['key'] ?? '' );
 			if ( $key ) $allowed[] = $key;

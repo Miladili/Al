@@ -402,12 +402,43 @@ function get_project_core_field_library() {
 		'designer' => array( 'label' => 'Designer', 'type' => 'text', 'meta_key' => '_pss_designer', 'description' => 'Designer name.' ),
 		'architect' => array( 'label' => 'Architect', 'type' => 'text', 'meta_key' => '_pss_architect', 'description' => 'Architect name.' ),
 		'client' => array( 'label' => 'Client', 'type' => 'text', 'meta_key' => '_pss_client', 'description' => 'Client name.' ),
+		'contractor' => array( 'label' => 'Contractor', 'type' => 'text', 'meta_key' => '_pss_contractor', 'description' => 'General contractor or builder.' ),
+		'contractor_company' => array( 'label' => 'Contractor company', 'type' => 'text', 'meta_key' => '_pss_contractor_company', 'description' => 'Contractor company name.' ),
+		'status' => array( 'label' => 'Status', 'type' => 'text', 'meta_key' => '_pss_status', 'description' => 'e.g. Concept, In progress, Completed.' ),
+		'budget' => array( 'label' => 'Budget', 'type' => 'text', 'meta_key' => '_pss_budget', 'description' => 'Optional budget or cost range.' ),
+		'completion' => array( 'label' => 'Completion', 'type' => 'text', 'meta_key' => '_pss_completion', 'description' => 'Completion date or season.' ),
+		'photographer' => array( 'label' => 'Photographer', 'type' => 'text', 'meta_key' => '_pss_photographer', 'description' => 'Photography credit.' ),
+		'consultant' => array( 'label' => 'Consultant', 'type' => 'text', 'meta_key' => '_pss_consultant', 'description' => 'Consultant or specialist.' ),
+		'engineer' => array( 'label' => 'Engineer', 'type' => 'text', 'meta_key' => '_pss_engineer', 'description' => 'Structural / MEP engineer.' ),
 		'team' => array( 'label' => 'Team', 'type' => 'textarea', 'meta_key' => '_pss_team', 'description' => 'Team members / collaborators.' ),
 		'services' => array( 'label' => 'Services', 'type' => 'textarea', 'meta_key' => '_pss_services', 'description' => 'Services delivered on this project.' ),
 		'materials' => array( 'label' => 'Materials', 'type' => 'textarea', 'meta_key' => '_pss_materials', 'description' => 'Main materials used.' ),
 		'colors' => array( 'label' => 'Colors', 'type' => 'text', 'meta_key' => '_pss_colors', 'description' => 'Primary colors / palette.' ),
 		'features' => array( 'label' => 'Features', 'type' => 'textarea', 'meta_key' => '_pss_features', 'description' => 'Key project features.' ),
 	);
+}
+
+function get_project_core_card_labels() {
+	$labels = array(
+		'core:title' => 'Title',
+		'core:subtitle' => 'Subtitle',
+		'core:style' => 'Style',
+		'core:location' => 'Location',
+		'core:type' => 'Project Type',
+		'core:category' => 'Category',
+		'core:year' => 'Year',
+		'core:area' => 'Area',
+		'core:duration' => 'Duration',
+		'core:designer' => 'Designer',
+		'core:architect' => 'Architect',
+		'core:client' => 'Client',
+		'core:contractor' => 'Contractor',
+		'core:status' => 'Status',
+		'core:budget' => 'Budget',
+		'core:completion' => 'Completion',
+		'core:photographer' => 'Photographer',
+	);
+	return $labels;
 }
 
 function get_project_field_library_options() {

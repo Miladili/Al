@@ -8,6 +8,8 @@ class Layouts {
 		add_filter( 'admin_body_class', array( __CLASS__, 'admin_body_class' ) );
 		add_action( 'init', array( __CLASS__, 'register_cpt' ), 6 );
 		add_action( 'admin_menu', array( __CLASS__, 'submenu' ) );
+		add_filter( 'parent_file', array( __CLASS__, 'parent_file' ) );
+		add_filter( 'submenu_file', array( __CLASS__, 'submenu_file' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'meta_box' ) );
 		add_action( 'save_post_' . PSS_LAYOUT_CPT, array( __CLASS__, 'save' ), 10, 2 );
 		add_filter( 'post_row_actions', array( __CLASS__, 'row_action' ), 10, 2 );
@@ -37,7 +39,7 @@ class Layouts {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		if ( ! $screen ) { return $classes; }
 		$allowed = array( PSS_PROJECT_CPT, PSS_LAYOUT_CPT );
-		if ( in_array( $screen->post_type, $allowed, true ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) || false !== strpos( (string) $screen->id, 'pss-project-settings' ) ) {
+		if ( in_array( $screen->post_type, $allowed, true ) || false !== strpos( (string) $screen->id, 'pss-project-fields' ) || false !== strpos( (string) $screen->id, 'pss-project-settings' ) || false !== strpos( (string) $screen->id, 'pss-layouts' ) ) {
 			$classes .= ' pss-admin-screen';
 		}
 		return $classes;
@@ -71,16 +73,49 @@ class Layouts {
 	}
 
 	public static function submenu() {
-		add_submenu_page( 'edit.php?post_type=' . PSS_PROJECT_CPT, 'Single Layouts', 'Single Layouts', 'edit_posts', 'edit.php?post_type=' . PSS_LAYOUT_CPT );
-		add_submenu_page( 'edit.php?post_type=' . PSS_PROJECT_CPT, 'Add Single Layout', 'Add Single Layout', 'edit_posts', 'post-new.php?post_type=' . PSS_LAYOUT_CPT );
-		add_submenu_page( 'edit.php?post_type=' . PSS_PROJECT_CPT, 'Project Settings', 'Settings', 'manage_options', 'pss-project-settings', array( __CLASS__, 'settings_page' ) );
+		add_submenu_page(
+			'edit.php?post_type=' . PSS_PROJECT_CPT,
+			'Single Layouts',
+			'Single Layouts',
+			'edit_posts',
+			'pss-layouts',
+			array( __CLASS__, 'hub_page' )
+		);
+	}
+
+	public static function parent_file( $parent ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen && PSS_LAYOUT_CPT === $screen->post_type ) {
+			return 'edit.php?post_type=' . PSS_PROJECT_CPT;
+		}
+		return $parent;
+	}
+
+	public static function submenu_file( $submenu ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen ) {
+			return $submenu;
+		}
+		$id = (string) $screen->id;
+		if ( PSS_LAYOUT_CPT === $screen->post_type || false !== strpos( $id, 'pss-layouts' ) || false !== strpos( $id, 'pss-project-settings' ) ) {
+			return 'pss-layouts';
+		}
+		return $submenu;
 	}
 
 	public static function assets( $hook ) {
-		$screen = get_current_screen();
-		if ( ! $screen || PSS_LAYOUT_CPT !== $screen->post_type ) return;
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen ) {
+			return;
+		}
+		$is_hub = false !== strpos( (string) $screen->id, 'pss-layouts' ) || false !== strpos( (string) $hook, 'pss-layouts' );
+		if ( ! $is_hub && PSS_LAYOUT_CPT !== $screen->post_type ) {
+			return;
+		}
 		wp_enqueue_style( 'pss-admin', PSS_URL . 'admin/assets/admin.css', array(), PSS_VERSION );
-		wp_enqueue_script( 'pss-layouts', PSS_URL . 'admin/assets/layouts.js', array(), PSS_VERSION, true );
+		if ( PSS_LAYOUT_CPT === $screen->post_type ) {
+			wp_enqueue_script( 'pss-layouts', PSS_URL . 'admin/assets/layouts.js', array(), PSS_VERSION, true );
+		}
 	}
 
 	public static function meta_box() {
@@ -482,24 +517,128 @@ class Layouts {
 		}
 	}
 
-	public static function settings_page() {
-		if ( ! current_user_can( 'manage_options' ) ) return;
-		if ( isset( $_POST['pss_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pss_settings_nonce'] ) ), 'pss_settings' ) ) {
+	public static function hub_page() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+		$tab = sanitize_key( $_GET['tab'] ?? 'layouts' );
+		if ( ! in_array( $tab, array( 'layouts', 'add', 'conditions', 'default', 'settings' ), true ) ) {
+			$tab = 'layouts';
+		}
+		if ( isset( $_POST['pss_create_layout_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pss_create_layout_nonce'] ) ), 'pss_create_layout' ) && current_user_can( 'edit_posts' ) ) {
+			$title = sanitize_text_field( wp_unslash( $_POST['pss_layout_title'] ?? '' ) ) ?: 'New Single Layout';
+			$id    = wp_insert_post( array( 'post_type' => PSS_LAYOUT_CPT, 'post_status' => 'publish', 'post_title' => $title ) );
+			if ( ! is_wp_error( $id ) && $id ) {
+				self::ensure_elementor_document( $id );
+				wp_safe_redirect( admin_url( 'post.php?post=' . $id . '&action=edit' ) );
+				exit;
+			}
+		}
+		if ( isset( $_POST['pss_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pss_settings_nonce'] ) ), 'pss_settings' ) && current_user_can( 'manage_options' ) ) {
 			update_option( 'pss_project_slug', sanitize_title( wp_unslash( $_POST['pss_project_slug'] ?? 'project' ) ) ?: 'project' );
 			update_option( 'pss_default_layout', absint( $_POST['pss_default_layout'] ?? 0 ) );
 			flush_rewrite_rules();
 			echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
 		}
-		$current_slug = get_option( 'pss_project_slug', 'project' );
+		$base = admin_url( 'edit.php?post_type=' . PSS_PROJECT_CPT . '&page=pss-layouts' );
+		$tabs = array(
+			'layouts'    => 'All Layouts',
+			'add'        => 'Add New Layout',
+			'default'    => 'Default Layout',
+			'conditions' => 'Conditions',
+			'settings'   => 'Settings',
+		);
+		echo '<div class="wrap pss-layouts-hub"><div class="pss-hub-hero"><div><span class="pss-editor-kicker">SINGLE PROJECT</span><h1>Single Layouts</h1><p>One place to manage reusable Elementor layouts, conditions and the default template. Design still opens in the real Elementor editor.</p></div><a class="button button-primary" href="' . esc_url( add_query_arg( 'tab', 'add', $base ) ) . '">Add New Layout</a></div>';
+		echo '<nav class="pss-hub-tabs">';
+		foreach ( $tabs as $id => $label ) {
+			echo '<a class="' . ( $tab === $id ? 'is-active' : '' ) . '" href="' . esc_url( add_query_arg( 'tab', $id, $base ) ) . '">' . esc_html( $label ) . '</a>';
+		}
+		echo '</nav>';
+		if ( 'add' === $tab ) {
+			self::hub_add();
+		} elseif ( 'conditions' === $tab ) {
+			self::hub_conditions();
+		} elseif ( 'default' === $tab || 'settings' === $tab ) {
+			self::hub_settings( $tab );
+		} else {
+			self::hub_list();
+		}
+		echo '</div>';
+	}
+
+	private static function hub_list() {
+		$layouts = get_posts( array( 'post_type' => PSS_LAYOUT_CPT, 'post_status' => array( 'publish', 'draft' ), 'posts_per_page' => -1, 'orderby' => 'modified', 'order' => 'DESC' ) );
+		$default = absint( get_option( 'pss_default_layout', 0 ) );
+		if ( ! $layouts ) {
+			echo '<div class="pss-empty-panel"><strong>No layouts yet.</strong><span>Create a layout, then open it with Elementor. Projects stay as data.</span></div>';
+			return;
+		}
+		echo '<div class="pss-layout-cards">';
+		foreach ( $layouts as $layout ) {
+			$edit = admin_url( 'post.php?post=' . $layout->ID . '&action=edit' );
+			$el   = self::get_elementor_edit_url( $layout->ID );
+			$conds = get_meta( $layout->ID, '_pss_conditions', array() );
+			$count = is_array( $conds ) ? count( $conds ) : 0;
+			echo '<article class="pss-layout-card">';
+			echo '<div><span class="pss-editor-kicker">' . ( $default === (int) $layout->ID ? 'DEFAULT' : esc_html( strtoupper( $layout->post_status ) ) ) . '</span>';
+			echo '<h2>' . esc_html( $layout->post_title ) . '</h2>';
+			echo '<p>' . esc_html( $count ? $count . ' condition rule(s)' : 'No extra conditions — can match all projects' ) . '</p></div>';
+			echo '<div class="pss-layout-card__actions">';
+			if ( $el ) {
+				echo '<a class="button button-primary" href="' . esc_url( $el ) . '">Edit with Elementor</a>';
+			}
+			echo '<a class="button" href="' . esc_url( $edit ) . '">Conditions</a>';
+			$dup = wp_nonce_url( admin_url( 'admin-post.php?action=pss_duplicate_layout&layout_id=' . $layout->ID ), 'pss_duplicate_layout_' . $layout->ID );
+			echo '<a class="button" href="' . esc_url( $dup ) . '">Duplicate</a>';
+			echo '</div></article>';
+		}
+		echo '</div>';
+	}
+
+	private static function hub_add() {
+		echo '<form method="post" class="pss-admin-card pss-hub-form">';
+		wp_nonce_field( 'pss_create_layout', 'pss_create_layout_nonce' );
+		echo '<h2>Add New Layout</h2><p>Creates a layout manager record and its Elementor design document. You will land on conditions; use Edit with Elementor for the canvas.</p>';
+		echo '<label>Layout name<input class="widefat" name="pss_layout_title" placeholder="e.g. Residential — Editorial" required></label>';
+		echo '<p><button class="button button-primary">Create layout</button></p></form>';
+	}
+
+	private static function hub_conditions() {
+		echo '<div class="pss-admin-card"><h2>How conditions work</h2><p>Each layout has include/exclude rules. Specific Project wins, then custom field, type, style, location, category. Exclude always vetoes. Open a layout to edit its rules, then Edit with Elementor for design.</p></div>';
+		self::hub_list();
+	}
+
+	private static function hub_settings( $tab ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			echo '<div class="pss-empty-panel"><strong>Settings are limited.</strong><span>Ask an administrator to change the default layout and project slug.</span></div>';
+			return;
+		}
+		$current_slug   = get_option( 'pss_project_slug', 'project' );
 		$current_layout = absint( get_option( 'pss_default_layout', 0 ) );
-		?>
-		<div class="wrap"><h1>Project Settings</h1><form method="post">
-			<?php wp_nonce_field( 'pss_settings', 'pss_settings_nonce' ); ?>
-			<table class="form-table"><tr><th>Project URL slug</th><td><input name="pss_project_slug" value="<?php echo esc_attr( $current_slug ); ?>"></td></tr>
-			<tr><th>Default Single Layout</th><td><select name="pss_default_layout"><option value="0">— None —</option><?php foreach ( get_posts( array( 'post_type' => PSS_LAYOUT_CPT, 'post_status' => 'publish', 'posts_per_page' => -1 ) ) as $layout ) echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $current_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>'; ?></select></td></tr></table>
-			<p><button class="button button-primary">Save Settings</button></p>
-		</form></div>
-		<?php
+		$layouts        = get_posts( array( 'post_type' => PSS_LAYOUT_CPT, 'post_status' => 'publish', 'posts_per_page' => -1 ) );
+		echo '<form method="post" class="pss-admin-card pss-hub-form">';
+		wp_nonce_field( 'pss_settings', 'pss_settings_nonce' );
+		if ( 'default' === $tab ) {
+			echo '<h2>Default Layout</h2><p>Used when no more specific layout matches a project.</p>';
+			echo '<label>Default Single Layout<select name="pss_default_layout" class="widefat"><option value="0">— None —</option>';
+			foreach ( $layouts as $layout ) {
+				echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $current_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>';
+			}
+			echo '</select></label><input type="hidden" name="pss_project_slug" value="' . esc_attr( $current_slug ) . '">';
+		} else {
+			echo '<h2>Settings</h2>';
+			echo '<label>Project URL slug<input name="pss_project_slug" class="widefat" value="' . esc_attr( $current_slug ) . '"></label>';
+			echo '<label>Default Single Layout<select name="pss_default_layout" class="widefat"><option value="0">— None —</option>';
+			foreach ( $layouts as $layout ) {
+				echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $current_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>';
+			}
+			echo '</select></label>';
+		}
+		echo '<p><button class="button button-primary">Save</button></p></form>';
+	}
+
+	public static function settings_page() {
+		self::hub_page();
 	}
 
 	public static function maybe_upgrade_starters() {

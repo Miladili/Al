@@ -33,6 +33,8 @@ class Project_Scroll extends Base {
 		$this->add_control( 'text_animation', array( 'label' => 'Text animation', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'rise', 'options' => array( 'none' => 'None', 'rise' => 'Rise', 'fade' => 'Fade', 'mask' => 'Mask' ) ) );
 		$this->add_control( 'transition_style', array( 'label' => 'Transition style', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'slide', 'options' => array( 'slide' => 'Slide', 'overlap' => 'Overlap', 'scale' => 'Scale' ) ) );
 		$this->add_control( 'mobile_behavior', array( 'label' => 'Mobile behavior', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'stack', 'options' => array( 'stack' => 'Stack vertically', 'swipe' => 'Keep horizontal swipe' ) ) );
+		$this->add_control( 'snap', array( 'label' => 'Snap to panels', 'type' => \Elementor\Controls_Manager::SWITCHER, 'description' => 'Ease toward the nearest panel while scrolling, similar to a GSAP snap.' ) );
+		$this->add_control( 'scrub', array( 'label' => 'Scrub smoothness', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 0.18, 'min' => 0, 'max' => 0.6, 'step' => 0.02, 'description' => '0 is locked to scroll. Higher values lag the track like GSAP scrub.' ) );
 		$this->add_control( 'reduced_motion', array( 'label' => 'Honor reduced motion', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->end_controls_section();
 
@@ -94,6 +96,8 @@ class Project_Scroll extends Base {
 			'pin'             => (float) ( $s['pin_duration'] ?? 1 ),
 			'distance'        => absint( $s['scroll_distance'] ?? 180 ),
 			'mobile'          => sanitize_key( $s['mobile_behavior'] ?? 'stack' ),
+			'snap'            => ! empty( $s['snap'] ),
+			'scrub'           => (float) ( $s['scrub'] ?? 0.18 ),
 			'reduced'         => ! empty( $s['reduced_motion'] ),
 		);
 		echo '<div class="pss-scroll pss-scroll--' . esc_attr( $cfg['easing'] ) . ' pss-scroll--img-' . esc_attr( sanitize_key( $s['image_behavior'] ?? 'zoom' ) ) . ' pss-scroll--text-' . esc_attr( sanitize_key( $s['text_animation'] ?? 'rise' ) ) . ' pss-scroll--' . esc_attr( sanitize_key( $s['transition_style'] ?? 'slide' ) ) . ' pss-scroll--mobile-' . esc_attr( $cfg['mobile'] ) . '" data-pss-scroll="' . \PSS\esc_attr_json( $cfg ) . '">';

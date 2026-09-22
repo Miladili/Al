@@ -85,20 +85,43 @@ document.addEventListener('DOMContentLoaded',function(){initBeforeAfter();lightb
         root._pssTravel=travel;
         root.style.height=Math.round(pinH+(travel*pinMul/speed)+extra)+'px';
       }
-      function tick(){
-        if(skip()){track.style.transform='';return;}
+      var currentP=0, raf=0;
+      function targetP(){
         var rect=root.getBoundingClientRect();
         var total=Math.max(1,root.offsetHeight-(pin.offsetHeight||window.innerHeight));
         var p=ease((-rect.top)/total,cfg.easing||'smooth');
         if(cfg.direction==='rtl')p=1-p;
+        if(cfg.snap){
+          var panels=Math.max(1,(track.children||[]).length-1);
+          p=Math.round(p*panels)/panels;
+        }
+        return Math.min(1,Math.max(0,p));
+      }
+      function apply(p){
         var x=-(root._pssTravel||0)*p;
         track.style.transform='translate3d('+x+'px,0,0)';
         root.style.setProperty('--pss-p',String(p));
         root.classList.toggle('is-active',p>0&&p<1);
+        var panels=track.querySelectorAll('.pss-scroll__panel');
+        panels.forEach(function(panel,i){
+          var n=Math.max(1,panels.length-1);
+          var dist=Math.abs((i/n)-p);
+          panel.style.setProperty('--pss-panel-p',String(1-Math.min(1,dist*1.6)));
+        });
+      }
+      function tick(){
+        if(skip()){track.style.transform='';return;}
+        var goal=targetP();
+        var scrub=Math.max(0,Math.min(.6,parseFloat(cfg.scrub||0)));
+        if(!scrub){currentP=goal;apply(currentP);return;}
+        currentP+=(goal-currentP)*(1-scrub);
+        if(Math.abs(goal-currentP)<0.001)currentP=goal;
+        apply(currentP);
+        if(currentP!==goal){cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}
       }
       layout();tick();
       window.addEventListener('resize',function(){layout();tick();},{passive:true});
-      window.addEventListener('scroll',tick,{passive:true});
+      window.addEventListener('scroll',function(){cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);},{passive:true});
     });
   }
   function magnetic(){

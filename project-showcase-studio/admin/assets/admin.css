@@ -49,3 +49,24 @@
 .pss-admin-screen .pss-project-editor .pss-record-source-row label input,.pss-admin-screen .pss-project-editor .pss-record-source-row label select,.pss-admin-screen .pss-project-editor .pss-grid-3>label input,.pss-admin-screen .pss-project-editor .pss-grid-3>label select,.pss-admin-screen .pss-project-editor .pss-grid-3>label textarea{margin-top:0}
 .pss-admin-screen .pss-local-field-structure:empty{display:none}
 @media(max-width:1000px){.pss-admin-screen #pss-quick-record-search{max-width:none;flex:1}}
+
+/* v2.5.0 Single Layouts hub — scoped to plugin screens only */
+.pss-admin-screen .pss-layouts-hub{max-width:1080px}
+.pss-admin-screen .pss-hub-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:22px 24px;border-radius:18px;background:linear-gradient(135deg,#111827,#2c3947);color:#fff;margin:12px 0 18px}
+.pss-admin-screen .pss-hub-hero h1{margin:6px 0 8px;color:#fff;font-size:28px}
+.pss-admin-screen .pss-hub-hero p{margin:0;max-width:640px;opacity:.74}
+.pss-admin-screen .pss-hub-hero .button-primary{background:#fff;border-color:#fff;color:#111}
+.pss-admin-screen .pss-hub-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;padding:6px;border:1px solid #e2e5e9;border-radius:14px;background:#f6f7f8}
+.pss-admin-screen .pss-hub-tabs a{padding:8px 12px;border-radius:10px;text-decoration:none;color:#1d2327}
+.pss-admin-screen .pss-hub-tabs a.is-active{background:#fff;font-weight:600;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.pss-admin-screen .pss-layout-cards{display:grid;gap:14px}
+.pss-admin-screen .pss-layout-card{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding:18px 20px;border:1px solid #e2e5e9;border-radius:16px;background:linear-gradient(180deg,#fff,#fafbfc)}
+.pss-admin-screen .pss-layout-card h2{margin:4px 0 6px;font-size:18px}
+.pss-admin-screen .pss-layout-card p{margin:0;color:#646970}
+.pss-admin-screen .pss-layout-card__actions{display:flex;flex-wrap:wrap;gap:8px}
+.pss-admin-screen .pss-hub-form label{display:flex;flex-direction:column;gap:6px;font-weight:600;margin:12px 0}
+.pss-admin-screen .pss-hub-form .widefat{max-width:420px}
+.pss-admin-screen #pss-field-library-search{margin:8px 0 16px}
+@media(max-width:780px){
+  .pss-admin-screen .pss-hub-hero,.pss-admin-screen .pss-layout-card{flex-direction:column;align-items:stretch}
+}

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.5.0
+- Single Layouts is one Projects submenu: All Layouts, Add New Layout, Default Layout, Conditions, and Settings live as hub tabs. Duplicate “Add Single Layout” / Settings menu items are gone.
+- Optional core records expanded (contractor, status, budget, completion, photographer, consultant, engineer) and can appear on cards when selected.
+- Project Fields library has a search box; the Project editor toolbar already filters the field library.
+- Showcase gained Mosaic and Stacked stories layouts plus Dossier / Atelier / Courtyard card systems. Card meta still never prints both on the image and below.
+- Horizontal Scroll gained optional snap and scrub smoothness without replacing the existing pin/track motion.
+- Admin CSS for the hub stays under `.pss-admin-screen`. Elementor library-document editor flow is unchanged.
+
 ## 2.4.0
 - Single Layout → Edit with Elementor now opens the linked Elementor Library document and no longer rewrites the editor preview iframe onto a Project URL (that mismatch blanked the canvas).
 - Asking Elementor to open a layout manager record redirects to the library document editor; Project posts still open as data, not Elementor pages. Pages/Posts are untouched.
