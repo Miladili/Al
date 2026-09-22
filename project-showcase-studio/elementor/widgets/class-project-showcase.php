@@ -1,6 +1,8 @@
 <?php
 namespace PSS\Elementor\Widgets;
 
+defined( 'ABSPATH' ) || exit;
+
 class Project_Showcase extends Base {
 	public function get_name() { return 'pss_project_showcase'; }
 	public function get_title() { return 'Project Showcase'; }
@@ -18,7 +20,19 @@ class Project_Showcase extends Base {
 		) );
 		$this->add_control( 'animation', array(
 			'label' => 'Animation', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'reveal',
-			'options' => array( 'none'=>'None', 'reveal'=>'Reveal', 'lift'=>'Lift', 'zoom'=>'Image Zoom', 'parallax'=>'Cursor Parallax', 'directional'=>'Directional Hover', 'float'=>'Soft Float', 'tilt'=>'3D Tilt', 'mask'=>'Mask Reveal', 'blur'=>'Blur Reveal', 'text'=>'Text Reveal', 'magnetic'=>'Magnetic Card' ),
+			'options' => array( 'none'=>'None', 'reveal'=>'Reveal', 'lift'=>'Lift', 'zoom'=>'Image Zoom', 'parallax'=>'Cursor Parallax', 'directional'=>'Directional Hover', 'float'=>'Soft Float', 'tilt'=>'3D Tilt', 'mask'=>'Mask Reveal', 'blur'=>'Blur Reveal', 'text'=>'Text Reveal', 'magnetic'=>'Magnetic Card', 'cinematic'=>'Cinematic Hover' ),
+		) );
+		$this->add_control( 'meta_placement', array(
+			'label' => 'Project info placement',
+			'type' => \Elementor\Controls_Manager::SELECT,
+			'default' => 'auto',
+			'options' => array(
+				'auto'    => 'Auto (inside overlay cards, below editorial cards)',
+				'overlay' => 'Inside the card image only',
+				'below'   => 'Below the image only',
+				'none'    => 'Hide extra fields',
+			),
+			'description' => 'Never shows the same fields both on the image and under the card.',
 		) );
 		$this->add_control( 'card_data_mode', array(
 			'label' => 'Card data', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'project',
@@ -26,7 +40,7 @@ class Project_Showcase extends Base {
 		) );
 		$this->add_control( 'manual_card_fields', array(
 			'label' => 'Manual field keys', 'type' => \Elementor\Controls_Manager::TEXTAREA,
-			'placeholder' => 'cabinet_material, countertop, ceiling_height', 'description' => 'Comma or line separated field keys. Works with global and project-only fields.',
+			'placeholder' => 'cabinet_material, countertop, ceiling_height',
 			'condition' => array( 'card_data_mode' => 'manual' ),
 		) );
 		$this->add_control( 'show_title', array( 'label' => 'Show title', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
@@ -37,8 +51,46 @@ class Project_Showcase extends Base {
 		$this->end_controls_section();
 
 		$this->start_controls_section( 'responsive', array( 'label' => 'Responsive', 'tab' => \Elementor\Controls_Manager::TAB_LAYOUT ) );
-		$this->add_responsive_control( 'columns', array( 'label' => 'Columns', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 3, 'tablet_default' => 2, 'mobile_default' => 1, 'min' => 1, 'max' => 6 ) );
-		$this->add_responsive_control( 'gap', array( 'label' => 'Gap', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 22, 'tablet_default' => 16, 'mobile_default' => 12, 'min' => 0, 'max' => 120 ) );
+		$this->add_responsive_control( 'columns', array(
+			'label' => 'Columns', 'type' => \Elementor\Controls_Manager::NUMBER,
+			'default' => 3, 'tablet_default' => 2, 'mobile_default' => 1, 'min' => 1, 'max' => 6,
+			'selectors' => array( '{{WRAPPER}} .pss-showcase' => '--pss-cols: {{VALUE}};' ),
+		) );
+		$this->add_responsive_control( 'gap', array(
+			'label' => 'Gap', 'type' => \Elementor\Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+			'default' => array( 'size' => 22, 'unit' => 'px' ),
+			'tablet_default' => array( 'size' => 16, 'unit' => 'px' ),
+			'mobile_default' => array( 'size' => 12, 'unit' => 'px' ),
+			'selectors' => array( '{{WRAPPER}} .pss-showcase' => '--pss-gap: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'image_ratio', array(
+			'label' => 'Image ratio', 'type' => \Elementor\Controls_Manager::SELECT,
+			'default' => '4 / 5', 'tablet_default' => '4 / 5', 'mobile_default' => '4 / 5',
+			'options' => array( '1 / 1'=>'1:1', '4 / 5'=>'4:5', '3 / 4'=>'3:4', '16 / 11'=>'16:11', '16 / 9'=>'16:9', '3 / 2'=>'3:2' ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__media' => 'aspect-ratio: {{VALUE}};' ),
+		) );
+		$this->add_responsive_control( 'card_radius', array(
+			'label' => 'Corner radius', 'type' => \Elementor\Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 48 ) ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__media' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->end_controls_section();
+
+		$this->start_controls_section( 'card_style', array( 'label' => 'Card', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'title_size', array(
+			'label' => 'Title size', 'type' => \Elementor\Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 14, 'max' => 72 ) ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__body h3' => 'font-size: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_control( 'title_color', array(
+			'label' => 'Title color', 'type' => \Elementor\Controls_Manager::COLOR,
+			'selectors' => array( '{{WRAPPER}} .pss-card__body h3' => 'color: {{VALUE}};' ),
+		) );
+		$this->add_control( 'overlay_color', array(
+			'label' => 'Image overlay', 'type' => \Elementor\Controls_Manager::COLOR,
+			'selectors' => array( '{{WRAPPER}} .pss-card__veil' => 'background: linear-gradient(180deg, transparent 28%, {{VALUE}} 100%);' ),
+		) );
 		$this->end_controls_section();
 
 		$this->start_controls_section( 'filters', array( 'label' => 'Filters', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
@@ -60,6 +112,7 @@ class Project_Showcase extends Base {
 			'order' => sanitize_key( $s['order'] ?? 'DESC' ),
 			'preset' => sanitize_key( $s['preset'] ?? 'modern' ),
 			'animation' => sanitize_key( $s['animation'] ?? 'reveal' ),
+			'meta_placement' => sanitize_key( $s['meta_placement'] ?? 'auto' ),
 			'card_data_mode' => sanitize_key( $s['card_data_mode'] ?? 'project' ),
 			'manual_card_fields' => (string) ( $s['manual_card_fields'] ?? '' ),
 			'show_title' => ! empty( $s['show_title'] ),
@@ -72,7 +125,7 @@ class Project_Showcase extends Base {
 		$posts = \PSS\Ajax::query( $settings );
 		$layout = sanitize_key( $s['layout'] ?? 'grid' );
 		$cols = absint( $s['columns'] ?? 3 );
-		$gap = absint( $s['gap'] ?? 22 );
+		$gap = isset( $s['gap']['size'] ) ? absint( $s['gap']['size'] ) : absint( $s['gap'] ?? 22 );
 		$enable_search = ! empty( $s['enable_search'] );
 		echo '<div class="pss-showcase pss-showcase--' . esc_attr( $layout ) . '" data-settings="' . \PSS\esc_attr_json( $settings ) . '" data-page="1" style="--pss-cols:' . esc_attr( $cols ) . ';--pss-gap:' . esc_attr( $gap ) . 'px">';
 		if ( $enable_search || $settings['allow_category'] || $settings['allow_style'] || $settings['allow_location'] || $settings['allow_type'] || $settings['allow_year'] ) {

@@ -336,6 +336,17 @@ function get_field_value( $project_id, $key, $default = '' ) {
 	return ( '' === $value || null === $value ) ? $default : $value;
 }
 
+function is_placeholder_text( $text ) {
+	$text = trim( (string) $text );
+	if ( '' === $text ) {
+		return true;
+	}
+	if ( false !== strpos( $text, '%' ) && preg_match( '/%[a-z0-9_]+%/i', $text ) ) {
+		return true;
+	}
+	return false;
+}
+
 function field_value_text( $value ) {
 	if ( is_array( $value ) ) {
 		$out = array();

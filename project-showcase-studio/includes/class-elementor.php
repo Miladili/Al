@@ -221,6 +221,7 @@ class Elementor {
 			'project-before-after'   => 'Project_Before_After',
 			'project-video'          => 'Project_Video',
 			'project-showcase'       => 'Project_Showcase',
+			'project-scroll'         => 'Project_Scroll',
 			'project-field'          => 'Project_Field',
 			'project-hero'           => 'Project_Hero',
 			'project-stats'          => 'Project_Stats',

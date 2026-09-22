@@ -39,6 +39,31 @@ class Templates {
 		);
 	}
 
+	private static function two_column( $key, $settings, $left, $right, $left_size = 58, $right_size = 42 ) {
+		return array(
+			'id'       => self::id( $key . '-s' ),
+			'elType'   => 'section',
+			'isInner'  => false,
+			'settings' => $settings,
+			'elements' => array(
+				array(
+					'id'       => self::id( $key . '-cl' ),
+					'elType'   => 'column',
+					'isInner'  => false,
+					'settings' => array( '_column_size' => absint( $left_size ) ),
+					'elements' => array_values( (array) $left ),
+				),
+				array(
+					'id'       => self::id( $key . '-cr' ),
+					'elType'   => 'column',
+					'isInner'  => false,
+					'settings' => array( '_column_size' => absint( $right_size ) ),
+					'elements' => array_values( (array) $right ),
+				),
+			),
+		);
+	}
+
 	private static function widget( $key, $type, $settings = array() ) {
 		return array(
 			'id'         => self::id( $key ),
@@ -164,7 +189,7 @@ class Templates {
 					),
 				)
 			),
-			self::section(
+			self::two_column(
 				'modern-intro',
 				self::cream( array( '_css_classes' => 'pss-template-section pss-template-modern-intro' ) ),
 				array(
@@ -172,9 +197,17 @@ class Templates {
 					self::heading( 'm-intro-t', 'A project told through space, material and detail.', 'h2', $ink ),
 					self::spacer( 'm-sp3', 12 ),
 					self::widget( 'm-desc', 'pss_project_description', array() ),
-					self::spacer( 'm-sp4', 28 ),
+					self::spacer( 'm-sp4', 18 ),
+					self::widget( 'm-tags', 'pss_project_tags', array() ),
+				),
+				array(
+					self::heading( 'm-meta-k', 'PROJECT FACTS', 'h6', $muted ),
 					self::widget( 'm-meta', 'pss_project_meta', array( 'layout' => 'grid' ) ),
-				)
+					self::spacer( 'm-sp4b', 18 ),
+					self::widget( 'm-loc-side', 'pss_project_location', array() ),
+				),
+				58,
+				42
 			),
 			self::section(
 				'modern-stats',
@@ -224,6 +257,9 @@ class Templates {
 					self::widget( 'm-fields', 'pss_project_custom_fields', array() ),
 					self::spacer( 'm-sp9', 22 ),
 					self::widget( 'm-feat', 'pss_project_features', array() ),
+					self::spacer( 'm-sp9b', 28 ),
+					self::heading( 'm-plan-t', 'Floor plan', 'h3', $ink ),
+					self::widget( 'm-plan', 'pss_project_floor_plan', array() ),
 				)
 			),
 			self::section(
@@ -298,8 +334,11 @@ class Templates {
 				array(
 					self::heading( 'm-rel-k', 'MORE PROJECTS', 'h6', $muted ),
 					self::heading( 'm-rel-t', 'Continue exploring.', 'h2', $ink ),
-					self::widget( 'm-rel', 'pss_related_projects', array( 'limit' => 3, 'layout' => 'cards' ) ),
+					self::widget( 'm-scroll', 'pss_project_scroll', array( 'limit' => 6, 'eyebrow' => 'Continue through the studio' ) ),
 					self::spacer( 'm-sp13', 28 ),
+					self::widget( 'm-rel', 'pss_related_projects', array( 'limit' => 3, 'layout' => 'cards' ) ),
+					self::spacer( 'm-sp13b', 28 ),
+					self::widget( 'm-share', 'pss_project_share', array() ),
 					self::widget( 'm-nav', 'pss_project_navigation', array() ),
 				)
 			),
@@ -363,7 +402,7 @@ class Templates {
 					self::widget( 'p-meta', 'pss_project_meta', array( 'layout' => 'inline' ) ),
 				)
 			),
-			self::section(
+			self::two_column(
 				'prem-story',
 				array(
 					'layout'                => 'boxed',
@@ -377,7 +416,8 @@ class Templates {
 					self::heading( 'p-st-k', 'A QUIET, MATERIAL-LED APPROACH', 'h6', $gold ),
 					self::heading( 'p-st-t', 'Crafted details. Calm proportions. A space designed to last.', 'h2', '#F6F0E6' ),
 					self::widget( 'p-desc', 'pss_project_description', array() ),
-					self::spacer( 'p-sp3', 28 ),
+				),
+				array(
 					self::widget(
 						'p-stats',
 						'pss_project_stats',
@@ -385,7 +425,11 @@ class Templates {
 							'fields' => "core:year\ncore:area\ncore:location\ncore:type",
 						)
 					),
-				)
+					self::spacer( 'p-sp3', 18 ),
+					self::widget( 'p-tags', 'pss_project_tags', array() ),
+				),
+				62,
+				38
 			),
 			self::section(
 				'prem-edit',
@@ -494,8 +538,11 @@ class Templates {
 				array(
 					self::heading( 'p-rel-k', 'SELECTED WORK', 'h6', $gold ),
 					self::heading( 'p-rel-t', 'More spaces worth exploring.', 'h2', '#F6F0E6' ),
-					self::widget( 'p-rel', 'pss_related_projects', array( 'limit' => 3, 'layout' => 'cards' ) ),
+					self::widget( 'p-scroll', 'pss_project_scroll', array( 'limit' => 6, 'eyebrow' => 'Selected work', 'easing' => 'cinematic' ) ),
 					self::spacer( 'p-sp8', 28 ),
+					self::widget( 'p-rel', 'pss_related_projects', array( 'limit' => 3, 'layout' => 'cards' ) ),
+					self::spacer( 'p-sp8b', 28 ),
+					self::widget( 'p-share', 'pss_project_share', array() ),
 					self::widget( 'p-nav', 'pss_project_navigation', array() ),
 				)
 			),

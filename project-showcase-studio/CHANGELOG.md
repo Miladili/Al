@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0
+- Showcase cards no longer print the same project fields on the image and under the card. Placement is Auto / Inside / Below / Hidden.
+- Placeholder tokens such as `%name%` are skipped on cards.
+- Card styles (modern, luxury, editorial, architectural, minimal) and hover motion were expanded, with Elementor responsive column/gap/ratio/radius controls.
+- Single Layout → Edit with Elementor still opens the linked Elementor Library document, never a Project post or the layout manager record.
+- Starter layouts Modern — Editorial and Premium — Cinematic were rebuilt as designed two-column landing pages (including floor plan, tags, share, and the new scroll widget).
+- New Elementor widget: Project Horizontal Scroll (vertical scroll drives pinned horizontal panels, reduced-motion and mobile stack/swipe).
+
 ## 2.2.0
 - Fixed Single Layouts so they open a real Elementor Library document via the Document API.
 - Stopped Project posts and layout manager records from opening in Elementor (this caused blank Add Project screens).
