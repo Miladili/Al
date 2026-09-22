@@ -82,3 +82,45 @@
 @media(max-width:780px){
   .pss-admin-screen .pss-hub-hero,.pss-admin-screen .pss-layout-card{flex-direction:column;align-items:stretch}
 }
+
+/* v2.8 schema-free project editor + ivory admin chrome (plugin screens only) */
+.pss-admin-screen .pss-field-editor-hero,
+.pss-admin-screen .pss-hub-hero,
+.pss-admin-screen .pss-field-library-hero{
+  background:linear-gradient(135deg,#F4EFE6,#E8DFD2);
+  color:#1C1916
+}
+.pss-admin-screen .pss-field-editor-hero h2,
+.pss-admin-screen .pss-hub-hero h1,
+.pss-admin-screen .pss-field-library-hero h1{color:#1C1916}
+.pss-admin-screen .pss-field-editor-hero p,
+.pss-admin-screen .pss-hub-hero p,
+.pss-admin-screen .pss-field-library-hero p{opacity:.82;color:#5C534A}
+.pss-admin-screen .pss-editor-pill{background:rgba(28,25,22,.06);color:#1C1916}
+.pss-admin-screen .pss-hub-hero .button-primary{background:#4A433C;border-color:#4A433C;color:#F6F1E8}
+.pss-admin-screen .pss-field-library-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:22px;border-radius:18px;margin:12px 0 18px}
+.pss-admin-screen .pss-schema-list{display:grid;gap:12px}
+.pss-admin-screen .pss-value-row--extra{
+  display:block;
+  background:#fff;
+  border:1px solid #e6e0d6;
+  border-radius:14px;
+  padding:14px 16px;
+  box-shadow:0 8px 24px rgba(28,25,22,.04);
+  scroll-margin-top:120px
+}
+.pss-admin-screen .pss-value-row--extra .pss-value-row__label{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px
+}
+.pss-admin-screen .pss-value-row__actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pss-admin-screen .pss-value-row--extra.is-collapsed .pss-value-row__control{display:none}
+.pss-admin-screen .pss-value-row--extra.is-dragging{opacity:.55}
+.pss-admin-screen .pss-schema-panel .pss-data-builder-toolbar{background:linear-gradient(180deg,#fff,#F7F3EC)}
+@media(max-width:782px){
+  .pss-admin-screen .pss-field-library-hero{flex-direction:column}
+  .pss-admin-screen .pss-value-row__actions{width:100%;margin-left:0}
+}

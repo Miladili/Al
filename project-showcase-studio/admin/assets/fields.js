@@ -67,41 +67,85 @@
     return node;
   }
 
-  function nextIndex(list, sel){ return list.querySelectorAll(sel).length; }
+  function usedKeys(){
+    return new Set([...document.querySelectorAll('#pss-local-fields-list input[name*="[key]"]')].map(el=> (el.value||'').toLowerCase()));
+  }
+
+  function uniqueKey(base){
+    const used=usedKeys();
+    let key=(base||'field').replace(/[^a-z0-9_]+/gi,'_').toLowerCase()||'field';
+    if(!used.has(key)) return key;
+    let i=2;
+    while(used.has(key+'_'+i)) i++;
+    return key+'_'+i;
+  }
+
+  function scalarControl(name, type, def){
+    if(type==='textarea'||type==='wysiwyg') return `<textarea class="widefat" name="${esc(name)}" rows="${type==='wysiwyg'?8:4}"></textarea>`;
+    if(type==='number') return `<input type="number" step="any" class="widefat" name="${esc(name)}" value="">`;
+    if(type==='date') return `<input type="date" class="widefat" name="${esc(name)}" value="">`;
+    if(type==='url'||type==='video') return `<input type="url" class="widefat" name="${esc(name)}" placeholder="https://">`;
+    if(type==='color') return `<input type="color" name="${esc(name)}" value="#B08A5A">`;
+    if(type==='toggle') return `<label class="pss-switch"><input type="hidden" name="${esc(name)}" value="0"><input type="checkbox" name="${esc(name)}" value="1"><span>Enabled</span></label>`;
+    if(type==='select') return `<select class="widefat" name="${esc(name)}"><option value="">— Select —</option>${(def?.options||[]).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select>`;
+    if(type==='image') return `<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="${esc(name)}" value=""><button type="button" class="button pss-single-media">Choose Image</button><span class="pss-media-current"></span></div>`;
+    if(type==='gallery') return `<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="${esc(name)}" value=""><button type="button" class="button pss-gallery-media">Choose Gallery</button><span class="pss-media-current"></span></div>`;
+    if(type==='file') return `<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="${esc(name)}" value=""><button type="button" class="button pss-file-media">Choose file</button><span class="pss-media-current"></span></div>`;
+    if(type==='map') return `<div class="pss-map-field"><input type="text" class="widefat" name="${esc(name)}[address]" placeholder="Address"><div class="pss-grid-3" style="margin-top:8px"><input type="text" name="${esc(name)}[lat]" placeholder="Lat"><input type="text" name="${esc(name)}[lng]" placeholder="Lng"></div></div>`;
+    return `<input type="text" class="widefat" name="${esc(name)}" value="">`;
+  }
 
   function extraRow(idx, def, token){
     const label=def?.label||'New field';
-    const key=(def?.record_key||def?.key||('custom_'+idx)).toString().replace(/[^a-z0-9_]+/gi,'_').toLowerCase();
+    const key=uniqueKey((def?.record_key||def?.key||('custom_'+idx)).toString());
     const type=def?.type||'text';
     const options=(def?.options||[]).join('\n');
     const sub=json(def?.subfields||[]);
     const src=token||'custom';
+    const name=`pss_local_field[${key}]`;
+    const subs=def?.subfields||[];
     let control='';
-    if(type==='textarea'||type==='wysiwyg') control=`<textarea class="widefat" name="pss_local_field[${esc(key)}]" rows="${type==='wysiwyg'?8:4}"></textarea>`;
-    else if(type==='number') control=`<input type="number" step="any" class="widefat" name="pss_local_field[${esc(key)}]" value="">`;
-    else if(type==='date') control=`<input type="date" class="widefat" name="pss_local_field[${esc(key)}]" value="">`;
-    else if(type==='url'||type==='video') control=`<input type="url" class="widefat" name="pss_local_field[${esc(key)}]" placeholder="https://">`;
-    else if(type==='color') control=`<input type="color" name="pss_local_field[${esc(key)}]" value="#111111">`;
-    else if(type==='toggle') control=`<label class="pss-switch"><input type="hidden" name="pss_local_field[${esc(key)}]" value="0"><input type="checkbox" name="pss_local_field[${esc(key)}]" value="1"><span>Enabled</span></label>`;
-    else if(type==='select') control=`<select class="widefat" name="pss_local_field[${esc(key)}]"><option value="">— Select —</option>${(def?.options||[]).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select>`;
-    else if(type==='image') control=`<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="pss_local_field[${esc(key)}]" value=""><button type="button" class="button pss-single-media">Choose Image</button><span class="pss-media-current"></span></div>`;
-    else if(type==='gallery') control=`<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="pss_local_field[${esc(key)}]" value=""><button type="button" class="button pss-gallery-media">Choose Gallery</button><span class="pss-media-current"></span></div>`;
-    else if(type==='file') control=`<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="pss_local_field[${esc(key)}]" value=""><button type="button" class="button pss-file-media">Choose file</button><span class="pss-media-current"></span></div>`;
-    else if(type==='map') control=`<div class="pss-map-field"><input type="text" class="widefat" name="pss_local_field[${esc(key)}][address]" placeholder="Address"><div class="pss-grid-3" style="margin-top:8px"><input type="text" name="pss_local_field[${esc(key)}][lat]" placeholder="Lat"><input type="text" name="pss_local_field[${esc(key)}][lng]" placeholder="Lng"></div></div>`;
-    else control=`<input type="text" class="widefat" name="pss_local_field[${esc(key)}]" value="">`;
+    if(type==='repeater'){
+      const fields=subs.map(sf=>`<div><label>${esc(sf.label||sf.key||'')}</label>${scalarControl(name+'[__INDEX__]['+(sf.key||'')+']', sf.type||'text', sf)}</div>`).join('');
+      control=`<div class="pss-repeater"><div class="pss-repeater-list"></div><div class="pss-repeater-row pss-template" aria-hidden="true"><div class="pss-repeater-row__head"><strong>Item</strong><button type="button" class="button-link-delete pss-remove-repeater">Remove</button></div><div class="pss-repeater-fields">${fields||'<p class="description">Add subfields in the Field Library, then add this field again.</p>'}</div></div><button type="button" class="button pss-add-repeater">+ Add Item</button></div>`;
+    } else if(type==='group'){
+      control=`<div class="pss-group-fields">${subs.map(sf=>`<div class="pss-group-field"><label>${esc(sf.label||sf.key||'')}</label>${scalarControl(name+'['+(sf.key||'')+']', sf.type||'text', sf)}</div>`).join('')||'<p class="description">This group has no subfields yet.</p>'}</div>`;
+    } else if(type==='table'){
+      const heads=subs.map(sf=>`<th>${esc(sf.label||sf.key||'')}</th>`).join('');
+      const cells=subs.map(sf=>`<td><input type="text" class="widefat" name="${esc(name)}[__INDEX__][${esc(sf.key||'')}]" value=""></td>`).join('');
+      control=`<div class="pss-data-table"><table><thead><tr>${heads}<th></th></tr></thead><tbody><tr class="pss-table-template" aria-hidden="true">${cells}<td><button type="button" class="button-link-delete pss-remove-table-row">Remove</button></td></tr></tbody></table><button type="button" class="button pss-add-table-row">+ Add Row</button></div>`;
+    } else if(type==='icon_value'){
+      control=`<div class="pss-icon-value-editor"><div class="pss-icon-value-list"><div class="pss-icon-value-row pss-template" aria-hidden="true"><input type="text" name="${esc(name)}[__INDEX__][icon]" placeholder="Icon"><input type="text" name="${esc(name)}[__INDEX__][title]" placeholder="Title"><input type="text" name="${esc(name)}[__INDEX__][value]" placeholder="Value"><button type="button" class="button-link-delete pss-remove-icon-value">Remove</button></div></div><button type="button" class="button pss-add-icon-value">+ Add Item</button></div>`;
+    } else {
+      control=scalarControl(name, type, def);
+    }
     const wrap=document.createElement('div');
     wrap.className='pss-value-row pss-value-row--extra';
+    wrap.draggable=true;
     wrap.dataset.index=String(idx);
-    wrap.innerHTML=`<input type="hidden" name="pss_local_defs[${idx}][source]" value="${esc(src)}"><input type="hidden" name="pss_local_defs[${idx}][label]" value="${esc(label)}"><input type="hidden" name="pss_local_defs[${idx}][key]" value="${esc(key)}"><input type="hidden" name="pss_local_defs[${idx}][type]" class="pss-local-field-type" value="${esc(type)}"><input type="hidden" name="pss_local_defs[${idx}][options]" class="pss-local-options" value="${esc(options)}"><input type="hidden" class="pss-local-subfields-json" name="pss_local_defs[${idx}][subfields_json]" value='${esc(sub)}'><label class="pss-value-row__label"><span>${esc(label)}</span><button type="button" class="button-link-delete pss-remove-local-field">Remove</button></label><div class="pss-local-field-value pss-value-row__control">${control}</div>`;
+    wrap.innerHTML=`<input type="hidden" name="pss_local_defs[${idx}][source]" value="${esc(src)}"><input type="hidden" name="pss_local_defs[${idx}][label]" value="${esc(label)}"><input type="hidden" name="pss_local_defs[${idx}][key]" value="${esc(key)}"><input type="hidden" name="pss_local_defs[${idx}][type]" class="pss-local-field-type" value="${esc(type)}"><input type="hidden" name="pss_local_defs[${idx}][options]" class="pss-local-options" value="${esc(options)}"><input type="hidden" class="pss-local-subfields-json" name="pss_local_defs[${idx}][subfields_json]" value='${esc(sub)}'><div class="pss-value-row__label"><button type="button" class="pss-drag-handle" aria-label="Reorder">⋮⋮</button><span>${esc(label)}</span><span class="pss-value-row__actions"><button type="button" class="button-link pss-collapse-field">Collapse</button><button type="button" class="button-link pss-duplicate-local-field">Duplicate</button><button type="button" class="button-link-delete pss-remove-local-field">Remove</button></span></div><div class="pss-local-field-value pss-value-row__control">${control}</div>`;
     return wrap;
   }
 
-  function updateEmpty(){
+  function reindexRows(){
     const list=document.getElementById('pss-local-fields-list');
+    if(!list) return;
+    const rows=[...list.querySelectorAll('.pss-value-row--extra')];
+    rows.forEach((row,i)=>{
+      row.dataset.index=String(i);
+      row.querySelectorAll('[name]').forEach(el=>{
+        if(el.name && el.name.indexOf('pss_local_defs[')===0){
+          el.name=el.name.replace(/pss_local_defs\[\d+\]/, 'pss_local_defs['+i+']');
+        }
+      });
+    });
+    const pill=document.querySelector('.pss-cms-editor .pss-editor-pill');
+    if(pill) pill.textContent=rows.length+' fields';
     const empty=document.getElementById('pss-local-field-empty');
-    const count=list?list.querySelectorAll('.pss-value-row--extra').length:0;
-    if(empty) empty.style.display=count?'none':'';
+    if(empty) empty.style.display=rows.length?'none':'';
   }
+
+  function updateEmpty(){ reindexRows(); }
 
   function nextExtraIndex(){
     const list=document.getElementById('pss-local-fields-list');
@@ -143,8 +187,35 @@
     });
   }
 
+  function bindDrag(list){
+    if(!list || list.dataset.dragBound==='1') return;
+    list.dataset.dragBound='1';
+    let dragging=null;
+    list.addEventListener('dragstart',e=>{
+      const row=e.target.closest('.pss-value-row--extra');
+      if(!row) return;
+      dragging=row;
+      row.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    list.addEventListener('dragover',e=>{
+      e.preventDefault();
+      const over=e.target.closest('.pss-value-row--extra');
+      if(!dragging || !over || over===dragging) return;
+      const rect=over.getBoundingClientRect();
+      const before=(e.clientY-rect.top)<rect.height/2;
+      list.insertBefore(dragging, before?over:over.nextSibling);
+    });
+    list.addEventListener('dragend',()=>{
+      dragging?.classList.remove('is-dragging');
+      dragging=null;
+      reindexRows();
+    });
+  }
+
   function bindProjectEditor(){
     const list=document.getElementById('pss-local-fields-list');
+    bindDrag(list);
     document.getElementById('pss-add-library-record')?.addEventListener('click',e=>{
       e.preventDefault();
       const select=document.getElementById('pss-quick-record-source');
@@ -154,6 +225,13 @@
       list?.appendChild(row); bindMedia(row); updateEmpty();
       const opt=select.options[select.selectedIndex]; opt?.remove(); select.selectedIndex=0;
       row.scrollIntoView({behavior:'smooth',block:'center'});
+    });
+    document.getElementById('pss-quick-record-search')?.addEventListener('input',e=>{
+      const term=(e.target.value||'').toLowerCase().trim();
+      document.querySelectorAll('#pss-quick-record-source option').forEach(opt=>{
+        if(!opt.value) return;
+        opt.hidden=!!(term && (opt.textContent||'').toLowerCase().indexOf(term)===-1);
+      });
     });
     const dialog=document.getElementById('pss-create-field-dialog');
     document.getElementById('pss-add-local-field')?.addEventListener('click',e=>{ e.preventDefault(); if(dialog) dialog.hidden=!dialog.hidden; });
@@ -170,14 +248,47 @@
       list?.appendChild(row); bindMedia(row); updateEmpty(); if(dialog) dialog.hidden=true;
       ['pss-new-label','pss-new-key','pss-new-options'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
     });
-    document.querySelector('.pss-cms-form')?.addEventListener('input', applyVisibility);
-    document.querySelector('.pss-cms-form')?.addEventListener('change', applyVisibility);
+    document.querySelector('.pss-cms-editor')?.addEventListener('input', applyVisibility);
+    document.querySelector('.pss-cms-editor')?.addEventListener('change', applyVisibility);
     applyVisibility(); cardPicker(); bindMedia(document); updateEmpty();
   }
 
   document.addEventListener('click', function(e){
     if(e.target.classList.contains('pss-remove-local-field')){
       e.preventDefault(); e.target.closest('.pss-value-row--extra,.pss-local-field-builder')?.remove(); updateEmpty();
+    }
+    if(e.target.classList.contains('pss-collapse-field')){
+      e.preventDefault();
+      const row=e.target.closest('.pss-value-row--extra');
+      if(!row) return;
+      row.classList.toggle('is-collapsed');
+      e.target.textContent=row.classList.contains('is-collapsed')?'Expand':'Collapse';
+    }
+    if(e.target.classList.contains('pss-duplicate-local-field')){
+      e.preventDefault();
+      const row=e.target.closest('.pss-value-row--extra');
+      const list=document.getElementById('pss-local-fields-list');
+      if(!row||!list) return;
+      const clone=row.cloneNode(true);
+      clone.classList.remove('is-collapsed','is-dragging');
+      clone.querySelectorAll('[data-bound]').forEach(el=>{ delete el.dataset.bound; });
+      const keyInput=clone.querySelector('input[name*="[key]"]');
+      const oldKey=keyInput?keyInput.value:'field';
+      const newKey=uniqueKey(oldKey+'_copy');
+      if(keyInput) keyInput.value=newKey;
+      const labelInput=clone.querySelector('input[name*="[label]"]');
+      if(labelInput && labelInput.value) labelInput.value=labelInput.value+' copy';
+      const title=clone.querySelector('.pss-value-row__label span');
+      if(title && !title.classList.contains('pss-value-row__actions')) title.textContent=(title.textContent||'')+' copy';
+      clone.querySelectorAll('[name]').forEach(el=>{
+        if(!el.name) return;
+        el.name=el.name.replace(new RegExp('pss_local_field\\['+oldKey.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\]','g'), 'pss_local_field['+newKey+']');
+      });
+      const src=clone.querySelector('input[name*="[source]"]');
+      if(src) src.value='custom';
+      list.insertBefore(clone, row.nextSibling);
+      bindMedia(clone);
+      updateEmpty();
     }
     if(e.target.classList.contains('pss-add-repeater')){
       e.preventDefault();
@@ -245,6 +356,7 @@
       }
       if(e.target.classList.contains('pss-remove-subfield')){ e.target.closest('.pss-subfield-row')?.remove(); const b=e.target.closest('.pss-field-builder'); if(b) syncDefinition(b); }
     });
+    list.addEventListener('input',e=>{ if(e.target.closest('.pss-subfield-row')) syncDefinition(e.target.closest('.pss-field-builder')); });
   }
 
   document.addEventListener('DOMContentLoaded', function(){

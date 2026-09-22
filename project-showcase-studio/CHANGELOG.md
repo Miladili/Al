@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.8.0
+- No mandatory universal project schema. Field Library defines reusable fields; each Project chooses its own attributes via Add Field.
+- Project editor starts empty (plus core title / featured image / gallery / taxonomies). Added fields are value-only cards with reorder, duplicate, collapse and remove.
+- Existing saved values are recovered without dumping the whole library onto every record.
+- Starter Modern and Premium layouts use ivory/stone/sand/taupe section colors instead of black.
+- Plugin-only admin chrome (heroes, schema cards) stays under `.pss-admin-screen`. Elementor registration and the single Single Layouts menu are unchanged.
+
 ## 2.7.0
 - Project editor no longer mixes field definitions with values. Reusable fields are defined once; Add/Edit Project shows a JetEngine-like value form.
 - Unique fields are added via “Add field to this project” and then edited as values only.

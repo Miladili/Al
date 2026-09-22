@@ -293,25 +293,44 @@ function get_field_definitions( $project_id = 0 ) {
 	if ( ! $project_id ) {
 		return $global;
 	}
-	$local = get_post_meta( absint( $project_id ), '_pss_local_field_definitions', true );
-	$local = is_array( $local ) ? $local : array();
-	$map = array();
+	$gmap = array();
 	foreach ( $global as $field ) {
 		$key = sanitize_key( $field['key'] ?? '' );
-		if ( $key ) { $map[ $key ] = $field; }
-	}
-	foreach ( $local as $field ) {
-		$key = sanitize_key( $field['key'] ?? '' );
-		if ( ! $key ) { continue; }
-		if ( 'global' === sanitize_key( $field['source'] ?? '' ) && isset( $map[ $key ] ) ) {
-			// A project row can reference a reusable field without cloning its
-			// definition forever. Global label/type/options stay authoritative.
-			$map[ $key ]['source'] = 'global';
-		} else {
-			$map[ $key ] = $field;
+		if ( $key ) {
+			$gmap[ $key ] = $field;
 		}
 	}
-	return array_values( $map );
+	$local = get_post_meta( absint( $project_id ), '_pss_local_field_definitions', true );
+	$local = is_array( $local ) ? $local : array();
+	$out  = array();
+	$used = array();
+	foreach ( $local as $field ) {
+		$key = sanitize_key( $field['key'] ?? '' );
+		if ( ! $key || isset( $used[ $key ] ) ) {
+			continue;
+		}
+		$used[ $key ] = true;
+		if ( 'global' === sanitize_key( $field['source'] ?? '' ) && isset( $gmap[ $key ] ) ) {
+			$merged           = $gmap[ $key ];
+			$merged['source'] = 'global';
+			$out[]            = $merged;
+		} else {
+			$out[] = $field;
+		}
+	}
+	if ( $out ) {
+		return $out;
+	}
+	// Older projects may have values without a per-project schema.
+	foreach ( $gmap as $key => $field ) {
+		$value = get_post_meta( absint( $project_id ), '_pss_field_' . $key, true );
+		if ( '' === $value || null === $value ) {
+			continue;
+		}
+		$field['source'] = 'global';
+		$out[]           = $field;
+	}
+	return $out;
 }
 
 function get_project_local_field_definitions( $project_id ) {

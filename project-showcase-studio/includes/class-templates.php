@@ -127,7 +127,7 @@ class Templates {
 				'layout'                 => 'boxed',
 				'content_width'          => array( 'unit' => '%', 'size' => 100 ),
 				'background_background'  => 'classic',
-				'background_color'       => '#101214',
+				'background_color'       => '#EDE6D8',
 				'padding'                => self::pad( 88, 88, 40 ),
 			),
 			$extra
@@ -157,7 +157,7 @@ class Templates {
 				'modern-hero',
 				self::dark(
 					array(
-						'background_color' => '#0C0E10',
+						'background_color' => '#F4EFE6',
 						'min_height'       => array( 'unit' => 'vh', 'size' => 88 ),
 						'_css_classes'     => 'pss-template-section pss-template-modern-hero',
 					)
@@ -213,13 +213,13 @@ class Templates {
 				'modern-stats',
 				self::dark(
 					array(
-						'background_color' => '#161A1E',
+						'background_color' => '#E4D8C8',
 						'padding'          => self::pad( 64, 64, 40 ),
 						'_css_classes'     => 'pss-template-section pss-template-modern-stats',
 					)
 				),
 				array(
-					self::heading( 'm-stats-k', 'AT A GLANCE', 'h6', '#AAB0B7' ),
+					self::heading( 'm-stats-k', 'AT A GLANCE', 'h6', $muted ),
 					self::spacer( 'm-sp5', 16 ),
 					self::widget(
 						'm-stats',
@@ -234,8 +234,8 @@ class Templates {
 				'modern-gallery',
 				self::dark( array( '_css_classes' => 'pss-template-section pss-template-gallery-wall' ) ),
 				array(
-					self::heading( 'm-gal-t', 'SELECTED IMAGES', 'h2', '#FFFFFF' ),
-					self::text( 'm-gal-c', '<p>Material, light, proportion and craft — presented as a visual sequence.</p>', '#AAB0B7' ),
+					self::heading( 'm-gal-t', 'SELECTED IMAGES', 'h2', $ink ),
+					self::text( 'm-gal-c', '<p>Material, light, proportion and craft — presented as a visual sequence.</p>', $muted ),
 					self::spacer( 'm-sp6', 16 ),
 					self::widget( 'm-gal', 'pss_project_gallery', array( 'layout' => 'masonry' ) ),
 				)
@@ -281,12 +281,12 @@ class Templates {
 				'modern-transform',
 				self::dark(
 					array(
-						'background_color' => '#0C0E10',
+						'background_color' => '#F4EFE6',
 						'_css_classes'     => 'pss-template-section pss-template-media-split',
 					)
 				),
 				array(
-					self::heading( 'm-tr-t', 'TRANSFORMATION', 'h2', '#FFFFFF' ),
+					self::heading( 'm-tr-t', 'TRANSFORMATION', 'h2', $ink ),
 					self::spacer( 'm-sp10', 18 ),
 					self::widget( 'm-ba', 'pss_project_before_after', array( 'height' => 560 ) ),
 					self::spacer( 'm-sp11', 18 ),
@@ -322,10 +322,10 @@ class Templates {
 			),
 			self::section(
 				'modern-process',
-				self::dark( array( 'background_color' => '#121416', '_css_classes' => 'pss-template-section pss-template-process' ) ),
+				self::dark( array( 'background_color' => '#EFE8DC', '_css_classes' => 'pss-template-section pss-template-process' ) ),
 				array(
-					self::heading( 'm-prcs-k', 'PROCESS', 'h6', '#AAB0B7' ),
-					self::heading( 'm-prcs-t', 'From brief to built form.', 'h2', '#FFFFFF' ),
+					self::heading( 'm-prcs-k', 'PROCESS', 'h6', $muted ),
+					self::heading( 'm-prcs-t', 'From brief to built form.', 'h2', $ink ),
 					self::spacer( 'm-prcs-sp', 18 ),
 					self::widget( 'm-process', 'pss_project_process', array( 'layout' => 'timeline' ) ),
 					self::spacer( 'm-prcs-sp2', 22 ),
@@ -338,7 +338,7 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#0C0E10',
+					'background_color'      => '#F4EFE6',
 					'padding'               => self::pad( 28, 28, 0 ),
 					'_css_classes'          => 'pss-template-section pss-template-marquee',
 				),
@@ -350,13 +350,13 @@ class Templates {
 				'modern-cta',
 				self::dark(
 					array(
-						'background_color' => '#17191D',
+						'background_color' => '#4A433C',
 						'_css_classes'     => 'pss-template-section pss-template-cta',
 					)
 				),
 				array(
-					self::heading( 'm-cta-t', 'Need a project with this level of detail?', 'h2', '#FFFFFF' ),
-					self::text( 'm-cta-c', '<p>Use this section as your enquiry, contact or project hand-off area.</p>', '#B8BDC4' ),
+					self::heading( 'm-cta-t', 'Need a project with this level of detail?', 'h2', '#F6F1E8' ),
+					self::text( 'm-cta-c', '<p>Use this section as your enquiry, contact or project hand-off area.</p>', '#D9C8AF' ),
 					self::widget( 'm-inq', 'pss_project_inquiry', array() ),
 				)
 			),
@@ -412,7 +412,7 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#11100E',
+					'background_color'      => '#E8DFD2',
 					'padding'               => self::pad( 92, 92, 40 ),
 					'min_height'            => array( 'unit' => 'vh', 'size' => 92 ),
 					'_css_classes'          => 'pss-template-section pss-template-premium-hero',
@@ -462,14 +462,14 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#171513',
+					'background_color'      => '#E8DFD2',
 					'padding'               => self::pad( 92, 92, 40 ),
 					'_css_classes'          => 'pss-template-section pss-template-premium-story',
 					'html_id'               => 'premium-story',
 				),
 				array(
 					self::heading( 'p-st-k', 'A QUIET, MATERIAL-LED APPROACH', 'h6', $gold ),
-					self::heading( 'p-st-t', 'Crafted details. Calm proportions. A space designed to last.', 'h2', '#F6F0E6' ),
+					self::heading( 'p-st-t', 'Crafted details. Calm proportions. A space designed to last.', 'h2', $ink ),
 					self::widget( 'p-desc', 'pss_project_description', array() ),
 				),
 				array(
@@ -507,13 +507,13 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#0D0E10',
+					'background_color'      => '#EDE6D8',
 					'padding'               => self::pad( 92, 92, 40 ),
 					'_css_classes'          => 'pss-template-section pss-template-premium-gallery',
 				),
 				array(
 					self::heading( 'p-gal-k', 'THE VISUAL SEQUENCE', 'h6', $gold ),
-					self::heading( 'p-gal-t', 'A cinematic walk through the space.', 'h2', '#FFFFFF' ),
+					self::heading( 'p-gal-t', 'A cinematic walk through the space.', 'h2', $ink ),
 					self::spacer( 'p-sp5', 24 ),
 					self::widget( 'p-gal', 'pss_project_gallery', array( 'layout' => 'masonry' ) ),
 				)
@@ -539,12 +539,12 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#171513',
+					'background_color'      => '#E8DFD2',
 					'padding'               => self::pad( 86, 94, 40 ),
 					'_css_classes'          => 'pss-template-section pss-template-premium-media',
 				),
 				array(
-					self::heading( 'p-tr-t', 'TRANSFORMATION', 'h2', '#F6F0E6' ),
+					self::heading( 'p-tr-t', 'TRANSFORMATION', 'h2', $ink ),
 					self::widget( 'p-ba', 'pss_project_before_after', array( 'height' => 600 ) ),
 					self::spacer( 'p-sp6', 18 ),
 					self::widget( 'p-vid', 'pss_project_video', array( 'ratio' => '16-9' ) ),
@@ -571,13 +571,13 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#11100E',
+					'background_color'      => '#E8DFD2',
 					'padding'               => self::pad( 92, 92, 40 ),
 					'_css_classes'          => 'pss-template-section pss-template-premium-story-block',
 				),
 				array(
 					self::heading( 'p-nar-k', 'THE NARRATIVE', 'h6', $gold ),
-					self::heading( 'p-nar-t', 'A slower reading of the space.', 'h2', '#F6F0E6' ),
+					self::heading( 'p-nar-t', 'A slower reading of the space.', 'h2', $ink ),
 					self::widget( 'p-story', 'pss_project_story', array() ),
 					self::spacer( 'p-nar-sp', 24 ),
 					self::widget( 'p-sticky', 'pss_project_sticky', array( 'layout' => 'image-right' ) ),
@@ -593,12 +593,12 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#0C0D0E',
+					'background_color'      => '#5C534A',
 					'padding'               => self::pad( 86, 94, 40 ),
 					'_css_classes'          => 'pss-template-section pss-template-premium-cta',
 				),
 				array(
-					self::heading( 'p-cta-t', 'Ready for your own signature project?', 'h2', '#FFFFFF' ),
+					self::heading( 'p-cta-t', 'Ready for your own signature project?', 'h2', '#F6F1E8' ),
 					self::text( 'p-cta-c', '<p>Turn this final section into your enquiry, booking or consultation call-to-action.</p>', '#B9B0A3' ),
 					self::widget( 'p-inq', 'pss_project_inquiry', array() ),
 				)
@@ -608,13 +608,13 @@ class Templates {
 				array(
 					'layout'                => 'boxed',
 					'background_background' => 'classic',
-					'background_color'      => '#171513',
+					'background_color'      => '#E8DFD2',
 					'padding'               => self::pad( 86, 94, 40 ),
 					'_css_classes'          => 'pss-template-section pss-template-related',
 				),
 				array(
 					self::heading( 'p-rel-k', 'SELECTED WORK', 'h6', $gold ),
-					self::heading( 'p-rel-t', 'More spaces worth exploring.', 'h2', '#F6F0E6' ),
+					self::heading( 'p-rel-t', 'More spaces worth exploring.', 'h2', $ink ),
 					self::widget( 'p-scroll', 'pss_project_scroll', array( 'limit' => 6, 'eyebrow' => 'Selected work', 'easing' => 'cinematic' ) ),
 					self::spacer( 'p-sp8', 28 ),
 					self::widget( 'p-rel', 'pss_related_projects', array( 'limit' => 3, 'layout' => 'cards' ) ),

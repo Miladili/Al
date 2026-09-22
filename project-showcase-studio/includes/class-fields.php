@@ -45,8 +45,14 @@ class Fields {
 		foreach ( $defs as $field ) { $field_options[ sanitize_key( $field['key'] ?? '' ) ] = (string) ( $field['label'] ?? $field['key'] ?? '' ); }
 		?>
 		<div class="wrap pss-fields-admin">
-			<h1>Project Fields</h1>
-			<p class="description">Define reusable fields once here. Add/Edit Project only asks for values — never key, type or options.</p>
+			<div class="pss-field-library-hero">
+				<div>
+					<span class="pss-editor-kicker">FIELD LIBRARY</span>
+					<h1>Reusable field definitions</h1>
+					<p>Define Label, Key, Type, Options, Validation and Conditions once. This list is not applied to every project. Each project adds only the fields it needs.</p>
+				</div>
+				<span class="pss-editor-pill"><?php echo esc_html( count( $defs ) ); ?> definitions</span>
+			</div>
 			<p><input type="search" id="pss-field-library-search" class="regular-text" placeholder="Search field library…"></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="pss_save_field_definitions">
@@ -252,76 +258,73 @@ class Fields {
 
 	public static function render_project_fields( $project_id ) {
 		self::maybe_seed_default_fields();
-		$global_defs  = get_field_definitions();
 		$local_defs   = get_project_local_field_definitions( $project_id );
 		$local_values = get_project_local_field_values( $project_id );
 		$library      = get_project_field_library_options();
-		$global_keys  = array();
-		foreach ( $global_defs as $field ) {
-			$key = sanitize_key( $field['key'] ?? '' );
-			if ( $key ) { $global_keys[ $key ] = true; }
-		}
-		$extras = array();
+		$schema       = array();
+		$used         = array();
 		foreach ( $local_defs as $field ) {
 			$key = sanitize_key( $field['key'] ?? '' );
-			if ( ! $key || isset( $global_keys[ $key ] ) ) { continue; }
-			$extras[] = $field;
+			if ( ! $key || isset( $used[ $key ] ) ) { continue; }
+			$used[ $key ] = true;
+			$schema[] = $field;
 		}
-		$used = $global_keys;
-		foreach ( $extras as $field ) { $used[ sanitize_key( $field['key'] ?? '' ) ] = true; }
+		// Recover previously saved values without forcing a universal schema.
+		if ( ! $schema ) {
+			foreach ( $library as $token => $def ) {
+				$record_key = sanitize_key( $def['record_key'] ?? '' );
+				if ( ! $record_key || isset( $used[ $record_key ] ) ) { continue; }
+				$value = get_field_value( $project_id, $record_key, '' );
+				$has = is_array( $value ) ? ! empty( $value ) : ( '' !== trim( (string) $value ) );
+				if ( ! $has ) { continue; }
+				$schema[] = array(
+					'source' => $def['source'] ?? 'global',
+					'source_key' => $def['key'] ?? $record_key,
+					'label' => $def['label'] ?? $record_key,
+					'key' => $record_key,
+					'type' => $def['type'] ?? 'text',
+					'options' => $def['options'] ?? array(),
+					'subfields' => $def['subfields'] ?? array(),
+					'description' => $def['description'] ?? '',
+				);
+				$used[ $record_key ] = true;
+			}
+		}
 
 		echo '<script>window.PSSProjectFieldLibrary=' . wp_json_encode( $library ) . ';window.PSSFieldTypes=' . wp_json_encode( self::types() ) . ';</script>';
 		echo '<div class="pss-field-editor-shell pss-cms-editor">';
-		echo '<div class="pss-field-editor-hero"><div><span class="pss-editor-kicker">PROJECT</span><h2>Project details</h2><p>Fill the values defined in Projects → Project Fields. Keys, types and options stay in the field library.</p></div></div>';
+		echo '<div class="pss-field-editor-hero"><div><span class="pss-editor-kicker">PROJECT SCHEMA</span><h2>Build this project’s fields</h2><p>There is no mandatory project template. Add only the fields this project needs — from the library or created once for this record. After adding, you only edit values.</p></div><span class="pss-editor-pill">' . esc_html( count( $schema ) ) . ' fields</span></div>';
 
-		echo '<div class="pss-cms-panel"><h3>Classification</h3><div class="pss-cms-grid">';
+		echo '<div class="pss-cms-panel"><h3>Classification</h3><p class="description">Native WordPress taxonomies. Title, featured image and the editor above stay standard WordPress fields.</p><div class="pss-cms-grid">';
 		self::taxonomy_select( $project_id, 'pss_project_type', 'Project Type' );
 		self::taxonomy_select( $project_id, 'pss_project_style', 'Style' );
 		self::taxonomy_select( $project_id, 'pss_project_location', 'Location' );
 		self::taxonomy_select( $project_id, 'pss_project_category', 'Category' );
 		echo '</div></div>';
 
-		echo '<div class="pss-cms-panel"><h3>Project fields</h3>';
-		if ( ! $global_defs ) {
-			echo '<p class="description">No reusable fields yet. Add them under Projects → Project Fields, or use “Add field to this project”.</p>';
-		}
-		echo '<div class="pss-cms-form">';
-		foreach ( $global_defs as $field ) {
-			$key = sanitize_key( $field['key'] ?? '' );
-			if ( ! $key ) { continue; }
-			$value = get_field_value( $project_id, $key, '' );
-			$visibility = is_array( $field['visibility'] ?? null ) ? $field['visibility'] : array();
-			$hidden = ! self::visibility_matches( $project_id, $visibility );
-			echo '<div class="pss-value-row" data-field-key="' . esc_attr( $key ) . '" data-vis-enabled="' . ( ! empty( $visibility['enabled'] ) ? '1' : '0' ) . '" data-vis-field="' . esc_attr( $visibility['field_key'] ?? '' ) . '" data-vis-op="' . esc_attr( $visibility['operator'] ?? '' ) . '" data-vis-value="' . esc_attr( $visibility['value'] ?? '' ) . '"' . ( $hidden ? ' style="display:none"' : '' ) . '>';
-			echo '<label class="pss-value-row__label"><span>' . esc_html( $field['label'] ?? $key ) . '</span>';
-			if ( ! empty( $field['description'] ) ) { echo '<em>' . esc_html( $field['description'] ) . '</em>'; }
-			echo '</label><div class="pss-value-row__control">';
-			self::render_editor( 'pss_field[' . $key . ']', $field['type'] ?? 'text', $value, $field );
-			echo '</div></div>';
-		}
-		echo '</div></div>';
-
-		echo '<div class="pss-cms-panel"><h3>Fields unique to this project</h3>';
-		echo '<div class="pss-data-builder-toolbar"><div class="pss-data-builder-toolbar__copy"><strong>Add field to this project</strong><span>Pick an existing library field or create a new one. After adding, only the value is shown.</span></div>';
-		echo '<div class="pss-data-builder-toolbar__actions"><select id="pss-quick-record-source" class="widefat"><option value="">Choose existing field…</option>';
+		echo '<div class="pss-cms-panel pss-schema-panel">';
+		echo '<div class="pss-data-builder-toolbar"><div class="pss-data-builder-toolbar__copy"><strong>Add Field</strong><span>Reuse a library field or create a new one. Definition stays hidden after insert.</span></div>';
+		echo '<div class="pss-data-builder-toolbar__actions"><input type="search" id="pss-quick-record-search" class="widefat" placeholder="Search field library…"><select id="pss-quick-record-source" class="widefat"><option value="">Choose from library…</option>';
 		foreach ( $library as $token => $def ) {
 			$record_key = sanitize_key( $def['record_key'] ?? '' );
 			if ( ! $record_key || isset( $used[ $record_key ] ) ) { continue; }
 			echo '<option value="' . esc_attr( $token ) . '">' . esc_html( $def['label'] ?? $record_key ) . '</option>';
 		}
-		echo '</select><button type="button" class="button" id="pss-add-library-record">Add field</button><button type="button" class="button button-primary" id="pss-add-local-field">Create new field</button></div></div>';
-		echo '<div id="pss-create-field-dialog" class="pss-create-field" hidden><strong>Create a field for this project</strong><div class="pss-grid-3"><label>Label<input type="text" id="pss-new-label" class="widefat"></label><label>Key<input type="text" id="pss-new-key" class="widefat" placeholder="ceiling_height"></label><label>Type<select id="pss-new-type" class="widefat">';
+		echo '</select><button type="button" class="button button-primary" id="pss-add-library-record">Add Field</button><button type="button" class="button" id="pss-add-local-field">Create new field</button></div></div>';
+		echo '<div id="pss-create-field-dialog" class="pss-create-field" hidden><strong>Create a field for this project</strong><div class="pss-grid-3"><label>Label<input type="text" id="pss-new-label" class="widefat"></label><label>Key<input type="text" id="pss-new-key" class="widefat" placeholder="bedrooms"></label><label>Type<select id="pss-new-type" class="widefat">';
 		self::type_options( 'text' );
 		echo '</select></label></div><label>Options (one per line, for Select)<textarea id="pss-new-options" class="widefat" rows="3"></textarea></label><p><button type="button" class="button button-primary" id="pss-create-field-confirm">Create and add value</button> <button type="button" class="button" id="pss-create-field-cancel">Cancel</button></p></div>';
-		echo '<div id="pss-local-fields-list" class="pss-cms-form">';
-		foreach ( $extras as $index => $field ) {
+
+		echo '<div id="pss-local-fields-list" class="pss-schema-list">';
+		foreach ( $schema as $index => $field ) {
 			$key = sanitize_key( $field['key'] ?? '' );
 			$value = array_key_exists( $key, $local_values ) ? $local_values[ $key ] : get_field_value( $project_id, $key, '' );
 			self::render_value_only_row( $index, $field, $value );
 		}
 		echo '</div>';
-		echo '<div id="pss-local-field-empty" class="pss-empty-panel"' . ( empty( $extras ) ? '' : ' style="display:none"' ) . '><strong>No extra fields on this project.</strong><span>Reusable fields above already appear for every project.</span></div></div>';
-		echo '<div class="pss-card-data-panel"><div class="pss-section-head"><div><h3>Card display fields</h3><p>Choose which values appear on Showcase cards.</p></div></div>';
+		echo '<div id="pss-local-field-empty" class="pss-empty-panel"' . ( $schema ? ' style="display:none"' : '' ) . '><strong>This project has no extra fields yet.</strong><span>Use Add Field. A kitchen project, a villa and an office can each have a completely different schema.</span></div></div>';
+
+		echo '<div class="pss-card-data-panel"><div class="pss-section-head"><div><h3>Card display fields</h3><p>Choose which of this project’s values appear on Showcase cards.</p></div></div>';
 		self::render_card_field_picker( $project_id, get_field_definitions( $project_id ) );
 		echo '</div></div>';
 	}
@@ -350,14 +353,14 @@ class Fields {
 		$source = sanitize_key( $field['source'] ?? 'custom' );
 		$source_key = sanitize_key( $field['source_key'] ?? $key );
 		$token = 'custom' === $source ? 'custom' : ( 'core' === $source ? 'core:' . $source_key : 'global:' . $source_key );
-		echo '<div class="pss-value-row pss-value-row--extra" data-index="' . esc_attr( $index ) . '">';
+		echo '<div class="pss-value-row pss-value-row--extra" draggable="true" data-index="' . esc_attr( $index ) . '">';
 		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][source]" value="' . esc_attr( $token ) . '">';
 		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][label]" value="' . esc_attr( $label ) . '">';
 		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][key]" value="' . esc_attr( $key ) . '">';
 		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][type]" class="pss-local-field-type" value="' . esc_attr( $type ) . '">';
 		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][options]" class="pss-local-options" value="' . esc_attr( implode( "\n", $options ) ) . '">';
 		echo '<input type="hidden" class="pss-local-subfields-json" name="pss_local_defs[' . esc_attr( $index ) . '][subfields_json]" value="' . esc_attr( wp_json_encode( $subfields ) ) . '">';
-		echo '<label class="pss-value-row__label"><span>' . esc_html( $label ?: $key ) . '</span><button type="button" class="button-link-delete pss-remove-local-field">Remove</button></label>';
+		echo '<div class="pss-value-row__label"><button type="button" class="pss-drag-handle" aria-label="Reorder">⋮⋮</button><span>' . esc_html( $label ?: $key ) . '</span><span class="pss-value-row__actions"><button type="button" class="button-link pss-collapse-field">Collapse</button><button type="button" class="button-link pss-duplicate-local-field">Duplicate</button><button type="button" class="button-link-delete pss-remove-local-field">Remove</button></span></div>';
 		echo '<div class="pss-local-field-value pss-value-row__control">';
 		self::render_editor( 'pss_local_field[' . $key . ']', $type, $value, $field );
 		echo '</div></div>';
@@ -555,6 +558,7 @@ class Fields {
 		$core_library = get_project_core_field_library();
 		foreach ( $defs as $field ) {
 			$key   = sanitize_key( $field['key'] );
+			if ( ! array_key_exists( $key, $input ) ) { continue; }
 			$type  = $field['type'];
 			$value = $input[ $key ] ?? '';
 			$value = self::sanitize_value_by_type( $value, $type, $field );
@@ -626,7 +630,19 @@ class Fields {
 					}
 				}
 			}
-			if ( '' !== $value && array() !== $value ) $local_values[ $key ] = $value;
+			if ( '' !== $value && array() !== $value ) {
+				$local_values[ $key ] = $value;
+				update_post_meta( $post_id, '_pss_field_' . $key, $value );
+			} else {
+				delete_post_meta( $post_id, '_pss_field_' . $key );
+			}
+		}
+		$previous_local = get_project_local_field_values( $post_id );
+		foreach ( array_keys( (array) $previous_local ) as $old_key ) {
+			$old_key = sanitize_key( $old_key );
+			if ( $old_key && ! isset( $used[ $old_key ] ) ) {
+				delete_post_meta( $post_id, '_pss_field_' . $old_key );
+			}
 		}
 		update_post_meta( $post_id, '_pss_local_field_definitions', $local_defs );
 		update_post_meta( $post_id, '_pss_local_field_values', $local_values );
