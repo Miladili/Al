@@ -174,16 +174,54 @@ abstract class Base extends \Elementor\Widget_Base {
 	}
 
 	protected function media_url( $image_control, $fallback = '' ) {
-		if ( is_array( $image_control ) && ! empty( $image_control['url'] ) ) {
-			return $image_control['url'];
-		}
-		if ( is_array( $image_control ) && ! empty( $image_control['id'] ) ) {
-			$url = wp_get_attachment_image_url( absint( $image_control['id'] ), 'full' );
-			if ( $url ) {
-				return $url;
+		$url = $this->resolve_image_src( $image_control );
+		return $url ? $url : ( is_string( $fallback ) ? $fallback : '' );
+	}
+
+	protected function resolve_image_src( $value ) {
+		try {
+			if ( is_array( $value ) ) {
+				if ( ! empty( $value['url'] ) && is_string( $value['url'] ) ) {
+					return esc_url_raw( $value['url'] );
+				}
+				if ( ! empty( $value['id'] ) ) {
+					$value = $value['id'];
+				} elseif ( isset( $value[0] ) ) {
+					$value = $value[0];
+				} else {
+					return '';
+				}
 			}
+			if ( is_numeric( $value ) && absint( $value ) ) {
+				$url = wp_get_attachment_image_url( absint( $value ), 'full' );
+				return $url ? $url : '';
+			}
+			if ( is_string( $value ) ) {
+				$value = trim( $value );
+				if ( '' === $value ) {
+					return '';
+				}
+				if ( 0 === strpos( $value, 'http://' ) || 0 === strpos( $value, 'https://' ) ) {
+					return esc_url_raw( $value );
+				}
+				if ( is_numeric( $value ) ) {
+					$url = wp_get_attachment_image_url( absint( $value ), 'full' );
+					return $url ? $url : '';
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return '';
 		}
-		return $fallback;
+		return '';
+	}
+
+	protected function add_box_style( $selector ) {
+		$this->start_controls_section( 'pss_box_style', array( 'label' => 'Box', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'pss_pad', array( 'label' => 'Padding', 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( $selector => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		$this->add_control( 'pss_bg', array( 'label' => 'Background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'background-color: {{VALUE}};' ) ) );
+		$this->add_control( 'pss_border_c', array( 'label' => 'Border', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'border-color: {{VALUE}};' ) ) );
+		$this->add_responsive_control( 'pss_radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'selectors' => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->end_controls_section();
 	}
 
 	protected function project_image( $project_id, $which = 'featured' ) {

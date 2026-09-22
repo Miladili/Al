@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.0
+- Project editor no longer mixes field definitions with values. Reusable fields are defined once; Add/Edit Project shows a JetEngine-like value form.
+- Unique fields are added via “Add field to this project” and then edited as values only.
+- Extra field types: WYSIWYG, Color, File, Video, Map. Nested Group is allowed inside structured fields.
+- Before/After render is fully defensive (empty project, missing media, invalid URLs, empty repeater, editor preview).
+- Classification taxonomies and transformation images use proper selects / Media Library controls.
+
 ## 2.6.0
 - Card presets now switch composition markup (split, fullscreen, float, dossier, caption-side, hover-reveal, perspective) instead of recoloring one DOM tree.
 - Title / meta / index / CTA placements are independent. Overlay content is not repeated below the image.

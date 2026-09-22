@@ -23,15 +23,18 @@ class Project_Before_After extends Base {
 		$this->add_control( 'after_image', array( 'label' => 'After image', 'type' => \Elementor\Controls_Manager::MEDIA, 'condition' => array( 'content_source' => 'manual' ) ) );
 		$this->add_control( 'before_url', array( 'label' => 'Before image URL', 'type' => \Elementor\Controls_Manager::URL, 'placeholder' => 'https://', 'condition' => array( 'content_source' => 'manual' ) ) );
 		$this->add_control( 'after_url', array( 'label' => 'After image URL', 'type' => \Elementor\Controls_Manager::URL, 'placeholder' => 'https://', 'condition' => array( 'content_source' => 'manual' ) ) );
+		$this->add_control( 'fallback_image', array( 'label' => 'Fallback image', 'type' => \Elementor\Controls_Manager::MEDIA ) );
 		$this->add_control( 'before_field', array( 'label' => 'Before dynamic field', 'type' => \Elementor\Controls_Manager::SELECT2, 'options' => self::field_options(), 'condition' => array( 'content_source' => 'project' ) ) );
 		$this->add_control( 'after_field', array( 'label' => 'After dynamic field', 'type' => \Elementor\Controls_Manager::SELECT2, 'options' => self::field_options(), 'condition' => array( 'content_source' => 'project' ) ) );
 		$this->end_controls_section();
 
-		if ( class_exists( '\Elementor\Repeater' ) ) {
+		if ( class_exists( '\\Elementor\\Repeater' ) ) {
 			$repeater = new \Elementor\Repeater();
 			$repeater->add_control( 'title', array( 'label' => 'Title', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'before_image', array( 'label' => 'Before', 'type' => \Elementor\Controls_Manager::MEDIA ) );
 			$repeater->add_control( 'after_image', array( 'label' => 'After', 'type' => \Elementor\Controls_Manager::MEDIA ) );
+			$repeater->add_control( 'before_url', array( 'label' => 'Before URL', 'type' => \Elementor\Controls_Manager::URL ) );
+			$repeater->add_control( 'after_url', array( 'label' => 'After URL', 'type' => \Elementor\Controls_Manager::URL ) );
 			$this->start_controls_section( 'pairs', array( 'label' => 'Additional comparisons', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
 			$this->add_control( 'items', array( 'label' => 'Items', 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title }}}', 'prevent_empty' => false ) );
 			$this->end_controls_section();
@@ -48,48 +51,80 @@ class Project_Before_After extends Base {
 	}
 
 	protected function render() {
-		$s  = $this->get_settings_for_display();
-		$id = $this->project_id( $s );
-		$pairs = $this->pairs( $s, $id );
-		if ( ! $pairs ) {
-			return;
-		}
-		$start = isset( $s['start']['size'] ) ? absint( $s['start']['size'] ) : 50;
-		$ori   = sanitize_key( $s['orientation'] ?? 'horizontal' );
-		foreach ( $pairs as $pair ) {
-			echo '<div class="pss-before-after pss-before-after--' . esc_attr( $ori ) . '" style="--pss-ba-pos:' . esc_attr( $start ) . '%" data-pss-ba="' . esc_attr( $ori ) . '">';
-			echo '<img class="pss-before-after__after" src="' . esc_url( $pair['after'] ) . '" alt="' . esc_attr( $s['after_label'] ?? 'After' ) . '">';
-			echo '<div class="pss-before-after__clip" style="width:' . esc_attr( $start ) . '%"><img src="' . esc_url( $pair['before'] ) . '" alt="' . esc_attr( $s['before_label'] ?? 'Before' ) . '"></div>';
-			if ( ! empty( $s['show_labels'] ) ) {
-				echo '<span class="pss-before-after__label pss-before-after__label--before">' . esc_html( $s['before_label'] ?: 'Before' ) . '</span>';
-				echo '<span class="pss-before-after__label pss-before-after__label--after">' . esc_html( $s['after_label'] ?: 'After' ) . '</span>';
+		try {
+			$s     = $this->get_settings_for_display();
+			$s     = is_array( $s ) ? $s : array();
+			$pairs = $this->pairs( $s );
+			if ( ! $pairs ) {
+				return;
 			}
-			echo '<span class="pss-before-after__handle">';
-			$this->render_icon( $s['handle_icon'] ?? array() );
-			echo '</span>';
-			echo '<input type="range" min="0" max="100" value="' . esc_attr( $start ) . '" aria-label="Before After position">';
-			echo '</div>';
+			$start = isset( $s['start']['size'] ) ? absint( $s['start']['size'] ) : 50;
+			$start = max( 0, min( 100, $start ) );
+			$ori   = sanitize_key( $s['orientation'] ?? 'horizontal' );
+			if ( ! in_array( $ori, array( 'horizontal', 'vertical' ), true ) ) {
+				$ori = 'horizontal';
+			}
+			foreach ( $pairs as $pair ) {
+				$before = $this->resolve_image_src( $pair['before'] ?? '' );
+				$after  = $this->resolve_image_src( $pair['after'] ?? '' );
+				if ( ! $before || ! $after ) {
+					continue;
+				}
+				echo '<div class="pss-before-after pss-before-after--' . esc_attr( $ori ) . '" style="--pss-ba-pos:' . esc_attr( $start ) . '%">';
+				echo '<img class="pss-before-after__after" src="' . esc_url( $after ) . '" alt="' . esc_attr( $s['after_label'] ?? 'After' ) . '">';
+				echo '<div class="pss-before-after__clip" style="width:' . esc_attr( $start ) . '%"><img src="' . esc_url( $before ) . '" alt="' . esc_attr( $s['before_label'] ?? 'Before' ) . '"></div>';
+				if ( ! empty( $s['show_labels'] ) ) {
+					echo '<span class="pss-before-after__label pss-before-after__label--before">' . esc_html( $s['before_label'] ?: 'Before' ) . '</span>';
+					echo '<span class="pss-before-after__label pss-before-after__label--after">' . esc_html( $s['after_label'] ?: 'After' ) . '</span>';
+				}
+				echo '<span class="pss-before-after__handle">';
+				$this->render_icon( is_array( $s['handle_icon'] ?? null ) ? $s['handle_icon'] : array() );
+				echo '</span>';
+				echo '<input type="range" min="0" max="100" value="' . esc_attr( $start ) . '" aria-label="Before After position">';
+				echo '</div>';
+			}
+		} catch ( \Throwable $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( '[PSS] Before/After render: ' . $e->getMessage() );
+			}
 		}
 	}
 
-	private function pairs( $s, $project_id ) {
-		$pairs = array();
+	private function pairs( $s ) {
+		$pairs    = array();
+		$fallback = $this->resolve_image_src( $s['fallback_image'] ?? array() );
 		if ( $this->is_manual( $s ) ) {
-			$before = $this->media_url( $s['before_image'] ?? array(), $s['before_url']['url'] ?? '' );
-			$after  = $this->media_url( $s['after_image'] ?? array(), $s['after_url']['url'] ?? '' );
+			$before = $this->resolve_image_src( $s['before_image'] ?? array() );
+			if ( ! $before ) {
+				$before = $this->resolve_image_src( $s['before_url']['url'] ?? '' );
+			}
+			$after = $this->resolve_image_src( $s['after_image'] ?? array() );
+			if ( ! $after ) {
+				$after = $this->resolve_image_src( $s['after_url']['url'] ?? '' );
+			}
 			if ( $before && $after ) {
 				$pairs[] = array( 'before' => $before, 'after' => $after );
 			}
 		} else {
-			$before = $this->dynamic_image( $project_id, $s['before_field'] ?? '', 'before' );
-			$after  = $this->dynamic_image( $project_id, $s['after_field'] ?? '', 'after' );
+			$id     = $this->project_id( $s );
+			$before = $this->dynamic_image( $id, $s['before_field'] ?? '', 'before', $fallback );
+			$after  = $this->dynamic_image( $id, $s['after_field'] ?? '', 'after', $fallback );
 			if ( $before && $after ) {
 				$pairs[] = array( 'before' => $before, 'after' => $after );
 			}
 		}
 		foreach ( (array) ( $s['items'] ?? array() ) as $item ) {
-			$b = $this->media_url( $item['before_image'] ?? array() );
-			$a = $this->media_url( $item['after_image'] ?? array() );
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+			$b = $this->resolve_image_src( $item['before_image'] ?? array() );
+			if ( ! $b ) {
+				$b = $this->resolve_image_src( $item['before_url']['url'] ?? '' );
+			}
+			$a = $this->resolve_image_src( $item['after_image'] ?? array() );
+			if ( ! $a ) {
+				$a = $this->resolve_image_src( $item['after_url']['url'] ?? '' );
+			}
 			if ( $b && $a ) {
 				$pairs[] = array( 'before' => $b, 'after' => $a );
 			}
@@ -97,20 +132,26 @@ class Project_Before_After extends Base {
 		return $pairs;
 	}
 
-	private function dynamic_image( $project_id, $field_key, $fallback ) {
+	private function dynamic_image( $project_id, $field_key, $fallback_slot, $fallback_src = '' ) {
+		$project_id = absint( $project_id );
 		if ( $field_key && $project_id ) {
-			$data = \PSS\get_project_card_field( $project_id, $field_key );
-			$value = $data['value'] ?? '';
-			if ( is_numeric( $value ) ) {
-				$url = wp_get_attachment_image_url( absint( $value ), 'full' );
+			try {
+				$data  = \PSS\get_project_card_field( $project_id, $field_key );
+				$value = is_array( $data ) ? ( $data['value'] ?? '' ) : '';
+				$url   = $this->resolve_image_src( $value );
 				if ( $url ) {
 					return $url;
 				}
-			}
-			if ( is_string( $value ) && 0 === strpos( $value, 'http' ) ) {
-				return $value;
+			} catch ( \Throwable $e ) {
+				$url = '';
 			}
 		}
-		return $this->project_image( $project_id, $fallback );
+		if ( $project_id ) {
+			$url = $this->resolve_image_src( $this->project_image( $project_id, $fallback_slot ) );
+			if ( $url ) {
+				return $url;
+			}
+		}
+		return $fallback_src;
 	}
 }

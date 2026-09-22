@@ -7,6 +7,7 @@ class Fields {
 	public static function init() {
 		add_filter( 'admin_body_class', array( __CLASS__, 'admin_body_class' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_action( 'admin_init', array( __CLASS__, 'maybe_seed_default_fields' ) );
 		add_action( 'admin_post_pss_save_field_definitions', array( __CLASS__, 'save_definitions' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 	}
@@ -45,7 +46,7 @@ class Fields {
 		?>
 		<div class="wrap pss-fields-admin">
 			<h1>Project Fields</h1>
-			<p class="description">Create reusable fields for Projects. These fields are filled in the Project editor and can be displayed from Elementor.</p>
+			<p class="description">Define reusable fields once here. Add/Edit Project only asks for values — never key, type or options.</p>
 			<p><input type="search" id="pss-field-library-search" class="regular-text" placeholder="Search field library…"></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="pss_save_field_definitions">
@@ -140,12 +141,7 @@ class Fields {
 	}
 
 	private static function type_options( $current ) {
-		$types = array(
-			'text' => 'Text', 'textarea' => 'Textarea', 'number' => 'Number', 'date' => 'Date', 'url' => 'URL', 'image' => 'Image',
-			'gallery' => 'Gallery', 'select' => 'Select', 'multi_select' => 'Multi Select', 'toggle' => 'Toggle', 'repeater' => 'Repeater',
-			'group' => 'Group', 'table' => 'Table', 'icon_value' => 'Icon + Title + Value',
-		);
-		foreach ( $types as $value => $label ) {
+		foreach ( self::types() as $value => $label ) {
 			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $current, $value, false ) . '>' . esc_html( $label ) . '</option>';
 		}
 	}
@@ -200,10 +196,35 @@ class Fields {
 		exit;
 	}
 
+
+	public static function maybe_seed_default_fields() {
+		$existing = get_option( 'pss_field_definitions', array() );
+		if ( is_array( $existing ) && ! empty( $existing ) ) {
+			return;
+		}
+		update_option(
+			'pss_field_definitions',
+			array(
+				array( 'label' => 'Year', 'key' => 'year', 'type' => 'number', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Area', 'key' => 'area', 'type' => 'text', 'description' => 'e.g. 240 m²', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Designer', 'key' => 'designer', 'type' => 'text', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Architect', 'key' => 'architect', 'type' => 'text', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Client', 'key' => 'client', 'type' => 'text', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Budget', 'key' => 'budget', 'type' => 'text', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Status', 'key' => 'status', 'type' => 'select', 'description' => '', 'required' => false, 'options' => array( 'Concept', 'In progress', 'Completed' ), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Completion', 'key' => 'completion', 'type' => 'date', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Materials', 'key' => 'materials', 'type' => 'textarea', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+				array( 'label' => 'Services', 'key' => 'services', 'type' => 'textarea', 'description' => '', 'required' => false, 'options' => array(), 'subfields' => array(), 'visibility' => array() ),
+			),
+			false
+		);
+	}
+
 	private static function types() {
 		return array(
-			'text' => 'Text', 'textarea' => 'Textarea', 'number' => 'Number', 'date' => 'Date', 'url' => 'URL', 'image' => 'Image',
-			'gallery' => 'Gallery', 'select' => 'Select', 'multi_select' => 'Multi Select', 'toggle' => 'Toggle', 'repeater' => 'Repeater',
+			'text' => 'Text', 'textarea' => 'Textarea', 'wysiwyg' => 'WYSIWYG', 'number' => 'Number', 'date' => 'Date', 'url' => 'URL', 'color' => 'Color',
+			'image' => 'Image', 'gallery' => 'Gallery', 'file' => 'File', 'video' => 'Video', 'map' => 'Map / Location',
+			'select' => 'Select', 'multi_select' => 'Multi Select', 'toggle' => 'Toggle', 'repeater' => 'Repeater',
 			'group' => 'Group', 'table' => 'Table', 'icon_value' => 'Icon + Title + Value',
 		);
 	}
@@ -217,110 +238,129 @@ class Fields {
 				continue;
 			}
 			$type = $table ? 'text' : sanitize_key( $row['type'] ?? 'text' );
-			if ( ! isset( self::types()[ $type ] ) || in_array( $type, array( 'repeater', 'group', 'table', 'icon_value' ), true ) ) {
-				$type = 'text';
-			}
-			$out[] = array( 'label' => $label, 'key' => $key, 'type' => $type );
+		if ( ! isset( self::types()[ $type ] ) || in_array( $type, array( 'repeater', 'table', 'icon_value' ), true ) ) {
+			$type = 'text';
+		}
+		$nested = array();
+		if ( 'group' === $type && ! empty( $row['subfields'] ) && is_array( $row['subfields'] ) ) {
+			$nested = self::sanitize_subfields( $row['subfields'], false );
+		}
+		$out[] = array( 'label' => $label, 'key' => $key, 'type' => $type, 'subfields' => $nested, 'options' => array_values( array_filter( array_map( 'sanitize_text_field', (array) ( $row['options'] ?? array() ) ) ) ) );
 		}
 		return $out;
 	}
 
 	public static function render_project_fields( $project_id ) {
-		$global_defs = get_field_definitions();
-		$local_defs = get_project_local_field_definitions( $project_id );
+		self::maybe_seed_default_fields();
+		$global_defs  = get_field_definitions();
+		$local_defs   = get_project_local_field_definitions( $project_id );
 		$local_values = get_project_local_field_values( $project_id );
-		$library = get_project_field_library_options();
-		$defs = get_field_definitions( $project_id );
-		$used = array();
+		$library      = get_project_field_library_options();
+		$global_keys  = array();
+		foreach ( $global_defs as $field ) {
+			$key = sanitize_key( $field['key'] ?? '' );
+			if ( $key ) { $global_keys[ $key ] = true; }
+		}
+		$extras = array();
 		foreach ( $local_defs as $field ) {
 			$key = sanitize_key( $field['key'] ?? '' );
-			if ( $key ) $used[ $key ] = true;
+			if ( ! $key || isset( $global_keys[ $key ] ) ) { continue; }
+			$extras[] = $field;
 		}
+		$used = $global_keys;
+		foreach ( $extras as $field ) { $used[ sanitize_key( $field['key'] ?? '' ) ] = true; }
 
-		// Legacy/shared fields that already contain data are surfaced as normal data records,
-		// so users can continue editing existing projects without seeing a rigid schema.
-		foreach ( $library as $source_token => $def ) {
+		echo '<script>window.PSSProjectFieldLibrary=' . wp_json_encode( $library ) . ';window.PSSFieldTypes=' . wp_json_encode( self::types() ) . ';</script>';
+		echo '<div class="pss-field-editor-shell pss-cms-editor">';
+		echo '<div class="pss-field-editor-hero"><div><span class="pss-editor-kicker">PROJECT</span><h2>Project details</h2><p>Fill the values defined in Projects → Project Fields. Keys, types and options stay in the field library.</p></div></div>';
+
+		echo '<div class="pss-cms-panel"><h3>Classification</h3><div class="pss-cms-grid">';
+		self::taxonomy_select( $project_id, 'pss_project_type', 'Project Type' );
+		self::taxonomy_select( $project_id, 'pss_project_style', 'Style' );
+		self::taxonomy_select( $project_id, 'pss_project_location', 'Location' );
+		self::taxonomy_select( $project_id, 'pss_project_category', 'Category' );
+		echo '</div></div>';
+
+		echo '<div class="pss-cms-panel"><h3>Project fields</h3>';
+		if ( ! $global_defs ) {
+			echo '<p class="description">No reusable fields yet. Add them under Projects → Project Fields, or use “Add field to this project”.</p>';
+		}
+		echo '<div class="pss-cms-form">';
+		foreach ( $global_defs as $field ) {
+			$key = sanitize_key( $field['key'] ?? '' );
+			if ( ! $key ) { continue; }
+			$value = get_field_value( $project_id, $key, '' );
+			$visibility = is_array( $field['visibility'] ?? null ) ? $field['visibility'] : array();
+			$hidden = ! self::visibility_matches( $project_id, $visibility );
+			echo '<div class="pss-value-row" data-field-key="' . esc_attr( $key ) . '" data-vis-enabled="' . ( ! empty( $visibility['enabled'] ) ? '1' : '0' ) . '" data-vis-field="' . esc_attr( $visibility['field_key'] ?? '' ) . '" data-vis-op="' . esc_attr( $visibility['operator'] ?? '' ) . '" data-vis-value="' . esc_attr( $visibility['value'] ?? '' ) . '"' . ( $hidden ? ' style="display:none"' : '' ) . '>';
+			echo '<label class="pss-value-row__label"><span>' . esc_html( $field['label'] ?? $key ) . '</span>';
+			if ( ! empty( $field['description'] ) ) { echo '<em>' . esc_html( $field['description'] ) . '</em>'; }
+			echo '</label><div class="pss-value-row__control">';
+			self::render_editor( 'pss_field[' . $key . ']', $field['type'] ?? 'text', $value, $field );
+			echo '</div></div>';
+		}
+		echo '</div></div>';
+
+		echo '<div class="pss-cms-panel"><h3>Fields unique to this project</h3>';
+		echo '<div class="pss-data-builder-toolbar"><div class="pss-data-builder-toolbar__copy"><strong>Add field to this project</strong><span>Pick an existing library field or create a new one. After adding, only the value is shown.</span></div>';
+		echo '<div class="pss-data-builder-toolbar__actions"><select id="pss-quick-record-source" class="widefat"><option value="">Choose existing field…</option>';
+		foreach ( $library as $token => $def ) {
 			$record_key = sanitize_key( $def['record_key'] ?? '' );
-			if ( ! $record_key || isset( $used[ $record_key ] ) ) continue;
-			$value = get_field_value( $project_id, $record_key, '' );
-			$has_value = is_array( $value ) ? ! empty( $value ) : ( '' !== (string) $value );
-			if ( ! $has_value || ! in_array( $def['source'] ?? '', array( 'global', 'core' ), true ) ) continue;
-			$local_defs[] = array(
-				'source' => $def['source'],
-				'label' => $def['label'] ?? $record_key,
-				'key' => $record_key,
-				'type' => $def['type'] ?? 'text',
-				'description' => $def['description'] ?? '',
-				'options' => $def['options'] ?? array(),
-				'subfields' => $def['subfields'] ?? array(),
-				'source_key' => $def['key'] ?? '',
-			);
-			$used[ $record_key ] = true;
+			if ( ! $record_key || isset( $used[ $record_key ] ) ) { continue; }
+			echo '<option value="' . esc_attr( $token ) . '">' . esc_html( $def['label'] ?? $record_key ) . '</option>';
 		}
-
-		$record_count = count( $local_defs );
-		echo '<script>window.PSSProjectFieldLibrary=' . wp_json_encode( $library ) . ';</script>';
-		echo '<div class="pss-field-editor-shell">';
-		echo '<div class="pss-field-editor-hero"><div><span class="pss-editor-kicker">PROJECT DATA</span><h2>Build this project from data records</h2><p>This editor is intentionally schema-free. Add a record, choose a reusable field from the library or create a brand-new field, then enter its value. Different projects can have completely different fields.</p></div><div class="pss-editor-pill">' . esc_html( $record_count ) . ' records</div></div>';
-
-		echo '<div class="pss-data-builder-toolbar">';
-		echo '<div class="pss-data-builder-toolbar__copy"><strong>Add project data</strong><span>Choose an existing field or create a new one. You can add as many records as the project needs.</span></div>';
-		echo '<div class="pss-data-builder-toolbar__actions"><input type="search" id="pss-quick-record-search" class="widefat" placeholder="Search fields…"><select id="pss-quick-record-source" class="widefat">';
-		echo '<option value="">+ Add record from library…</option>';
-		foreach ( $library as $source_token => $def ) {
-			$record_key = sanitize_key( $def['record_key'] ?? '' );
-			if ( ! $record_key || isset( $used[ $record_key ] ) ) continue;
-			echo '<option value="' . esc_attr( $source_token ) . '">' . esc_html( ( $def['label'] ?? $record_key ) . ' — ' . ( $def['type'] ?? 'text' ) ) . '</option>';
-		}
-		echo '</select><button type="button" class="button button-secondary" id="pss-add-library-record">Add selected</button><button type="button" class="button button-primary" id="pss-add-local-field">+ New custom record</button></div>';
-		echo '</div>';
-
-		echo '<div id="pss-local-fields-list" class="pss-record-list">';
-		foreach ( $local_defs as $index => $field ) {
+		echo '</select><button type="button" class="button" id="pss-add-library-record">Add field</button><button type="button" class="button button-primary" id="pss-add-local-field">Create new field</button></div></div>';
+		echo '<div id="pss-create-field-dialog" class="pss-create-field" hidden><strong>Create a field for this project</strong><div class="pss-grid-3"><label>Label<input type="text" id="pss-new-label" class="widefat"></label><label>Key<input type="text" id="pss-new-key" class="widefat" placeholder="ceiling_height"></label><label>Type<select id="pss-new-type" class="widefat">';
+		self::type_options( 'text' );
+		echo '</select></label></div><label>Options (one per line, for Select)<textarea id="pss-new-options" class="widefat" rows="3"></textarea></label><p><button type="button" class="button button-primary" id="pss-create-field-confirm">Create and add value</button> <button type="button" class="button" id="pss-create-field-cancel">Cancel</button></p></div>';
+		echo '<div id="pss-local-fields-list" class="pss-cms-form">';
+		foreach ( $extras as $index => $field ) {
 			$key = sanitize_key( $field['key'] ?? '' );
 			$value = array_key_exists( $key, $local_values ) ? $local_values[ $key ] : get_field_value( $project_id, $key, '' );
-			self::render_local_field_row( $index, $field, $value );
+			self::render_value_only_row( $index, $field, $value );
 		}
 		echo '</div>';
-		echo '<div id="pss-local-field-empty" class="pss-empty-panel"' . ( empty( $local_defs ) ? '' : ' style="display:none"' ) . '><strong>No project data records yet.</strong><span>Use the library selector above or add a custom record. Nothing is mandatory.</span></div>';
-
-		echo '<div class="pss-card-data-panel">';
-		echo '<div class="pss-section-head"><div><h3>Card display fields</h3><p>Pick any core field or custom field and decide exactly what appears on Project Showcase cards.</p></div><span class="pss-field-library__count">Per project</span></div>';
-		self::render_card_field_picker( $project_id, $defs );
-		echo '</div>';
-		echo '</div>';
+		echo '<div id="pss-local-field-empty" class="pss-empty-panel"' . ( empty( $extras ) ? '' : ' style="display:none"' ) . '><strong>No extra fields on this project.</strong><span>Reusable fields above already appear for every project.</span></div></div>';
+		echo '<div class="pss-card-data-panel"><div class="pss-section-head"><div><h3>Card display fields</h3><p>Choose which values appear on Showcase cards.</p></div></div>';
+		self::render_card_field_picker( $project_id, get_field_definitions( $project_id ) );
+		echo '</div></div>';
 	}
 
-	private static function render_local_field_row( $index, $field, $value = '' ) {
+	private static function taxonomy_select( $project_id, $taxonomy, $label ) {
+		if ( ! taxonomy_exists( $taxonomy ) ) { return; }
+		$terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => false ) );
+		$current = wp_get_object_terms( $project_id, $taxonomy, array( 'fields' => 'ids' ) );
+		$current = ( ! is_wp_error( $current ) && $current ) ? absint( $current[0] ) : 0;
+		echo '<label class="pss-value-row"><span class="pss-value-row__label">' . esc_html( $label ) . '</span>';
+		echo '<select name="pss_tax[' . esc_attr( $taxonomy ) . ']" class="widefat"><option value="">— Select —</option>';
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( $current, (int) $term->term_id, false ) . '>' . esc_html( $term->name ) . '</option>';
+			}
+		}
+		echo '</select></label>';
+	}
+
+	private static function render_value_only_row( $index, $field, $value = '' ) {
 		$type = sanitize_key( $field['type'] ?? 'text' );
 		$label = (string) ( $field['label'] ?? '' );
 		$key = sanitize_key( $field['key'] ?? sanitize_title( $label ) );
 		$options = (array) ( $field['options'] ?? array() );
 		$subfields = is_array( $field['subfields'] ?? null ) ? $field['subfields'] : array();
 		$source = sanitize_key( $field['source'] ?? 'custom' );
-		$source_key = sanitize_key( $field['source_key'] ?? '' );
-		if ( ! $source_key && in_array( $source, array( 'global', 'core' ), true ) ) {
-			$source_key = 'core' === $source && 0 === strpos( $key, 'core_' ) ? substr( $key, 5 ) : $key;
-		}
-		$source_token = 'global' === $source ? 'global:' . $source_key : ( 'core' === $source ? 'core:' . $source_key : 'custom' );
-		?>
-		<div class="pss-local-field-builder" draggable="true" data-index="<?php echo esc_attr( $index ); ?>" data-current-value="<?php echo esc_attr( wp_json_encode( $value ) ); ?>">
-			<div class="pss-local-field-builder__header"><div><span class="pss-editor-kicker">PROJECT RECORD</span><strong><?php echo esc_html( $label ?: 'New data record' ); ?></strong><span class="pss-record-source-badge"><?php echo 'custom' === $source ? 'Project-only field' : ( 'core' === $source ? 'Built-in field' : 'Reusable field' ); ?></span></div><div class="pss-local-field-actions"><button type="button" class="button-link pss-duplicate-local-field">Duplicate</button><button type="button" class="button-link-delete pss-remove-local-field">Remove</button></div></div>
-			<div class="pss-grid-3 pss-record-source-row">
-				<label>Field source<select class="pss-local-field-source widefat" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][source]"><?php echo self::library_source_options( $source_token ); ?></select></label>
-				<label>Label<input type="text" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][label]" value="<?php echo esc_attr( $label ); ?>" class="widefat"></label>
-				<label>Key<input type="text" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][key]" value="<?php echo esc_attr( $key ); ?>" class="widefat" placeholder="e.g. ceiling_height"></label>
-			</div>
-			<div class="pss-grid-3">
-				<label>Type<select class="pss-local-field-type" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][type]"><?php self::type_options( $type ); ?></select></label>
-				<label>Options / structure<textarea name="pss_local_defs[<?php echo esc_attr( $index ); ?>][options]" class="pss-local-options widefat" rows="3" placeholder="For Select / Multi Select: one option per line"><?php echo esc_textarea( implode( "\n", $options ) ); ?></textarea></label>
-				<label>Description<input type="text" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][description]" value="<?php echo esc_attr( $field['description'] ?? '' ); ?>" class="widefat"></label>
-			</div>
-			<?php if ( ! empty( $subfields ) ) : ?><input type="hidden" class="pss-local-subfields-json" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][subfields_json]" value="<?php echo esc_attr( wp_json_encode( $subfields ) ); ?>"><?php else : ?><input type="hidden" class="pss-local-subfields-json" name="pss_local_defs[<?php echo esc_attr( $index ); ?>][subfields_json]" value="[]"><?php endif; ?>
-			<div class="pss-local-field-structure" data-existing-options="<?php echo esc_attr( implode( "\n", $options ) ); ?>" data-existing-subfields="<?php echo esc_attr( wp_json_encode( $subfields ) ); ?>"></div>
-			<div class="pss-local-field-value"><label>Value</label><?php self::render_editor( 'pss_local_field[' . $key . ']', $type, $value, $field ); ?></div>
-		</div>
-		<?php
+		$source_key = sanitize_key( $field['source_key'] ?? $key );
+		$token = 'custom' === $source ? 'custom' : ( 'core' === $source ? 'core:' . $source_key : 'global:' . $source_key );
+		echo '<div class="pss-value-row pss-value-row--extra" data-index="' . esc_attr( $index ) . '">';
+		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][source]" value="' . esc_attr( $token ) . '">';
+		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][label]" value="' . esc_attr( $label ) . '">';
+		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][key]" value="' . esc_attr( $key ) . '">';
+		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][type]" class="pss-local-field-type" value="' . esc_attr( $type ) . '">';
+		echo '<input type="hidden" name="pss_local_defs[' . esc_attr( $index ) . '][options]" class="pss-local-options" value="' . esc_attr( implode( "\n", $options ) ) . '">';
+		echo '<input type="hidden" class="pss-local-subfields-json" name="pss_local_defs[' . esc_attr( $index ) . '][subfields_json]" value="' . esc_attr( wp_json_encode( $subfields ) ) . '">';
+		echo '<label class="pss-value-row__label"><span>' . esc_html( $label ?: $key ) . '</span><button type="button" class="button-link-delete pss-remove-local-field">Remove</button></label>';
+		echo '<div class="pss-local-field-value pss-value-row__control">';
+		self::render_editor( 'pss_local_field[' . $key . ']', $type, $value, $field );
+		echo '</div></div>';
 	}
 
 	private static function library_source_options( $selected = '' ) {
@@ -361,18 +401,35 @@ class Fields {
 
 	private static function render_editor( $name, $type, $value, $field ) {
 		$attr = ' name="' . esc_attr( $name ) . '" ';
+		if ( is_array( $value ) && ! in_array( $type, array( 'repeater', 'group', 'table', 'icon_value', 'multi_select', 'gallery', 'map' ), true ) ) {
+			$value = '';
+		}
 		switch ( $type ) {
 			case 'textarea':
-				echo '<textarea' . $attr . 'rows="4" class="widefat">' . esc_textarea( $value ) . '</textarea>';
+				echo '<textarea' . $attr . 'rows="4" class="widefat">' . esc_textarea( is_scalar( $value ) ? $value : '' ) . '</textarea>';
 				break;
 			case 'number':
-				echo '<input type="number" step="any"' . $attr . 'value="' . esc_attr( $value ) . '" class="widefat">';
+				echo '<input type="number" step="any"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat">';
 				break;
 			case 'date':
-				echo '<input type="date"' . $attr . 'value="' . esc_attr( $value ) . '" class="widefat">';
+				echo '<input type="date"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat">';
 				break;
 			case 'url':
-				echo '<input type="url"' . $attr . 'value="' . esc_attr( $value ) . '" class="widefat">';
+			case 'video':
+				echo '<input type="url"' . $attr . 'value="' . esc_attr( is_array( $value ) ? ( $value['url'] ?? '' ) : $value ) . '" class="widefat" placeholder="https://">';
+				break;
+			case 'wysiwyg':
+				echo '<textarea' . $attr . 'rows="8" class="widefat pss-wysiwyg">' . esc_textarea( is_scalar( $value ) ? $value : '' ) . '</textarea>';
+				break;
+			case 'color':
+				echo '<input type="color"' . $attr . 'value="' . esc_attr( $value ? $value : '#111111' ) . '">';
+				break;
+			case 'file':
+				echo '<div class="pss-media-field"><input type="hidden" class="pss-media-id" data-media-type="file"' . $attr . 'value="' . esc_attr( absint( $value ) ) . '"><button type="button" class="button pss-file-media">Choose file</button><span class="pss-media-current">' . esc_html( $value ? 'ID ' . absint( $value ) : '' ) . '</span></div>';
+				break;
+			case 'map':
+				$map = is_array( $value ) ? $value : array( 'address' => is_string( $value ) ? $value : '' );
+				echo '<div class="pss-map-field"><input type="text" class="widefat" name="' . esc_attr( $name ) . '[address]" value="' . esc_attr( $map['address'] ?? '' ) . '" placeholder="Address"><div class="pss-grid-3" style="margin-top:8px"><input type="text" name="' . esc_attr( $name ) . '[lat]" value="' . esc_attr( $map['lat'] ?? '' ) . '" placeholder="Lat"><input type="text" name="' . esc_attr( $name ) . '[lng]" value="' . esc_attr( $map['lng'] ?? '' ) . '" placeholder="Lng"></div></div>';
 				break;
 			case 'toggle':
 				echo '<label class="pss-switch"><input type="hidden" name="' . esc_attr( $name ) . '" value="0"><input type="checkbox" name="' . esc_attr( $name ) . '" value="1" ' . checked( ! empty( $value ), true, false ) . '><span>Enabled</span></label>';
@@ -393,7 +450,13 @@ class Fields {
 				echo '</select>';
 				break;
 			case 'image':
-				echo '<div class="pss-media-field"><input type="hidden" class="pss-media-id" data-media-type="image"' . $attr . 'value="' . esc_attr( absint( $value ) ) . '"><button type="button" class="button pss-single-media">Choose Image</button><span class="pss-media-current">' . esc_html( $value ? 'ID ' . absint( $value ) : '' ) . '</span></div>';
+				$img_id  = absint( is_array( $value ) ? ( $value['id'] ?? 0 ) : $value );
+				$thumb   = $img_id ? wp_get_attachment_image_url( $img_id, 'thumbnail' ) : '';
+				echo '<div class="pss-media-field"><input type="hidden" class="pss-media-id" data-media-type="image"' . $attr . 'value="' . esc_attr( $img_id ) . '"><button type="button" class="button pss-single-media">Choose Image</button>';
+				if ( $thumb ) {
+					echo '<img class="pss-media-thumb" src="' . esc_url( $thumb ) . '" alt="">';
+				}
+				echo '<span class="pss-media-current">' . esc_html( $img_id ? 'ID ' . $img_id : '' ) . '</span></div>';
 				break;
 			case 'gallery':
 				$gallery = is_array( $value ) ? array_map( 'absint', $value ) : array_filter( array_map( 'absint', explode( ',', (string) $value ) ) );
@@ -418,13 +481,7 @@ class Fields {
 
 	private static function render_subfield( $base, $field, $value = '' ) {
 		$type = $field['type'] ?? 'text';
-		switch ( $type ) {
-			case 'textarea': echo '<textarea class="widefat" name="' . esc_attr( $base ) . '" rows="2">' . esc_textarea( $value ) . '</textarea>'; break;
-			case 'number': echo '<input type="number" step="any" class="widefat" name="' . esc_attr( $base ) . '" value="' . esc_attr( $value ) . '">'; break;
-			case 'date': echo '<input type="date" class="widefat" name="' . esc_attr( $base ) . '" value="' . esc_attr( $value ) . '">'; break;
-			case 'url': echo '<input type="url" class="widefat" name="' . esc_attr( $base ) . '" value="' . esc_attr( $value ) . '">'; break;
-			default: echo '<input type="text" class="widefat" name="' . esc_attr( $base ) . '" value="' . esc_attr( $value ) . '">';
-		}
+		self::render_editor( $base, $type, $value, $field );
 	}
 
 	private static function render_repeater( $name, $value, $subfields ) {
@@ -495,6 +552,7 @@ class Fields {
 	public static function save_project_fields( $post_id ) {
 		$defs  = get_field_definitions();
 		$input = isset( $_POST['pss_field'] ) ? wp_unslash( $_POST['pss_field'] ) : array();
+		$core_library = get_project_core_field_library();
 		foreach ( $defs as $field ) {
 			$key   = sanitize_key( $field['key'] );
 			$type  = $field['type'];
@@ -504,6 +562,13 @@ class Fields {
 				delete_post_meta( $post_id, '_pss_field_' . $key );
 			} else {
 				update_post_meta( $post_id, '_pss_field_' . $key, $value );
+			}
+			if ( isset( $core_library[ $key ]['meta_key'] ) ) {
+				if ( '' === $value || array() === $value ) {
+					delete_post_meta( $post_id, $core_library[ $key ]['meta_key'] );
+				} else {
+					update_post_meta( $post_id, $core_library[ $key ]['meta_key'], is_array( $value ) ? $value : (string) $value );
+				}
 			}
 		}
 
@@ -582,12 +647,16 @@ class Fields {
 			if ( is_array( $value ) ) return array_values( array_filter( array_map( 'absint', $value ) ) );
 			return array_values( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ) );
 		}
-		if ( 'image' === $type ) return absint( $value );
+		if ( in_array( $type, array( 'image', 'file' ), true ) ) return absint( is_array( $value ) ? ( $value['id'] ?? 0 ) : $value );
 		if ( 'multi_select' === $type ) return array_values( array_filter( array_map( 'sanitize_text_field', (array) $value ) ) );
 		if ( 'toggle' === $type ) return empty( $value ) ? 0 : 1;
 		if ( in_array( $type, array( 'number' ), true ) ) return is_numeric( $value ) ? (float) $value : '';
-		if ( in_array( $type, array( 'date' ), true ) ) return sanitize_text_field( $value );
-		if ( 'url' === $type ) return esc_url_raw( $value );
+		if ( in_array( $type, array( 'date', 'color' ), true ) ) return sanitize_text_field( $value );
+		if ( in_array( $type, array( 'url', 'video' ), true ) ) return esc_url_raw( is_array( $value ) ? ( $value['url'] ?? '' ) : $value );
+		if ( 'map' === $type ) {
+			$map = is_array( $value ) ? $value : array( 'address' => (string) $value );
+			return array( 'address' => sanitize_text_field( $map['address'] ?? '' ), 'lat' => sanitize_text_field( $map['lat'] ?? '' ), 'lng' => sanitize_text_field( $map['lng'] ?? '' ) );
+		}
 		if ( in_array( $type, array( 'repeater', 'group', 'table', 'icon_value' ), true ) ) {
 			return self::sanitize_structured( $value );
 		}

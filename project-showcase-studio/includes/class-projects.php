@@ -229,6 +229,17 @@ class Projects {
 		if ( array_key_exists( 'pss_layout_override', $_POST ) ) {
 			update_post_meta( $post_id, '_pss_layout_override', absint( $_POST['pss_layout_override'] ) );
 		}
+		if ( isset( $_POST['pss_tax'] ) && is_array( $_POST['pss_tax'] ) ) {
+			$allowed = array( 'pss_project_type', 'pss_project_style', 'pss_project_location', 'pss_project_category' );
+			foreach ( wp_unslash( $_POST['pss_tax'] ) as $taxonomy => $term_id ) {
+				$taxonomy = sanitize_key( $taxonomy );
+				if ( ! in_array( $taxonomy, $allowed, true ) ) {
+					continue;
+				}
+				$term_id = absint( $term_id );
+				wp_set_object_terms( $post_id, $term_id ? array( $term_id ) : array(), $taxonomy );
+			}
+		}
 		Fields::save_project_fields( $post_id );
 		WooCommerce::save_related_products( $post_id );
 	}

@@ -1,4 +1,4 @@
-# Project Showcase Studio v2.6.0
+# Project Showcase Studio v2.7.0
 
 A native WordPress Project Manager + flexible Custom Field engine + Elementor Single Layout system + modern Project Showcase + WooCommerce relation layer.
 

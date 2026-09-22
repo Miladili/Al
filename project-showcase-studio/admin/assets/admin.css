@@ -67,6 +67,18 @@
 .pss-admin-screen .pss-hub-form label{display:flex;flex-direction:column;gap:6px;font-weight:600;margin:12px 0}
 .pss-admin-screen .pss-hub-form .widefat{max-width:420px}
 .pss-admin-screen #pss-field-library-search{margin:8px 0 16px}
+.pss-admin-screen .pss-cms-editor .pss-cms-panel{margin:0 0 18px;padding:20px;border:1px solid #e2e5e9;border-radius:16px;background:#fff}
+.pss-admin-screen .pss-cms-editor .pss-cms-panel h3{margin:0 0 14px;font-size:16px}
+.pss-admin-screen .pss-cms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.pss-admin-screen .pss-cms-form{display:grid;gap:14px}
+.pss-admin-screen .pss-value-row{display:grid;grid-template-columns:220px minmax(0,1fr);gap:14px;align-items:start;padding:12px 0;border-bottom:1px solid #f0f0f1}
+.pss-admin-screen .pss-value-row__label{display:flex;flex-direction:column;gap:4px;font-weight:600}
+.pss-admin-screen .pss-value-row__label em{font-weight:400;color:#646970;font-style:normal;font-size:12px}
+.pss-admin-screen .pss-value-row__control .widefat{max-width:100%}
+.pss-admin-screen .pss-media-thumb{width:54px;height:54px;object-fit:cover;border-radius:8px;margin-left:8px;vertical-align:middle}
+.pss-admin-screen .pss-create-field{margin:12px 0;padding:16px;border:1px dashed #c3c4c7;border-radius:12px;background:#f6f7f7}
+.pss-admin-screen .pss-value-row--extra .pss-value-row__label{flex-direction:row;justify-content:space-between;align-items:center}
+@media(max-width:782px){.pss-admin-screen .pss-cms-grid,.pss-admin-screen .pss-value-row{grid-template-columns:1fr}}
 @media(max-width:780px){
   .pss-admin-screen .pss-hub-hero,.pss-admin-screen .pss-layout-card{flex-direction:column;align-items:stretch}
 }

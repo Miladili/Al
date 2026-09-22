@@ -357,7 +357,15 @@ function get_field_value( $project_id, $key, $default = '' ) {
 		}
 	}
 	$value = get_post_meta( $project_id, '_pss_field_' . $key, true );
-	return ( '' === $value || null === $value ) ? $default : $value;
+	if ( '' !== $value && null !== $value ) {
+		return $value;
+	}
+	$core = get_project_core_field_library();
+	if ( isset( $core[ $key ]['meta_key'] ) ) {
+		$value = get_post_meta( $project_id, $core[ $key ]['meta_key'], true );
+		return ( '' === $value || null === $value ) ? $default : $value;
+	}
+	return $default;
 }
 
 function is_placeholder_text( $text ) {
