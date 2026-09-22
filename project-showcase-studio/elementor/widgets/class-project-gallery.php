@@ -11,7 +11,7 @@ class Project_Gallery extends Base {
 	protected function register_controls() {
 		$this->add_source_controls();
 		$this->start_controls_section( 'content', array( 'label' => 'Gallery' ) );
-		$this->add_control( 'layout', array( 'label' => 'Layout', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'masonry', 'options' => array( 'grid' => 'Grid', 'masonry' => 'Masonry', 'featured' => 'Featured', 'strip' => 'Horizontal', 'justified' => 'Justified' ) ) );
+		$this->add_control( 'layout', array( 'label' => 'Layout', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'masonry', 'options' => array( 'grid' => 'Grid', 'masonry' => 'Masonry', 'featured' => 'Featured', 'strip' => 'Horizontal', 'justified' => 'Justified', 'fullscreen' => 'Fullscreen' ) ) );
 		$this->add_responsive_control( 'columns', array( 'label' => 'Columns', 'type' => \Elementor\Controls_Manager::NUMBER, 'min' => 1, 'max' => 6, 'default' => 3, 'tablet_default' => 2, 'mobile_default' => 1, 'selectors' => array( '{{WRAPPER}} .pss-gallery' => '--pss-cols: {{VALUE}};' ) ) );
 		$this->add_responsive_control( 'gap', array( 'label' => 'Gap', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 80 ) ), 'selectors' => array( '{{WRAPPER}} .pss-gallery' => 'gap: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_control( 'lightbox', array( 'label' => 'Lightbox', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
@@ -20,6 +20,7 @@ class Project_Gallery extends Base {
 		$this->end_controls_section();
 		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
 		$this->add_responsive_control( 'radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'selectors' => array( '{{WRAPPER}} .pss-gallery img' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'image_height', array( 'label' => 'Image height', 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', 'vh' ), 'range' => array( 'px' => array( 'min' => 120, 'max' => 900 ), 'vh' => array( 'min' => 20, 'max' => 100 ) ), 'selectors' => array( '{{WRAPPER}} .pss-gallery img' => 'height: {{SIZE}}{{UNIT}}; object-fit: cover;' ) ) );
 		$this->end_controls_section();
 	}
 

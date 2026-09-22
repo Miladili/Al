@@ -10,7 +10,13 @@ class Project_Slider extends Base {
 
 	protected function register_controls() {
 		$this->start_controls_section( 'content', array( 'label' => 'Slider', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
-		$this->add_control( 'limit', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 8, 'min' => 2, 'max' => 24 ) );
+		$this->add_control( 'content_source', array( 'label' => 'Source', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'project', 'options' => array( 'project' => 'Dynamic projects', 'manual' => 'Manual project list' ) ) );
+		$this->add_control( 'limit', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 8, 'min' => 2, 'max' => 24, 'condition' => array( 'content_source' => 'project' ) ) );
+		if ( class_exists( '\\Elementor\\Repeater' ) ) {
+			$repeater = new \Elementor\Repeater();
+			$repeater->add_control( 'project_id', array( 'label' => 'Project', 'type' => \Elementor\Controls_Manager::SELECT2, 'options' => $this->safe_projects(), 'label_block' => true ) );
+			$this->add_control( 'manual_projects', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => 'Project', 'condition' => array( 'content_source' => 'manual' ), 'prevent_empty' => false ) );
+		}
 		$this->add_control( 'preset', array( 'label' => 'Card composition', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'cinematic', 'options' => array( 'cinematic'=>'Cinematic', 'luxury'=>'Luxury', 'minimal'=>'Minimal', 'overlay'=>'Overlay', 'fullscreen'=>'Fullscreen', 'editorial'=>'Editorial', 'magazine'=>'Magazine' ) ) );
 		$this->add_control( 'show_title', array( 'label' => 'Show title', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->add_control( 'title_placement', array( 'label' => 'Title', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'overlay', 'options' => array( 'overlay'=>'On image', 'below'=>'Below', 'hidden'=>'Hidden' ) ) );
@@ -67,7 +73,8 @@ class Project_Slider extends Base {
 		$this->add_control( 'progress', array( 'label' => 'Progress bar', 'type' => \Elementor\Controls_Manager::SWITCHER ) );
 		$this->add_control( 'drag', array( 'label' => 'Drag / swipe', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->add_control( 'keyboard', array( 'label' => 'Keyboard', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
-		$this->add_control( 'transition', array( 'label' => 'Transition', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'slide', 'options' => array( 'slide'=>'Slide', 'fade'=>'Fade', 'scale'=>'Scale' ) ) );
+		$this->add_control( 'wheel', array( 'label' => 'Mouse wheel', 'type' => \Elementor\Controls_Manager::SWITCHER ) );
+		$this->add_control( 'transition', array( 'label' => 'Transition', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'slide', 'options' => array( 'slide'=>'Slide', 'fade'=>'Fade', 'scale'=>'Scale', 'coverflow'=>'Coverflow' ) ) );
 		$this->add_control( 'duration', array( 'label' => 'Transition speed (ms)', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 620, 'min' => 120, 'max' => 1600 ) );
 		$this->add_control( 'easing', array( 'label' => 'Easing', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'smooth', 'options' => array( 'linear'=>'Linear', 'smooth'=>'Smooth', 'cinematic'=>'Cinematic' ) ) );
 		$this->end_controls_section();
@@ -75,13 +82,24 @@ class Project_Slider extends Base {
 		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
 		$this->add_control( 'arrow_color', array( 'label' => 'Arrows', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-slider__arrow' => 'color: {{VALUE}}; border-color: {{VALUE}};' ) ) );
 		$this->add_control( 'dot_color', array( 'label' => 'Dots', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-slider__dot' => 'background: {{VALUE}};' ) ) );
+		$this->add_control( 'progress_color', array( 'label' => 'Progress', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-slider__progress span' => 'background: {{VALUE}};' ) ) );
 		$this->add_typography( 'title_typo', '{{WRAPPER}} .pss-card__title' );
 		$this->end_controls_section();
+		$this->add_motion_vars( '{{WRAPPER}} .pss-slider' );
 	}
 
 	protected function render() {
 		$s     = $this->get_settings_for_display();
-		$posts = \PSS\Ajax::query( array( 'limit' => absint( $s['limit'] ?? 8 ) ) );
+		if ( 'manual' === ( $s['content_source'] ?? '' ) ) {
+			$posts = array();
+			foreach ( (array) ( $s['manual_projects'] ?? array() ) as $row ) {
+				$id = absint( $row['project_id'] ?? 0 );
+				if ( $id ) { $posts[] = get_post( $id ); }
+			}
+			$posts = array_filter( $posts );
+		} else {
+			$posts = \PSS\Ajax::query( array( 'limit' => absint( $s['limit'] ?? 8 ) ) );
+		}
 		if ( ! $posts ) {
 			return;
 		}
@@ -107,6 +125,7 @@ class Project_Slider extends Base {
 			'duration'   => absint( $s['duration'] ?? 620 ),
 			'easing'     => sanitize_key( $s['easing'] ?? 'smooth' ),
 			'direction'  => sanitize_key( $s['direction'] ?? 'horizontal' ),
+			'wheel'      => ! empty( $s['wheel'] ),
 		);
 		$bleed = ! empty( $s['full_width'] ) ? ' pss-slider--bleed' : '';
 		$peek  = ! empty( $s['peek'] ) ? ' pss-slider--peek' : '';
@@ -124,5 +143,17 @@ class Project_Slider extends Base {
 			echo '<div class="pss-slider__dots"></div>';
 		}
 		echo '</div></div>';
+	}
+
+	private function safe_projects() {
+		$out = array();
+		try {
+			foreach ( get_posts( array( 'post_type' => \PSS_PROJECT_CPT, 'post_status' => 'publish', 'posts_per_page' => 80, 'orderby' => 'title', 'order' => 'ASC', 'fields' => 'ids' ) ) as $id ) {
+				$out[ absint( $id ) ] = get_the_title( $id );
+			}
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+		return $out;
 	}
 }

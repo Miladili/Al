@@ -372,3 +372,74 @@
 @media(prefers-reduced-motion:reduce){
   .pss-slider__track,.pss-card--comp-hover-reveal .pss-card__overlay,.pss-card--comp-perspective .pss-card__link{transition:none!important}
 }
+
+/* v2.9 engines, card modes, motion, sticky, slider coverflow */
+.pss-engine--hscroll,.pss-showcase--horizontal .pss-engine--hscroll,.pss-showcase--cinematic .pss-engine--hscroll{display:block}
+.pss-engine--hscroll .pss-engine__track,.pss-engine--hscroll.pss-showcase__grid{display:flex;overflow:auto;gap:var(--pss-gap,22px);scroll-snap-type:x mandatory;padding-bottom:8px}
+.pss-engine--hscroll .pss-card{min-width:min(78vw,560px);scroll-snap-align:start;flex:0 0 auto}
+.pss-engine--vstory.pss-showcase__grid{display:grid;grid-template-columns:1fr;gap:clamp(48px,8vw,120px);max-width:980px;margin:0 auto}
+.pss-engine--vstory .pss-card__media{aspect-ratio:16/10}
+.pss-engine--bento.pss-showcase__grid{grid-auto-flow:dense;grid-template-columns:repeat(var(--pss-cols,3),minmax(0,1fr))}
+.pss-engine--bento .pss-card:nth-child(7n+1){grid-column:span 2;grid-row:span 2}
+.pss-engine--bento .pss-card:nth-child(7n+1) .pss-card__media{aspect-ratio:1/1;height:100%}
+.pss-engine--masonry.pss-showcase__grid{display:block;column-count:var(--pss-cols,3);column-gap:var(--pss-gap,22px)}
+.pss-engine--masonry .pss-card{display:inline-block;width:100%;margin:0 0 var(--pss-gap,22px);break-inside:avoid}
+.pss-engine--magazine.pss-showcase__grid{grid-template-columns:minmax(0,1.4fr) minmax(0,.8fr);grid-auto-rows:minmax(180px,auto)}
+.pss-engine--magazine .pss-card:first-child{grid-row:span 2}
+.pss-engine--magazine .pss-card:first-child .pss-card__media{aspect-ratio:4/5}
+.pss-engine--fullscreen.pss-showcase__grid{grid-template-columns:1fr;gap:0}
+.pss-engine--fullscreen .pss-card__media{aspect-ratio:auto;min-height:88vh;border-radius:0}
+.pss-showcase--luxury .pss-showcase__grid{gap:clamp(28px,5vw,72px)}
+.pss-showcase--luxury .pss-card__media{border-radius:0;aspect-ratio:3/4}
+.pss-showcase--architectural .pss-showcase__grid{gap:8px}
+.pss-showcase--architectural .pss-card__media{border-radius:0}
+.pss-showcase--split .pss-card__link{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center}
+.pss-showcase--floating .pss-card{padding:18px}
+.pss-showcase--floating .pss-card__float{display:block}
+.pss-showcase--dossier .pss-card{border:1px solid rgba(0,0,0,.1);padding:16px;background:#f7f4ee}
+.pss-showcase--minimal .pss-card__veil{opacity:.2}
+.pss-showcase--perspective .pss-card__link{transform-style:preserve-3d}
+.pss-showcase--asymmetric .pss-card:nth-child(odd){margin-top:48px}
+.pss-showcase--overlapping .pss-showcase__grid{display:flex;flex-wrap:wrap}
+.pss-card--comp-flip .pss-card__flip{position:relative;transform-style:preserve-3d;transition:transform calc(var(--pss-dur,650ms)) var(--pss-ease,cubic-bezier(.2,.7,.2,1))}
+.pss-card--comp-flip:hover .pss-card__flip{transform:rotateY(180deg)}
+.pss-card__flip-front,.pss-card__flip-back{backface-visibility:hidden}
+.pss-card__flip-back{position:absolute;inset:0;padding:28px;background:#f4f1ea;transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:flex-end}
+.pss-card--comp-expanding .pss-card__expand{max-height:0;overflow:hidden;transition:max-height calc(var(--pss-dur,650ms)) ease,padding .4s ease}
+.pss-card--comp-expanding:hover .pss-card__expand{max-height:240px;padding-top:14px}
+.pss-card--comp-follow .pss-card__follow{will-change:transform}
+.pss-card--comp-magnetic .pss-card__link{transition:transform .18s ease}
+.pss-card--comp-story .pss-card__story{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
+.pss-card__overlay--hover{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease}
+.pss-card:hover .pss-card__overlay--hover{opacity:1;transform:none}
+.pss-card__badge{position:absolute;right:16px;bottom:16px;z-index:3;padding:6px 10px;border-radius:999px;background:#fff;color:#111;font-size:10px;letter-spacing:.12em}
+.pss-card--anim-stagger{opacity:0;transform:translateY(18px);animation:pssReveal calc(var(--pss-dur,650ms)) var(--pss-ease,cubic-bezier(.2,.7,.2,1)) forwards}
+.pss-card--anim-stagger:nth-child(2){animation-delay:.08s}.pss-card--anim-stagger:nth-child(3){animation-delay:.16s}.pss-card--anim-stagger:nth-child(4){animation-delay:.24s}
+.pss-card--anim-pan .pss-card__media img{transform:scale(1.12) translateX(-4%);transition:transform 1.4s ease}
+.pss-card--anim-pan:hover .pss-card__media img{transform:scale(1.12) translateX(4%)}
+.pss-card--anim-clip .pss-card__media{clip-path:inset(8% 8% 8% 8%);transition:clip-path calc(var(--pss-dur,650ms)) var(--pss-ease,cubic-bezier(.2,.7,.2,1))}
+.pss-card--anim-clip:hover .pss-card__media{clip-path:inset(0)}
+.pss-slider--coverflow .pss-card{transform:perspective(900px) rotateY(12deg) scale(.92);opacity:.55;transition:transform var(--pss-dur,620ms) ease,opacity var(--pss-dur,620ms) ease}
+.pss-slider--coverflow .pss-card.is-active{transform:none;opacity:1}
+.pss-scroll__progress,.pss-sticky__progress{height:2px;background:rgba(0,0,0,.08);margin:0 0 16px}
+.pss-scroll__progress span,.pss-sticky__progress span{display:block;height:100%;width:0;background:#c4b49a;transition:width .12s linear}
+.pss-sticky__media{position:sticky;top:24px;display:grid}
+.pss-sticky__frame{grid-area:1/1;width:100%;object-fit:cover;opacity:0;transition:opacity .55s ease}
+.pss-sticky__frame.is-active{opacity:1}
+.pss-sticky__step{min-height:70vh;display:flex;flex-direction:column;justify-content:center;padding:24px 0}
+.pss-gallery--fullscreen{grid-template-columns:1fr}
+.pss-gallery--fullscreen img{width:100%;min-height:70vh;object-fit:cover;border-radius:0}
+.pss-gallery--justified{display:flex;flex-wrap:wrap;gap:var(--pss-gap,8px)}
+.pss-gallery--justified a,.pss-gallery--justified>div{flex:1 1 220px}
+.pss-gallery--justified img{width:100%;height:220px;object-fit:cover}
+@media(max-width:900px){
+  .pss-engine--magazine.pss-showcase__grid,.pss-card--comp-story .pss-card__story,.pss-showcase--split .pss-card__link{grid-template-columns:1fr}
+  .pss-engine--bento .pss-card:nth-child(7n+1){grid-column:auto;grid-row:auto}
+  .pss-sticky--mobile-stack{grid-template-columns:1fr}
+  .pss-sticky--mobile-stack .pss-sticky__media{position:static}
+  .pss-sticky__step{min-height:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .pss-card--anim-stagger{opacity:1;transform:none;animation:none}
+  .pss-card--comp-flip:hover .pss-card__flip,.pss-card--anim-pan .pss-card__media img{transform:none}
+}

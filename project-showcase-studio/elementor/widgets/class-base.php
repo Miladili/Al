@@ -216,11 +216,45 @@ abstract class Base extends \Elementor\Widget_Base {
 	}
 
 	protected function add_box_style( $selector ) {
-		$this->start_controls_section( 'pss_box_style', array( 'label' => 'Box', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->start_controls_section( 'pss_box_style', array( 'label' => 'Container', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'pss_margin', array( 'label' => 'Margin', 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em', '%' ), 'selectors' => array( $selector => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->add_responsive_control( 'pss_pad', array( 'label' => 'Padding', 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( $selector => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->add_control( 'pss_bg', array( 'label' => 'Background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'background-color: {{VALUE}};' ) ) );
-		$this->add_control( 'pss_border_c', array( 'label' => 'Border', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'border-color: {{VALUE}};' ) ) );
-		$this->add_responsive_control( 'pss_radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'selectors' => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'pss_border_c', array( 'label' => 'Border', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'border-color: {{VALUE}}; border-style: solid; border-width: 1px;' ) ) );
+		$this->add_responsive_control( 'pss_radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 80 ) ), 'selectors' => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'pss_z', array( 'label' => 'Z-index', 'type' => \Elementor\Controls_Manager::NUMBER, 'selectors' => array( $selector => 'z-index: {{VALUE}};' ) ) );
+		if ( class_exists( '\\Elementor\\Group_Control_Box_Shadow' ) ) {
+			$this->add_group_control( \Elementor\Group_Control_Box_Shadow::get_type(), array( 'name' => 'pss_shadow', 'selector' => $selector ) );
+		}
+		$this->end_controls_section();
+	}
+
+	protected function add_motion_vars( $selector = '{{WRAPPER}}' ) {
+		$this->start_controls_section( 'pss_motion_vars', array( 'label' => 'Motion', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'pss_motion_dur', array( 'label' => 'Duration (ms)', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 650, 'tablet_default' => 500, 'mobile_default' => 0, 'min' => 0, 'max' => 2400, 'selectors' => array( $selector => '--pss-dur: {{VALUE}}ms;' ) ) );
+		$this->add_control( 'pss_motion_delay', array( 'label' => 'Delay (ms)', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 0, 'min' => 0, 'max' => 2000, 'selectors' => array( $selector => '--pss-delay: {{VALUE}}ms;' ) ) );
+		$this->add_control( 'pss_motion_ease', array( 'label' => 'Easing', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'cubic-bezier(.2,.7,.2,1)', 'options' => array( 'linear' => 'Linear', 'ease' => 'Ease', 'cubic-bezier(.2,.7,.2,1)' => 'Smooth', 'cubic-bezier(.16,1,.3,1)' => 'Cinematic' ), 'selectors' => array( $selector => '--pss-ease: {{VALUE}};' ) ) );
+		$this->add_responsive_control( 'pss_motion_int', array( 'label' => 'Intensity', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 12 ), 'selectors' => array( $selector => '--pss-intensity: {{SIZE}};' ) ) );
+		$this->end_controls_section();
+	}
+
+	protected function add_title_style( $selector ) {
+		$this->start_controls_section( 'pss_title_style', array( 'label' => 'Title', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_control( 'pss_title_color', array( 'label' => 'Color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'color: {{VALUE}};' ) ) );
+		$this->add_control( 'pss_title_hover', array( 'label' => 'Hover color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}}:hover ' . $selector => 'color: {{VALUE}};' ) ) );
+		$this->add_typography( 'pss_title_typo', $selector );
+		$this->end_controls_section();
+	}
+
+	protected function add_icon_style( $selector ) {
+		$this->start_controls_section( 'pss_icon_style', array( 'label' => 'Icon', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'pss_icon_size', array( 'label' => 'Size', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 8, 'max' => 96 ) ), 'selectors' => array( $selector => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'pss_icon_color', array( 'label' => 'Color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'color: {{VALUE}}; fill: {{VALUE}};' ) ) );
+		$this->add_control( 'pss_icon_hover', array( 'label' => 'Hover color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}}:hover ' . $selector => 'color: {{VALUE}}; fill: {{VALUE}};' ) ) );
+		$this->add_control( 'pss_icon_bg', array( 'label' => 'Background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'background-color: {{VALUE}};' ) ) );
+		$this->add_responsive_control( 'pss_icon_radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'selectors' => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'pss_icon_rotate', array( 'label' => 'Rotation', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 360 ) ), 'selectors' => array( $selector => 'transform: rotate({{SIZE}}deg);' ) ) );
+		$this->add_responsive_control( 'pss_icon_space', array( 'label' => 'Spacing', 'type' => \Elementor\Controls_Manager::SLIDER, 'selectors' => array( $selector => 'margin-inline-end: {{SIZE}}{{UNIT}};' ) ) );
 		$this->end_controls_section();
 	}
 

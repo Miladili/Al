@@ -13,10 +13,19 @@ class Project_Scroll extends Base {
 	public function get_icon() {
 		return 'eicon-slider-push';
 	}
+	public function get_script_depends() {
+		return array( 'pss-gsap', 'pss-scrolltrigger', 'pss-frontend' );
+	}
 
 	protected function register_controls() {
 		$this->start_controls_section( 'query', array( 'label' => 'Projects', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
-		$this->add_control( 'limit', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 6, 'min' => 2, 'max' => 16 ) );
+		$this->add_control( 'content_source', array( 'label' => 'Source', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'project', 'options' => array( 'project' => 'Dynamic projects', 'manual' => 'Manual project list' ) ) );
+		$this->add_control( 'limit', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 6, 'min' => 2, 'max' => 16, 'condition' => array( 'content_source' => 'project' ) ) );
+		if ( class_exists( '\\Elementor\\Repeater' ) ) {
+			$repeater = new \Elementor\Repeater();
+			$repeater->add_control( 'project_id', array( 'label' => 'Project', 'type' => \Elementor\Controls_Manager::SELECT2, 'options' => $this->safe_projects(), 'label_block' => true ) );
+			$this->add_control( 'manual_projects', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => 'Project', 'condition' => array( 'content_source' => 'manual' ), 'prevent_empty' => false ) );
+		}
 		$this->add_control( 'orderby', array( 'label' => 'Order By', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'date', 'options' => array( 'date'=>'Date', 'title'=>'Title', 'modified'=>'Modified', 'menu_order'=>'Menu Order' ) ) );
 		$this->add_control( 'order', array( 'label' => 'Order', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'DESC', 'options' => array( 'DESC'=>'Descending', 'ASC'=>'Ascending' ) ) );
 		$this->add_control( 'eyebrow', array( 'label' => 'Eyebrow', 'type' => \Elementor\Controls_Manager::TEXT, 'default' => 'Selected work' ) );
@@ -36,6 +45,7 @@ class Project_Scroll extends Base {
 		$this->add_control( 'snap', array( 'label' => 'Snap to panels', 'type' => \Elementor\Controls_Manager::SWITCHER, 'description' => 'Ease toward the nearest panel while scrolling, similar to a GSAP snap.' ) );
 		$this->add_control( 'scrub', array( 'label' => 'Scrub smoothness', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 0.18, 'min' => 0, 'max' => 0.6, 'step' => 0.02, 'description' => '0 is locked to scroll. Higher values lag the track like GSAP scrub.' ) );
 		$this->add_control( 'reduced_motion', array( 'label' => 'Honor reduced motion', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
+		$this->add_control( 'show_progress', array( 'label' => 'Progress bar', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->end_controls_section();
 
 		$this->start_controls_section( 'layout', array( 'label' => 'Panel layout', 'tab' => \Elementor\Controls_Manager::TAB_LAYOUT ) );
@@ -81,11 +91,20 @@ class Project_Scroll extends Base {
 
 	protected function render() {
 		$s = $this->get_settings_for_display();
-		$posts = \PSS\Ajax::query( array(
-			'limit'   => absint( $s['limit'] ?? 6 ),
-			'orderby' => sanitize_key( $s['orderby'] ?? 'date' ),
-			'order'   => sanitize_key( $s['order'] ?? 'DESC' ),
-		) );
+		if ( 'manual' === ( $s['content_source'] ?? '' ) ) {
+			$posts = array();
+			foreach ( (array) ( $s['manual_projects'] ?? array() ) as $row ) {
+				$id = absint( $row['project_id'] ?? 0 );
+				if ( $id ) { $posts[] = get_post( $id ); }
+			}
+			$posts = array_filter( $posts );
+		} else {
+			$posts = \PSS\Ajax::query( array(
+				'limit'   => absint( $s['limit'] ?? 6 ),
+				'orderby' => sanitize_key( $s['orderby'] ?? 'date' ),
+				'order'   => sanitize_key( $s['order'] ?? 'DESC' ),
+			) );
+		}
 		if ( ! $posts ) {
 			return;
 		}
@@ -102,6 +121,9 @@ class Project_Scroll extends Base {
 		);
 		echo '<div class="pss-scroll pss-scroll--' . esc_attr( $cfg['easing'] ) . ' pss-scroll--img-' . esc_attr( sanitize_key( $s['image_behavior'] ?? 'zoom' ) ) . ' pss-scroll--text-' . esc_attr( sanitize_key( $s['text_animation'] ?? 'rise' ) ) . ' pss-scroll--' . esc_attr( sanitize_key( $s['transition_style'] ?? 'slide' ) ) . ' pss-scroll--mobile-' . esc_attr( $cfg['mobile'] ) . '" data-pss-scroll="' . \PSS\esc_attr_json( $cfg ) . '">';
 		echo '<div class="pss-scroll__pin">';
+		if ( ! empty( $s['show_progress'] ) ) {
+			echo '<div class="pss-scroll__progress" aria-hidden="true"><span></span></div>';
+		}
 		if ( ! empty( $s['eyebrow'] ) ) {
 			echo '<span class="pss-scroll__kicker">' . esc_html( $s['eyebrow'] ) . '</span>';
 		}

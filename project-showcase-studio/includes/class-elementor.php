@@ -141,6 +141,8 @@ class Elementor {
 		self::$assets_registered = true;
 		wp_register_style( 'pss-frontend', PSS_URL . 'assets/css/frontend.css', array(), PSS_VERSION );
 		wp_register_style( 'pss-elementor', PSS_URL . 'assets/css/elementor.css', array( 'pss-frontend' ), PSS_VERSION );
+		wp_register_script( 'pss-gsap', 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js', array(), '3.12.5', true );
+		wp_register_script( 'pss-scrolltrigger', 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js', array( 'pss-gsap' ), '3.12.5', true );
 		wp_register_script( 'pss-frontend', PSS_URL . 'assets/js/frontend.js', array(), PSS_VERSION, true );
 		if ( ! wp_scripts()->get_data( 'pss-frontend', 'data' ) ) {
 			wp_localize_script(
@@ -284,8 +286,16 @@ class Elementor {
 			'project-sticky'         => 'Project_Sticky',
 		);
 
+		$disabled = get_option( 'pss_disabled_widgets', array() );
+		if ( ! is_array( $disabled ) ) {
+			$disabled = array();
+		}
+
 		$successful = 0;
 		foreach ( $files as $file => $class ) {
+			if ( in_array( $file, $disabled, true ) ) {
+				continue;
+			}
 			try {
 				$path = PSS_PATH . 'elementor/widgets/class-' . $file . '.php';
 				if ( ! file_exists( $path ) ) {

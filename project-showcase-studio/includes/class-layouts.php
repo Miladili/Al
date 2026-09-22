@@ -537,6 +537,10 @@ class Layouts {
 		if ( isset( $_POST['pss_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pss_settings_nonce'] ) ), 'pss_settings' ) && current_user_can( 'manage_options' ) ) {
 			update_option( 'pss_project_slug', sanitize_title( wp_unslash( $_POST['pss_project_slug'] ?? 'project' ) ) ?: 'project' );
 			update_option( 'pss_default_layout', absint( $_POST['pss_default_layout'] ?? 0 ) );
+			if ( isset( $_POST['pss_widgets_present'] ) ) {
+				$disabled = array_map( 'sanitize_key', (array) ( $_POST['pss_disabled_widgets'] ?? array() ) );
+				update_option( 'pss_disabled_widgets', array_values( array_filter( $disabled ) ) );
+			}
 			flush_rewrite_rules();
 			echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
 		}
@@ -633,6 +637,25 @@ class Layouts {
 				echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $current_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>';
 			}
 			echo '</select></label>';
+			$disabled = get_option( 'pss_disabled_widgets', array() );
+			if ( ! is_array( $disabled ) ) { $disabled = array(); }
+			$widgets = array(
+				'project-showcase' => 'Project Showcase',
+				'project-slider' => 'Project Slider',
+				'project-scroll' => 'Project Horizontal Scroll',
+				'project-sticky' => 'Sticky Scroll Story',
+				'project-gallery' => 'Project Gallery',
+				'project-before-after' => 'Before / After',
+				'related-projects' => 'Related Projects',
+				'project-hero' => 'Project Hero',
+				'project-marquee' => 'Project Marquee',
+			);
+			echo '<input type="hidden" name="pss_widgets_present" value="1">';
+			echo '<p><strong>Disable unused widgets</strong></p><p class="description">Unchecked widgets stay registered. Checked widgets are skipped on the next page load — they will not appear in the Elementor panel.</p><div class="pss-widget-toggles" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 20px">';
+			foreach ( $widgets as $slug => $label ) {
+				echo '<label><input type="checkbox" name="pss_disabled_widgets[]" value="' . esc_attr( $slug ) . '" ' . checked( in_array( $slug, $disabled, true ), true, false ) . '> ' . esc_html( $label ) . '</label>';
+			}
+			echo '</div>';
 		}
 		echo '<p><button class="button button-primary">Save</button></p></form>';
 	}
