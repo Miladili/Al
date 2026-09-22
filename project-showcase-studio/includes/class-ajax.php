@@ -20,47 +20,93 @@ class Ajax {
 
 	public static function query( $settings = array() ) {
 		$args = array(
-			'post_type' => PSS_PROJECT_CPT,
-			'post_status' => 'publish',
+			'post_type'      => PSS_PROJECT_CPT,
+			'post_status'    => 'publish',
 			'posts_per_page' => isset( $settings['limit'] ) ? max( 1, min( 100, absint( $settings['limit'] ) ) ) : 12,
-			's' => isset( $settings['search'] ) ? sanitize_text_field( $settings['search'] ) : '',
-			'paged' => isset( $settings['page'] ) ? max( 1, absint( $settings['page'] ) ) : 1,
-			'orderby' => isset( $settings['orderby'] ) ? sanitize_key( $settings['orderby'] ) : 'date',
-			'order' => isset( $settings['order'] ) && 'ASC' === strtoupper( $settings['order'] ) ? 'ASC' : 'DESC',
+			's'              => isset( $settings['search'] ) ? sanitize_text_field( $settings['search'] ) : '',
+			'paged'          => isset( $settings['page'] ) ? max( 1, absint( $settings['page'] ) ) : 1,
+			'orderby'        => isset( $settings['orderby'] ) ? sanitize_key( $settings['orderby'] ) : 'date',
+			'order'          => isset( $settings['order'] ) && 'ASC' === strtoupper( $settings['order'] ) ? 'ASC' : 'DESC',
 		);
 		$tax_query = array();
-		$map = array( 'category' => 'pss_project_category', 'style' => 'pss_project_style', 'location' => 'pss_project_location', 'type' => 'pss_project_type' );
+		$map       = array( 'category' => 'pss_project_category', 'style' => 'pss_project_style', 'location' => 'pss_project_location', 'type' => 'pss_project_type' );
 		foreach ( $map as $key => $taxonomy ) {
-			if ( ! empty( $settings[ $key ] ) ) $tax_query[] = array( 'taxonomy' => $taxonomy, 'field' => 'term_id', 'terms' => absint( $settings[ $key ] ) );
+			if ( ! empty( $settings[ $key ] ) ) {
+				$tax_query[] = array( 'taxonomy' => $taxonomy, 'field' => 'term_id', 'terms' => absint( $settings[ $key ] ) );
+			}
 		}
 		if ( ! empty( $settings['year'] ) ) {
 			$args['meta_query'] = array( array( 'key' => '_pss_year', 'value' => absint( $settings['year'] ), 'compare' => '=' ) );
 		}
-		if ( $tax_query ) { $tax_query['relation'] = 'AND'; $args['tax_query'] = $tax_query; }
+		if ( $tax_query ) {
+			$tax_query['relation'] = 'AND';
+			$args['tax_query']     = $tax_query;
+		}
 		return get_posts( $args );
 	}
 }
 
 class RenderCards {
-	private static function overlay_presets() {
-		return array( 'modern', 'luxury', 'cinematic', 'overlay', 'dark', 'glass', 'magazine', 'floating', 'architectural', 'monochrome', 'fullimage', 'interactive', 'dossier', 'atelier' );
+	private static function composition( $preset ) {
+		$map = array(
+			'editorial'      => 'split',
+			'luxury'         => 'caption-below',
+			'cinematic'      => 'fullscreen',
+			'architectural'  => 'index-split',
+			'magazine'       => 'caption-side',
+			'bento'          => 'stack',
+			'asymmetric'     => 'split-reverse',
+			'fullimage'      => 'fullscreen',
+			'fullscreen'     => 'fullscreen',
+			'floating'       => 'float-card',
+			'stacked'        => 'stack',
+			'overlapping'    => 'overlap',
+			'split'          => 'split',
+			'dossier'        => 'dossier',
+			'minimal'        => 'caption-below',
+			'interactive'    => 'hover-reveal',
+			'perspective'    => 'perspective',
+			'3d'             => 'perspective',
+			'overlay'        => 'fullscreen',
+			'dark'           => 'stack',
+			'light'          => 'caption-below',
+			'glass'          => 'float-card',
+			'classic'        => 'caption-below',
+			'line'           => 'caption-below',
+			'monochrome'     => 'caption-below',
+			'atelier'        => 'fullscreen',
+			'courtyard'      => 'stack',
+			'modern'         => 'stack',
+		);
+		$preset = sanitize_key( $preset );
+		return isset( $map[ $preset ] ) ? $map[ $preset ] : 'stack';
 	}
 
-	private static function meta_placement( $settings ) {
-		$placement = sanitize_key( $settings['meta_placement'] ?? 'auto' );
-		if ( in_array( $placement, array( 'overlay', 'below', 'none' ), true ) ) {
-			return $placement;
+	private static function slot( $settings, $key, $auto ) {
+		$value = sanitize_key( $settings[ $key ] ?? 'auto' );
+		$ok    = array( 'overlay', 'top', 'bottom', 'below', 'floating', 'hidden', 'none', 'auto' );
+		if ( ! in_array( $value, $ok, true ) || 'auto' === $value ) {
+			return $auto;
 		}
-		$preset = sanitize_key( $settings['preset'] ?? 'modern' );
-		return in_array( $preset, self::overlay_presets(), true ) ? 'overlay' : 'below';
+		return 'none' === $value ? 'hidden' : $value;
 	}
 
 	public static function cards( $projects, $settings = array() ) {
-		$html = '';
-		$preset = sanitize_key( $settings['preset'] ?? 'modern' );
-		$animation = sanitize_key( $settings['animation'] ?? 'reveal' );
+		$html           = '';
+		$preset         = sanitize_key( $settings['preset'] ?? 'modern' );
+		$animation      = sanitize_key( $settings['animation'] ?? 'reveal' );
 		$card_data_mode = sanitize_key( $settings['card_data_mode'] ?? 'project' );
-		$placement = self::meta_placement( $settings );
+		$composition    = self::composition( $preset );
+		$title_place    = self::slot( $settings, 'title_placement', in_array( $composition, array( 'fullscreen', 'hover-reveal', 'float-card' ), true ) ? 'overlay' : 'below' );
+		$meta_place     = self::slot( $settings, 'meta_placement', in_array( $composition, array( 'fullscreen', 'hover-reveal' ), true ) ? 'overlay' : 'below' );
+		$index_place    = self::slot( $settings, 'index_placement', 'overlay' );
+		$cta_place      = self::slot( $settings, 'cta_placement', 'hidden' );
+		$show_title     = ! isset( $settings['show_title'] ) || ! empty( $settings['show_title'] );
+		if ( ! $show_title ) {
+			$title_place = 'hidden';
+		}
+		$cta_label = sanitize_text_field( $settings['cta_label'] ?? 'View project' );
+
 		$manual_fields = array_filter(
 			array_map(
 				function( $key ) {
@@ -70,18 +116,16 @@ class RenderCards {
 				preg_split( '/[,\n]+/', (string) ( $settings['manual_card_fields'] ?? '' ) )
 			)
 		);
+
 		foreach ( $projects as $index => $project ) {
-			$id = $project->ID;
+			$id    = $project->ID;
 			$image = get_the_post_thumbnail_url( $id, 'large' );
 			if ( ! $image ) {
 				$gallery = get_gallery_ids( $id );
-				$image = $gallery ? wp_get_attachment_image_url( $gallery[0], 'large' ) : '';
+				$image   = $gallery ? wp_get_attachment_image_url( $gallery[0], 'large' ) : '';
 			}
-			$style = get_project_taxonomy_value( $id, 'pss_project_style' );
-			if ( is_placeholder_text( $style ) ) {
-				$style = '';
-			}
-			$url = get_permalink( $id );
+			$url        = get_permalink( $id );
+			$title      = get_the_title( $id );
 			$field_keys = 'manual' === $card_data_mode ? $manual_fields : ( 'project' === $card_data_mode ? get_project_card_fields( $id ) : array( 'core:style', 'core:location', 'core:year', 'core:area' ) );
 			$card_values = array();
 			foreach ( $field_keys as $field_key ) {
@@ -97,37 +141,100 @@ class RenderCards {
 				);
 			}
 			$index_no = sprintf( '%02d', ( (int) $index + 1 ) );
-			$classes = 'pss-card pss-card--' . esc_attr( $preset ) . ' pss-card--anim-' . esc_attr( $animation ) . ' pss-card--meta-' . esc_attr( $placement );
-			$html .= '<article class="' . $classes . '" data-pss-motion="' . esc_attr( $animation ) . '">';
-			$html .= '<a class="pss-card__link" href="' . esc_url( $url ) . '">';
-			$html .= '<div class="pss-card__media">';
-			if ( $image ) {
-				$html .= '<img loading="lazy" src="' . esc_url( $image ) . '" alt="' . esc_attr( get_the_title( $id ) ) . '">';
-			}
-			$html .= '<span class="pss-card__veil"></span><span class="pss-card__index">' . esc_html( $index_no ) . '</span><span class="pss-card__arrow" aria-hidden="true">↗</span>';
-			if ( 'overlay' === $placement && $card_values ) {
-				$html .= '<span class="pss-card__field-stack">';
-				foreach ( array_slice( $card_values, 0, 3 ) as $field ) {
-					$html .= '<span class="pss-card__field"><small>' . esc_html( $field['label'] ) . '</small><b>' . esc_html( $field['value'] ) . '</b></span>';
-				}
-				$html .= '</span>';
-			}
-			$html .= '</div>';
-			$html .= '<div class="pss-card__body">';
-			if ( 'overlay' !== $placement && $style ) {
-				$html .= '<span class="pss-card__eyebrow">' . esc_html( $style ) . '</span>';
-			}
-			if ( ! empty( $settings['show_title'] ) || ! isset( $settings['show_title'] ) ) {
-				$html .= '<h3>' . esc_html( get_the_title( $id ) ) . '</h3>';
-			}
-			if ( 'below' === $placement && $card_values ) {
-				$html .= '<div class="pss-card__meta-list">';
+			$classes  = 'pss-card pss-card--' . esc_attr( $preset ) . ' pss-card--comp-' . esc_attr( $composition ) . ' pss-card--anim-' . esc_attr( $animation );
+			$classes .= ' pss-card--title-' . esc_attr( $title_place ) . ' pss-card--meta-' . esc_attr( $meta_place );
+
+			$title_html = ( 'hidden' === $title_place ) ? '' : '<h3 class="pss-card__title">' . esc_html( $title ) . '</h3>';
+			$meta_html  = '';
+			if ( 'hidden' !== $meta_place && $card_values ) {
+				$meta_html = '<div class="pss-card__meta-list">';
 				foreach ( array_slice( $card_values, 0, 4 ) as $field ) {
-					$html .= '<span><small>' . esc_html( $field['label'] ) . '</small><b>' . esc_html( $field['value'] ) . '</b></span>';
+					$meta_html .= '<span><small>' . esc_html( $field['label'] ) . '</small><b>' . esc_html( $field['value'] ) . '</b></span>';
 				}
-				$html .= '</div>';
+				$meta_html .= '</div>';
 			}
-			$html .= '</div></a></article>';
+			$index_html = ( 'hidden' === $index_place ) ? '' : '<span class="pss-card__index">' . esc_html( $index_no ) . '</span>';
+			$cta_html   = ( 'hidden' === $cta_place ) ? '' : '<span class="pss-card__cta">' . esc_html( $cta_label ) . '</span>';
+
+			$overlay  = '';
+			$below    = '';
+			$floating = '';
+			$top      = '';
+			if ( 'overlay' === $title_place || 'bottom' === $title_place ) {
+				$overlay .= $title_html;
+			}
+			if ( 'overlay' === $meta_place || 'bottom' === $meta_place ) {
+				$overlay .= $meta_html;
+			}
+			if ( 'overlay' === $cta_place || 'bottom' === $cta_place ) {
+				$overlay .= $cta_html;
+			}
+			if ( 'top' === $title_place ) {
+				$top .= $title_html;
+			}
+			if ( 'top' === $meta_place ) {
+				$top .= $meta_html;
+			}
+			if ( 'below' === $title_place ) {
+				$below .= $title_html;
+			}
+			if ( 'below' === $meta_place ) {
+				$below .= $meta_html;
+			}
+			if ( 'below' === $cta_place ) {
+				$below .= $cta_html;
+			}
+			if ( 'floating' === $title_place ) {
+				$floating .= $title_html;
+			}
+			if ( 'floating' === $meta_place ) {
+				$floating .= $meta_html;
+			}
+			if ( 'floating' === $cta_place ) {
+				$floating .= $cta_html;
+			}
+
+			$media  = '<div class="pss-card__media">';
+			if ( $image ) {
+				$media .= '<img loading="lazy" src="' . esc_url( $image ) . '" alt="' . esc_attr( $title ) . '">';
+			}
+			$media .= '<span class="pss-card__veil"></span>';
+			if ( 'overlay' === $index_place ) {
+				$media .= $index_html;
+			}
+			$media .= '<span class="pss-card__arrow" aria-hidden="true">↗</span>';
+			if ( $top ) {
+				$media .= '<div class="pss-card__overlay pss-card__overlay--top">' . $top . '</div>';
+			}
+			if ( $overlay ) {
+				$media .= '<div class="pss-card__overlay pss-card__overlay--bottom">' . $overlay . '</div>';
+			}
+			$media .= '</div>';
+
+			$body = '';
+			if ( $below || ( 'below' === $index_place && $index_html ) ) {
+				$body  = '<div class="pss-card__body">';
+				if ( 'below' === $index_place ) {
+					$body .= $index_html;
+				}
+				$body .= $below . '</div>';
+			}
+
+			$float = $floating ? '<div class="pss-card__float">' . $floating . '</div>' : '';
+
+			$html .= '<article class="' . $classes . '" data-pss-motion="' . esc_attr( $animation ) . '" data-comp="' . esc_attr( $composition ) . '">';
+			$html .= '<a class="pss-card__link" href="' . esc_url( $url ) . '">';
+			if ( 'split' === $composition || 'split-reverse' === $composition || 'index-split' === $composition || 'caption-side' === $composition ) {
+				if ( 'index-split' === $composition ) {
+					$html .= '<span class="pss-card__giant-index">' . esc_html( $index_no ) . '</span>';
+				}
+				$html .= $media . $body . $float;
+			} elseif ( 'dossier' === $composition ) {
+				$html .= '<div class="pss-card__dossier-head">' . ( $index_html ?: '<span class="pss-card__index">' . esc_html( $index_no ) . '</span>' ) . $body . '</div>' . $media . $float;
+			} else {
+				$html .= $media . $body . $float;
+			}
+			$html .= '</a></article>';
 		}
 		return $html ? $html : '<div class="pss-empty">No projects found.</div>';
 	}

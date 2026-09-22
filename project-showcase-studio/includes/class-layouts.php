@@ -645,11 +645,11 @@ class Layouts {
 		if ( self::is_elementor_request() ) {
 			return;
 		}
-		if ( get_option( 'pss_starter_upgrade_version', '' ) === '2.3.0' ) {
+		if ( get_option( 'pss_starter_upgrade_version', '' ) === '2.6.0' ) {
 			return;
 		}
 		self::ensure_seed_layouts();
-		update_option( 'pss_starter_upgrade_version', '2.3.0', false );
+		update_option( 'pss_starter_upgrade_version', '2.6.0', false );
 	}
 
 	public static function ensure_seed_layouts() {
@@ -677,7 +677,7 @@ class Layouts {
 		$layout_id = absint( $layout_id );
 		if ( ! $layout_id || ! in_array( $style, array( 'modern', 'premium' ), true ) ) return;
 		$version = (string) get_post_meta( $layout_id, '_pss_starter_version', true );
-		if ( version_compare( $version ?: '0.0.0', '2.3.0', '>=' ) ) return;
+		if ( version_compare( $version ?: '0.0.0', '2.6.0', '>=' ) ) return;
 		$document_id = self::get_elementor_template_id( $layout_id );
 		$document = $document_id ? get_post( $document_id ) : null;
 		$manager = get_post( $layout_id );
@@ -687,7 +687,7 @@ class Layouts {
 		$effectively_blank = ! is_array( $parsed ) || count( $parsed ) < 3;
 		if ( $document && $manager && ( $document->post_modified_gmt === $document->post_date_gmt || $effectively_blank ) ) {
 			Elementor::seed_layout_content( $document_id, $style );
-			update_post_meta( $layout_id, '_pss_starter_version', '2.3.0' );
+			update_post_meta( $layout_id, '_pss_starter_version', '2.6.0' );
 		}
 	}
 
@@ -700,7 +700,7 @@ class Layouts {
 		$id = wp_insert_post( array( 'post_type' => PSS_LAYOUT_CPT, 'post_status' => 'publish', 'post_title' => $title ) );
 		if ( is_wp_error( $id ) || ! $id ) return 0;
 		update_post_meta( $id, '_pss_seed_style', sanitize_key( $style ) );
-		update_post_meta( $id, '_pss_starter_version', '2.3.0' );
+		update_post_meta( $id, '_pss_starter_version', '2.6.0' );
 		update_post_meta( $id, '_pss_condition_logic', 'all' );
 		if ( 'modern' === $style ) update_post_meta( $id, '_pss_conditions', array( array( 'mode' => 'include', 'type' => 'all', 'value' => '', 'field_key' => '', 'operator' => 'equals', 'priority' => 10 ) ) );
 		else update_post_meta( $id, '_pss_conditions', array( array( 'mode' => 'include', 'type' => 'all', 'value' => '', 'field_key' => '', 'operator' => 'equals', 'priority' => 0 ) ) );

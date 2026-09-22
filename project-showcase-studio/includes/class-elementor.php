@@ -280,6 +280,8 @@ class Elementor {
 			'project-story'          => 'Project_Story',
 			'project-marquee'        => 'Project_Marquee',
 			'project-slider'         => 'Project_Slider',
+			'project-process'        => 'Project_Process',
+			'project-sticky'         => 'Project_Sticky',
 		);
 
 		$successful = 0;

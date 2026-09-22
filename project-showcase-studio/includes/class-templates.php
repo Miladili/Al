@@ -309,6 +309,44 @@ class Templates {
 				)
 			),
 			self::section(
+				'modern-story',
+				self::cream( array( 'background_color' => '#EFE8DC', '_css_classes' => 'pss-template-section pss-template-story' ) ),
+				array(
+					self::heading( 'm-st-k', 'NARRATIVE', 'h6', $muted ),
+					self::heading( 'm-st-t', 'How the space was conceived.', 'h2', $ink ),
+					self::spacer( 'm-st-sp', 18 ),
+					self::widget( 'm-story', 'pss_project_story', array() ),
+					self::spacer( 'm-st-sp2', 28 ),
+					self::widget( 'm-sticky', 'pss_project_sticky', array() ),
+				)
+			),
+			self::section(
+				'modern-process',
+				self::dark( array( 'background_color' => '#121416', '_css_classes' => 'pss-template-section pss-template-process' ) ),
+				array(
+					self::heading( 'm-prcs-k', 'PROCESS', 'h6', '#AAB0B7' ),
+					self::heading( 'm-prcs-t', 'From brief to built form.', 'h2', '#FFFFFF' ),
+					self::spacer( 'm-prcs-sp', 18 ),
+					self::widget( 'm-process', 'pss_project_process', array( 'layout' => 'timeline' ) ),
+					self::spacer( 'm-prcs-sp2', 22 ),
+					self::widget( 'm-awards', 'pss_project_awards', array() ),
+					self::widget( 'm-team', 'pss_project_team', array() ),
+				)
+			),
+			self::section(
+				'modern-marquee',
+				array(
+					'layout'                => 'boxed',
+					'background_background' => 'classic',
+					'background_color'      => '#0C0E10',
+					'padding'               => self::pad( 28, 28, 0 ),
+					'_css_classes'          => 'pss-template-section pss-template-marquee',
+				),
+				array(
+					self::widget( 'm-marquee', 'pss_project_marquee', array() ),
+				)
+			),
+			self::section(
 				'modern-cta',
 				self::dark(
 					array(
@@ -336,6 +374,23 @@ class Templates {
 					self::heading( 'm-rel-t', 'Continue exploring.', 'h2', $ink ),
 					self::widget( 'm-scroll', 'pss_project_scroll', array( 'limit' => 6, 'eyebrow' => 'Continue through the studio' ) ),
 					self::spacer( 'm-sp13', 28 ),
+					self::widget(
+						'm-slider',
+						'pss_project_slider',
+						array(
+							'limit'           => 6,
+							'preset'          => 'cinematic',
+							'title_placement' => 'overlay',
+							'meta_placement'  => 'overlay',
+							'full_width'      => '',
+							'visible'         => 1.2,
+							'arrows'          => 'yes',
+							'dots'            => 'yes',
+							'loop'            => 'yes',
+							'peek'            => 'yes',
+						)
+					),
+					self::spacer( 'm-sp-slider', 28 ),
 					self::widget( 'm-rel', 'pss_related_projects', array( 'limit' => 3, 'layout' => 'cards' ) ),
 					self::spacer( 'm-sp13b', 28 ),
 					self::widget( 'm-share', 'pss_project_share', array() ),
@@ -509,6 +564,28 @@ class Templates {
 					self::heading( 'p-pr-t', 'Pieces that complete the story.', 'h2', $ink ),
 					self::spacer( 'p-sp7', 18 ),
 					self::widget( 'p-pr', 'pss_project_products', array( 'layout' => 'carousel' ) ),
+				)
+			),
+			self::section(
+				'prem-story',
+				array(
+					'layout'                => 'boxed',
+					'background_background' => 'classic',
+					'background_color'      => '#11100E',
+					'padding'               => self::pad( 92, 92, 40 ),
+					'_css_classes'          => 'pss-template-section pss-template-premium-story-block',
+				),
+				array(
+					self::heading( 'p-nar-k', 'THE NARRATIVE', 'h6', $gold ),
+					self::heading( 'p-nar-t', 'A slower reading of the space.', 'h2', '#F6F0E6' ),
+					self::widget( 'p-story', 'pss_project_story', array() ),
+					self::spacer( 'p-nar-sp', 24 ),
+					self::widget( 'p-sticky', 'pss_project_sticky', array( 'layout' => 'image-right' ) ),
+					self::spacer( 'p-nar-sp2', 24 ),
+					self::widget( 'p-process', 'pss_project_process', array( 'layout' => 'steps' ) ),
+					self::widget( 'p-awards', 'pss_project_awards', array() ),
+					self::widget( 'p-team', 'pss_project_team', array() ),
+					self::widget( 'p-marquee', 'pss_project_marquee', array() ),
 				)
 			),
 			self::section(

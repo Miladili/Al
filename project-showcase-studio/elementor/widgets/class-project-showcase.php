@@ -11,39 +11,54 @@ class Project_Showcase extends Base {
 	protected function register_controls() {
 		$this->start_controls_section( 'query', array( 'label' => 'Projects', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
 		$this->add_control( 'layout', array(
-			'label' => 'Layout', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'grid',
-			'options' => array( 'grid'=>'Grid', 'masonry'=>'Masonry', 'bento'=>'Bento', 'carousel'=>'Carousel', 'horizontal'=>'Horizontal', 'featured'=>'Featured', 'editorial'=>'Editorial', 'mosaic'=>'Mosaic', 'stack'=>'Stacked stories' ),
+			'label' => 'System', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'grid',
+			'options' => array( 'grid'=>'Grid', 'masonry'=>'Masonry', 'bento'=>'Bento', 'carousel'=>'Carousel', 'horizontal'=>'Horizontal', 'featured'=>'Featured', 'editorial'=>'Editorial', 'mosaic'=>'Mosaic', 'stack'=>'Stacked stories', 'overlapping'=>'Overlapping' ),
 		) );
 		$this->add_control( 'preset', array(
-			'label' => 'Card Style', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'modern',
-			'options' => array( 'modern'=>'Modern Editorial', 'luxury'=>'Luxury', 'editorial'=>'Editorial', 'architectural'=>'Architectural', 'cinematic'=>'Cinematic', 'minimal'=>'Minimal', 'classic'=>'Classic', 'dark'=>'Dark', 'light'=>'Light', 'glass'=>'Glass', 'magazine'=>'Magazine', 'overlay'=>'Overlay', 'split'=>'Split', 'bento'=>'Bento', 'floating'=>'Floating', 'monochrome'=>'Monochrome', 'line'=>'Editorial Line', 'asymmetric'=>'Asymmetric', 'fullimage'=>'Full image', 'interactive'=>'Interactive', 'dossier'=>'Dossier', 'atelier'=>'Atelier', 'courtyard'=>'Courtyard' ),
+			'label' => 'Card composition', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'modern',
+			'options' => array(
+				'modern'=>'Modern', 'luxury'=>'Luxury', 'editorial'=>'Editorial', 'architectural'=>'Architectural',
+				'cinematic'=>'Cinematic', 'minimal'=>'Minimal', 'classic'=>'Classic', 'dark'=>'Dark', 'light'=>'Light',
+				'glass'=>'Glass', 'magazine'=>'Magazine', 'overlay'=>'Overlay', 'split'=>'Split', 'bento'=>'Bento',
+				'floating'=>'Floating', 'monochrome'=>'Monochrome', 'line'=>'Editorial Line', 'asymmetric'=>'Asymmetric',
+				'fullimage'=>'Full image', 'fullscreen'=>'Fullscreen', 'interactive'=>'Interactive', 'dossier'=>'Dossier',
+				'atelier'=>'Atelier', 'courtyard'=>'Courtyard', 'stacked'=>'Stacked', 'overlapping'=>'Overlapping',
+				'perspective'=>'3D / Perspective',
+			),
 		) );
 		$this->add_control( 'animation', array(
-			'label' => 'Animation', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'reveal',
-			'options' => array( 'none'=>'None', 'reveal'=>'Reveal', 'lift'=>'Lift', 'zoom'=>'Image Zoom', 'parallax'=>'Cursor Parallax', 'directional'=>'Directional Hover', 'float'=>'Soft Float', 'tilt'=>'3D Tilt', 'mask'=>'Mask Reveal', 'blur'=>'Blur Reveal', 'text'=>'Text Reveal', 'magnetic'=>'Magnetic Card', 'cinematic'=>'Cinematic Hover' ),
+			'label' => 'Motion', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'reveal',
+			'options' => array( 'none'=>'None', 'reveal'=>'Scroll reveal', 'stagger'=>'Stagger', 'lift'=>'Lift', 'zoom'=>'Image Zoom', 'parallax'=>'Cursor Parallax', 'directional'=>'Directional Hover', 'float'=>'Soft Float', 'tilt'=>'3D Tilt', 'mask'=>'Mask Reveal', 'blur'=>'Blur Reveal', 'text'=>'Text Reveal', 'magnetic'=>'Magnetic Card', 'cinematic'=>'Cinematic Hover' ),
+		) );
+		$this->add_control( 'show_title', array( 'label' => 'Show title', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
+		$this->add_control( 'title_placement', array(
+			'label' => 'Title placement', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'auto',
+			'options' => array( 'auto'=>'Auto for this composition', 'overlay'=>'On the image', 'top'=>'Top overlay', 'below'=>'Below the image', 'floating'=>'Floating', 'hidden'=>'Hidden' ),
+			'condition' => array( 'show_title' => 'yes' ),
 		) );
 		$this->add_control( 'meta_placement', array(
-			'label' => 'Project info placement',
-			'type' => \Elementor\Controls_Manager::SELECT,
-			'default' => 'auto',
-			'options' => array(
-				'auto'    => 'Auto (inside overlay cards, below editorial cards)',
-				'overlay' => 'Inside the card image only',
-				'below'   => 'Below the image only',
-				'none'    => 'Hide extra fields',
-			),
-			'description' => 'Never shows the same fields both on the image and under the card.',
+			'label' => 'Metadata placement', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'auto',
+			'options' => array( 'auto'=>'Auto for this composition', 'overlay'=>'On the image', 'top'=>'Top overlay', 'below'=>'Below the image', 'floating'=>'Floating', 'hidden'=>'Hidden' ),
+			'description' => 'Never prints the same fields both on the image and under the card.',
 		) );
+		$this->add_control( 'index_placement', array(
+			'label' => 'Index / badge', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'overlay',
+			'options' => array( 'overlay'=>'On the image', 'below'=>'Below', 'hidden'=>'Hidden' ),
+		) );
+		$this->add_control( 'cta_placement', array(
+			'label' => 'CTA', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'hidden',
+			'options' => array( 'hidden'=>'Hidden', 'overlay'=>'On the image', 'below'=>'Below', 'floating'=>'Floating' ),
+		) );
+		$this->add_control( 'cta_label', array( 'label' => 'CTA label', 'type' => \Elementor\Controls_Manager::TEXT, 'default' => 'View project', 'condition' => array( 'cta_placement!' => 'hidden' ) ) );
 		$this->add_control( 'card_data_mode', array(
 			'label' => 'Card data', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'project',
 			'options' => array( 'project'=>'Use each Project’s selected fields', 'core'=>'Use standard meta fields', 'manual'=>'Choose field keys manually' ),
 		) );
 		$this->add_control( 'manual_card_fields', array(
 			'label' => 'Manual field keys', 'type' => \Elementor\Controls_Manager::TEXTAREA,
-			'placeholder' => 'cabinet_material, countertop, ceiling_height',
+			'placeholder' => 'core:year, core:location',
 			'condition' => array( 'card_data_mode' => 'manual' ),
 		) );
-		$this->add_control( 'show_title', array( 'label' => 'Show title', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->add_control( 'limit', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 9, 'min' => 1, 'max' => 100 ) );
 		$this->add_control( 'orderby', array( 'label' => 'Order By', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'date', 'options' => array( 'date'=>'Date', 'title'=>'Title', 'modified'=>'Modified', 'menu_order'=>'Menu Order' ) ) );
 		$this->add_control( 'order', array( 'label' => 'Order', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'DESC', 'options' => array( 'DESC'=>'Descending', 'ASC'=>'Ascending' ) ) );
@@ -70,6 +85,11 @@ class Project_Showcase extends Base {
 			'options' => array( '1 / 1'=>'1:1', '4 / 5'=>'4:5', '3 / 4'=>'3:4', '16 / 11'=>'16:11', '16 / 9'=>'16:9', '3 / 2'=>'3:2' ),
 			'selectors' => array( '{{WRAPPER}} .pss-card__media' => 'aspect-ratio: {{VALUE}};' ),
 		) );
+		$this->add_responsive_control( 'image_height', array(
+			'label' => 'Image height', 'type' => \Elementor\Controls_Manager::SLIDER,
+			'size_units' => array( 'px', 'vh' ), 'range' => array( 'px' => array( 'min' => 120, 'max' => 900 ), 'vh' => array( 'min' => 20, 'max' => 90 ) ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__media' => 'height: {{SIZE}}{{UNIT}}; aspect-ratio: auto;' ),
+		) );
 		$this->add_responsive_control( 'card_radius', array(
 			'label' => 'Corner radius', 'type' => \Elementor\Controls_Manager::SLIDER,
 			'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 48 ) ),
@@ -81,15 +101,21 @@ class Project_Showcase extends Base {
 		$this->add_responsive_control( 'title_size', array(
 			'label' => 'Title size', 'type' => \Elementor\Controls_Manager::SLIDER,
 			'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 14, 'max' => 72 ) ),
-			'selectors' => array( '{{WRAPPER}} .pss-card__body h3' => 'font-size: {{SIZE}}{{UNIT}};' ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__title' => 'font-size: {{SIZE}}{{UNIT}};' ),
 		) );
 		$this->add_control( 'title_color', array(
 			'label' => 'Title color', 'type' => \Elementor\Controls_Manager::COLOR,
-			'selectors' => array( '{{WRAPPER}} .pss-card__body h3' => 'color: {{VALUE}};' ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__title' => 'color: {{VALUE}};' ),
 		) );
+		$this->add_typography( 'title_typo', '{{WRAPPER}} .pss-card__title' );
 		$this->add_control( 'overlay_color', array(
 			'label' => 'Image overlay', 'type' => \Elementor\Controls_Manager::COLOR,
 			'selectors' => array( '{{WRAPPER}} .pss-card__veil' => 'background: linear-gradient(180deg, transparent 28%, {{VALUE}} 100%);' ),
+		) );
+		$this->add_responsive_control( 'content_align', array(
+			'label' => 'Content align', 'type' => \Elementor\Controls_Manager::CHOOSE,
+			'options' => array( 'left'=>array( 'title'=>'Left', 'icon'=>'eicon-text-align-left' ), 'center'=>array( 'title'=>'Center', 'icon'=>'eicon-text-align-center' ), 'right'=>array( 'title'=>'Right', 'icon'=>'eicon-text-align-right' ) ),
+			'selectors' => array( '{{WRAPPER}} .pss-card__body, {{WRAPPER}} .pss-card__overlay' => 'text-align: {{VALUE}};' ),
 		) );
 		$this->end_controls_section();
 
@@ -112,7 +138,11 @@ class Project_Showcase extends Base {
 			'order' => sanitize_key( $s['order'] ?? 'DESC' ),
 			'preset' => sanitize_key( $s['preset'] ?? 'modern' ),
 			'animation' => sanitize_key( $s['animation'] ?? 'reveal' ),
+			'title_placement' => sanitize_key( $s['title_placement'] ?? 'auto' ),
 			'meta_placement' => sanitize_key( $s['meta_placement'] ?? 'auto' ),
+			'index_placement' => sanitize_key( $s['index_placement'] ?? 'overlay' ),
+			'cta_placement' => sanitize_key( $s['cta_placement'] ?? 'hidden' ),
+			'cta_label' => (string) ( $s['cta_label'] ?? 'View project' ),
 			'card_data_mode' => sanitize_key( $s['card_data_mode'] ?? 'project' ),
 			'manual_card_fields' => (string) ( $s['manual_card_fields'] ?? '' ),
 			'show_title' => ! empty( $s['show_title'] ),

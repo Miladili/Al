@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.6.0
+- Card presets now switch composition markup (split, fullscreen, float, dossier, caption-side, hover-reveal, perspective) instead of recoloring one DOM tree.
+- Title / meta / index / CTA placements are independent. Overlay content is not repeated below the image.
+- Project Slider writes `--pss-slides` and `--pss-gap` through Elementor responsive `selectors`, then a JS engine actually slides, loops, autoplays, peeks, and handles swipe/keyboard.
+- Added Project Process and Sticky Scroll Story. No existing widget was removed.
+- Starter Single Layouts rebuilt with extra landing-page sections (story, process, marquee, awards, team, slider) while remaining classic Elementor sections/columns.
+- Library-document Elementor flow and the single Single Layouts hub are unchanged.
+
 ## 2.5.0
 - Single Layouts is one Projects submenu: All Layouts, Add New Layout, Default Layout, Conditions, and Settings live as hub tabs. Duplicate “Add Single Layout” / Settings menu items are gone.
 - Optional core records expanded (contractor, status, budget, completion, photographer, consultant, engineer) and can appear on cards when selected.
