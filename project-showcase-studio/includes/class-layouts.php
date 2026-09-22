@@ -288,7 +288,6 @@ class Layouts {
 				$document = \Elementor\Plugin::$instance->documents->create(
 					'page',
 					array(
-						'post_type'   => 'elementor_library',
 						'post_title'  => $post_title,
 						'post_status' => 'publish',
 					)
@@ -329,9 +328,38 @@ class Layouts {
 			return 0;
 		}
 
-		update_post_meta( $template_id, '_elementor_edit_mode', 'builder' );
-		update_post_meta( $template_id, '_elementor_template_type', 'page' );
+		self::prepare_library_document( $template_id );
 		return absint( $template_id );
+	}
+
+	public static function prepare_library_document( $template_id ) {
+		$template_id = absint( $template_id );
+		if ( ! $template_id || 'elementor_library' !== get_post_type( $template_id ) ) {
+			return;
+		}
+		update_post_meta( $template_id, '_elementor_edit_mode', 'builder' );
+		if ( ! get_post_meta( $template_id, '_elementor_template_type', true ) ) {
+			update_post_meta( $template_id, '_elementor_template_type', 'page' );
+		}
+		if ( ! get_post_meta( $template_id, '_elementor_version', true ) ) {
+			update_post_meta( $template_id, '_elementor_version', defined( 'ELEMENTOR_VERSION' ) ? ELEMENTOR_VERSION : PSS_VERSION );
+		}
+		if ( taxonomy_exists( 'elementor_library_type' ) ) {
+			$terms = wp_get_object_terms( $template_id, 'elementor_library_type', array( 'fields' => 'slugs' ) );
+			if ( empty( $terms ) || is_wp_error( $terms ) ) {
+				wp_set_object_terms( $template_id, 'page', 'elementor_library_type' );
+			}
+		}
+	}
+
+	private static function strip_manager_elementor_meta( $layout_id ) {
+		$layout_id = absint( $layout_id );
+		if ( ! $layout_id || PSS_LAYOUT_CPT !== get_post_type( $layout_id ) ) {
+			return;
+		}
+		foreach ( array( '_elementor_edit_mode', '_elementor_template_type', '_elementor_data', '_elementor_css', '_elementor_page_settings', '_elementor_controls_usage', '_elementor_version' ) as $key ) {
+			delete_post_meta( $layout_id, $key );
+		}
 	}
 
 	/**
@@ -361,16 +389,7 @@ class Layouts {
 		}
 
 		update_post_meta( $template_id, '_pss_manager_layout_id', $layout_id );
-		update_post_meta( $template_id, '_elementor_edit_mode', 'builder' );
-		if ( ! get_post_meta( $template_id, '_elementor_template_type', true ) ) {
-			update_post_meta( $template_id, '_elementor_template_type', 'page' );
-		}
-		if ( taxonomy_exists( 'elementor_library_type' ) ) {
-			$terms = wp_get_object_terms( $template_id, 'elementor_library_type', array( 'fields' => 'slugs' ) );
-			if ( empty( $terms ) || is_wp_error( $terms ) ) {
-				wp_set_object_terms( $template_id, 'page', 'elementor_library_type' );
-			}
-		}
+		self::prepare_library_document( $template_id );
 		if ( $legacy_settings && ! get_post_meta( $template_id, '_elementor_page_settings', true ) ) {
 			update_post_meta( $template_id, '_elementor_page_settings', maybe_unserialize( $legacy_settings ) );
 		}
@@ -388,6 +407,8 @@ class Layouts {
 				}
 			}
 		}
+
+		self::strip_manager_elementor_meta( $layout_id );
 
 		return absint( $template_id );
 	}
@@ -409,7 +430,8 @@ class Layouts {
 		$url = '';
 		if ( isset( \Elementor\Plugin::$instance->documents ) ) {
 			try {
-				$document = \Elementor\Plugin::$instance->documents->get( $template_id );
+				$documents = \Elementor\Plugin::$instance->documents;
+				$document  = method_exists( $documents, 'get' ) ? $documents->get( $template_id, false ) : null;
 				if ( $document && method_exists( $document, 'get_edit_url' ) ) {
 					$url = $document->get_edit_url();
 				}

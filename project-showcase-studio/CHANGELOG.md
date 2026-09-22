@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.4.0
+- Single Layout → Edit with Elementor now opens the linked Elementor Library document and no longer rewrites the editor preview iframe onto a Project URL (that mismatch blanked the canvas).
+- Asking Elementor to open a layout manager record redirects to the library document editor; Project posts still open as data, not Elementor pages. Pages/Posts are untouched.
+- Editor/preview project context is resolved from `editor_post_id` / library meta instead of swapping the preview document.
+- Leftover Elementor meta is stripped from layout manager records so Elementor does not treat them as canvases.
+- Widgets gained Dynamic Project Data vs Manual content sources (Before/After, Gallery, Image, Video, CTA, Field, Stats, Story, Team).
+- Added Image Reveal, Timeline, Awards, Team, Testimonials, Story, Marquee and Slider widgets. Existing Project widgets remain registered.
+- Showcase cards gained more distinct presets (asymmetric, full-image, interactive) without duplicating overlay + below meta.
+
 ## 2.3.0
 - Showcase cards no longer print the same project fields on the image and under the card. Placement is Auto / Inside / Below / Hidden.
 - Placeholder tokens such as `%name%` are skipped on cards.

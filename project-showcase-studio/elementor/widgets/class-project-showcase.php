@@ -16,7 +16,7 @@ class Project_Showcase extends Base {
 		) );
 		$this->add_control( 'preset', array(
 			'label' => 'Card Style', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'modern',
-			'options' => array( 'modern'=>'Modern', 'luxury'=>'Luxury', 'editorial'=>'Editorial', 'architectural'=>'Architectural', 'cinematic'=>'Cinematic', 'minimal'=>'Minimal', 'classic'=>'Classic', 'dark'=>'Dark', 'light'=>'Light', 'glass'=>'Glass', 'magazine'=>'Magazine', 'overlay'=>'Overlay', 'split'=>'Split', 'bento'=>'Bento', 'floating'=>'Floating', 'monochrome'=>'Monochrome', 'line'=>'Editorial Line' ),
+			'options' => array( 'modern'=>'Modern Editorial', 'luxury'=>'Luxury', 'editorial'=>'Editorial', 'architectural'=>'Architectural', 'cinematic'=>'Cinematic', 'minimal'=>'Minimal', 'classic'=>'Classic', 'dark'=>'Dark', 'light'=>'Light', 'glass'=>'Glass', 'magazine'=>'Magazine', 'overlay'=>'Overlay', 'split'=>'Split', 'bento'=>'Bento', 'floating'=>'Floating', 'monochrome'=>'Monochrome', 'line'=>'Editorial Line', 'asymmetric'=>'Asymmetric', 'fullimage'=>'Full image', 'interactive'=>'Interactive' ),
 		) );
 		$this->add_control( 'animation', array(
 			'label' => 'Animation', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'reveal',

@@ -2,7 +2,7 @@
 Tags: projects, portfolio, elementor, woocommerce, interior design, architecture
 Requires at least: 6.3
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 
 Manage Projects as independent data, define reusable Custom Fields, build reusable Single Project Layouts with Elementor, and display modern project cards.
 
@@ -27,6 +27,12 @@ Manage Projects as independent data, define reusable Custom Fields, build reusab
 Projects are data entities. They are not edited as Elementor pages. Elementor is used for reusable Single Project Layouts and Project widgets.
 
 The plugin does not replace site-wide header/footer settings, Elementor global settings, or WooCommerce templates.
+
+== 2.4.0 ==
+* Single Layout Edit with Elementor opens the linked library document without rewriting the preview onto a Project page.
+* Project widgets keep registering even if one widget fails.
+* Before/After, Gallery, Image, Video and others accept Project data or manual media.
+* Added Reveal, Timeline, Awards, Team, Testimonials, Story, Marquee and Slider widgets.
 
 == 2.3.0 ==
 * Showcase cards never repeat the same fields on the image and under the card.

@@ -38,8 +38,7 @@ class Elementor {
 		add_action( 'elementor/frontend/after_enqueue_scripts', array( __CLASS__, 'enqueue_canvas_scripts' ) );
 
 		add_filter( 'elementor/utils/is_post_support', array( __CLASS__, 'filter_post_support' ), 999, 3 );
-		add_filter( 'elementor/document/urls/preview', array( __CLASS__, 'preview_url' ), 10, 2 );
-		add_filter( 'elementor/document/urls/wp_preview', array( __CLASS__, 'preview_url' ), 10, 2 );
+		add_action( 'admin_bar_menu', array( __CLASS__, 'admin_bar' ), 999 );
 
 		add_action( 'admin_notices', array( __CLASS__, 'minimum_version_notice' ) );
 	}
@@ -69,6 +68,11 @@ class Elementor {
 	}
 
 	public static function filter_post_support( $supported, $post_id = 0, $post_type = '' ) {
+		$post_id   = absint( $post_id );
+		$post_type = sanitize_key( (string) $post_type );
+		if ( ! $post_type && $post_id ) {
+			$post_type = (string) get_post_type( $post_id );
+		}
 		if ( in_array( $post_type, array( PSS_PROJECT_CPT, PSS_LAYOUT_CPT ), true ) ) {
 			return false;
 		}
@@ -76,7 +80,9 @@ class Elementor {
 	}
 
 	/**
-	 * Projects and layout manager records must never open the Elementor canvas.
+	 * Projects are data. Layout manager records are not Elementor documents.
+	 * If Elementor is asked to open a layout manager row, send the user to the
+	 * linked library document's real editor. Never rewrite Pages/Posts.
 	 */
 	public static function block_unsupported_elementor_editor() {
 		if ( ! is_admin() ) {
@@ -91,9 +97,40 @@ class Elementor {
 			return;
 		}
 		$type = get_post_type( $post_id );
-		if ( PSS_PROJECT_CPT === $type || PSS_LAYOUT_CPT === $type ) {
+		if ( PSS_PROJECT_CPT === $type ) {
 			wp_safe_redirect( admin_url( 'post.php?post=' . $post_id . '&action=edit' ) );
 			exit;
+		}
+		if ( PSS_LAYOUT_CPT === $type ) {
+			$url = Layouts::get_elementor_edit_url( $post_id );
+			if ( $url ) {
+				wp_safe_redirect( $url );
+				exit;
+			}
+			wp_safe_redirect( admin_url( 'post.php?post=' . $post_id . '&action=edit' ) );
+			exit;
+		}
+	}
+
+	public static function admin_bar( $bar ) {
+		if ( ! is_object( $bar ) ) {
+			return;
+		}
+		if ( is_singular( PSS_PROJECT_CPT ) ) {
+			$bar->remove_node( 'elementor_edit_page' );
+			$bar->remove_node( 'elementor-inspector' );
+			$project_id = get_queried_object_id();
+			$layout_id  = $project_id ? get_matching_layout( $project_id ) : 0;
+			$url        = $layout_id ? Layouts::get_elementor_edit_url( $layout_id ) : '';
+			if ( $url && current_user_can( 'edit_posts' ) ) {
+				$bar->add_node(
+					array(
+						'id'    => 'pss-edit-layout-elementor',
+						'title' => __( 'Edit Layout with Elementor', 'project-showcase-studio' ),
+						'href'  => $url,
+					)
+				);
+			}
 		}
 	}
 
@@ -235,6 +272,14 @@ class Elementor {
 			'project-specifications' => 'Project_Specifications',
 			'project-tags'           => 'Project_Tags',
 			'project-features'       => 'Project_Features',
+			'project-reveal'         => 'Project_Reveal',
+			'project-timeline'       => 'Project_Timeline',
+			'project-awards'         => 'Project_Awards',
+			'project-team'           => 'Project_Team',
+			'project-testimonials'   => 'Project_Testimonials',
+			'project-story'          => 'Project_Story',
+			'project-marquee'        => 'Project_Marquee',
+			'project-slider'         => 'Project_Slider',
 		);
 
 		$successful = 0;
@@ -308,44 +353,14 @@ class Elementor {
 		}
 	}
 
+	/**
+	 * Keep Elementor's own preview URL for the library document.
+	 * Rewriting preview onto a Project permalink breaks the canvas because the
+	 * iframe document ID no longer matches the library document being edited.
+	 * Project data is resolved via `_pss_manager_layout_id` / preview project meta.
+	 */
 	public static function preview_url( $url, $document ) {
-		if ( ! is_object( $document ) ) {
-			return $url;
-		}
-
-		$template_id = 0;
-		if ( method_exists( $document, 'get_main_id' ) ) {
-			$template_id = absint( $document->get_main_id() );
-		}
-		if ( ! $template_id && method_exists( $document, 'get_id' ) ) {
-			$template_id = absint( $document->get_id() );
-		}
-		if ( ! $template_id || 'elementor_library' !== get_post_type( $template_id ) ) {
-			return $url;
-		}
-
-		$layout_id = absint( get_post_meta( $template_id, '_pss_manager_layout_id', true ) );
-		if ( ! $layout_id || PSS_LAYOUT_CPT !== get_post_type( $layout_id ) ) {
-			return $url;
-		}
-		$preview = absint( get_post_meta( $layout_id, '_pss_preview_project', true ) );
-		if ( ! $preview || PSS_PROJECT_CPT !== get_post_type( $preview ) ) {
-			return $url;
-		}
-
-		$project_url = get_permalink( $preview );
-		if ( ! $project_url ) {
-			return $url;
-		}
-
-		return add_query_arg(
-			array(
-				'pss_preview_project' => $preview,
-				'pss_preview_layout'  => $layout_id,
-				'elementor-preview'   => $template_id,
-			),
-			$project_url
-		);
+		return $url;
 	}
 
 	public static function seed_layout_content( $document_id, $style = 'modern' ) {

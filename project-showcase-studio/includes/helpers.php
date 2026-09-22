@@ -7,25 +7,50 @@ function esc_attr_json( $value ) {
 	return esc_attr( wp_json_encode( $value ) );
 }
 
+function get_editor_library_document_id() {
+	$candidates = array(
+		absint( $_REQUEST['editor_post_id'] ?? 0 ),
+		absint( $_REQUEST['initial_document_id'] ?? 0 ),
+		absint( $_REQUEST['elementor-preview'] ?? 0 ),
+		absint( $_GET['post'] ?? 0 ),
+		absint( $_POST['post_id'] ?? 0 ),
+	);
+	foreach ( $candidates as $id ) {
+		if ( $id && 'elementor_library' === get_post_type( $id ) ) {
+			return $id;
+		}
+	}
+	return 0;
+}
+
+function get_preview_project_from_library( $library_id ) {
+	$library_id = absint( $library_id );
+	if ( ! $library_id || 'elementor_library' !== get_post_type( $library_id ) ) {
+		return 0;
+	}
+	$manager_layout = absint( get_post_meta( $library_id, '_pss_manager_layout_id', true ) );
+	if ( ! $manager_layout ) {
+		return 0;
+	}
+	$preview = absint( get_post_meta( $manager_layout, '_pss_preview_project', true ) );
+	return ( $preview && PSS_PROJECT_CPT === get_post_type( $preview ) ) ? $preview : 0;
+}
+
 function get_project_id( $explicit = 0 ) {
 	if ( $explicit ) {
 		return absint( $explicit );
 	}
-	if ( ! empty( $_GET['pss_preview_project'] ) ) {
-		$preview = absint( $_GET['pss_preview_project'] );
+	if ( ! empty( $_REQUEST['pss_preview_project'] ) ) {
+		$preview = absint( $_REQUEST['pss_preview_project'] );
 		if ( $preview && PSS_PROJECT_CPT === get_post_type( $preview ) ) {
 			return $preview;
 		}
 	}
-	// Elementor editor requests identify the design document via ?post=ID.
-	$editor_post_id = ! empty( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
-	if ( $editor_post_id && 'elementor_library' === get_post_type( $editor_post_id ) ) {
-		$manager_layout = absint( get_post_meta( $editor_post_id, '_pss_manager_layout_id', true ) );
-		if ( $manager_layout ) {
-			$preview = absint( get_post_meta( $manager_layout, '_pss_preview_project', true ) );
-			if ( $preview && PSS_PROJECT_CPT === get_post_type( $preview ) ) {
-				return $preview;
-			}
+	$library_id = get_editor_library_document_id();
+	if ( $library_id ) {
+		$preview = get_preview_project_from_library( $library_id );
+		if ( $preview ) {
+			return $preview;
 		}
 	}
 	$queried_id = get_queried_object_id();
@@ -33,10 +58,9 @@ function get_project_id( $explicit = 0 ) {
 		return $queried_id;
 	}
 	if ( $queried_id && 'elementor_library' === get_post_type( $queried_id ) ) {
-		$manager_layout = absint( get_post_meta( $queried_id, '_pss_manager_layout_id', true ) );
-		if ( $manager_layout ) {
-			$preview = absint( get_post_meta( $manager_layout, '_pss_preview_project', true ) );
-			if ( $preview && PSS_PROJECT_CPT === get_post_type( $preview ) ) return $preview;
+		$preview = get_preview_project_from_library( $queried_id );
+		if ( $preview ) {
+			return $preview;
 		}
 	}
 	if ( ! empty( $GLOBALS['pss_current_project_id'] ) ) {
