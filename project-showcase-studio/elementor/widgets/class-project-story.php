@@ -30,6 +30,7 @@ class Project_Story extends Base {
 		$text = $this->is_manual( $s ) ? ( $s['text'] ?? '' ) : ( $id ? apply_filters( 'the_content', get_post_field( 'post_content', $id ) ) : '' );
 		$title = $s['heading'] ?: ( $id ? get_the_title( $id ) : '' );
 		if ( ! $title && ! $text ) {
+			$this->empty_state( 'Project Story', 'Add a heading and text, or choose a preview project with a description.' );
 			return;
 		}
 		echo '<section class="pss-story pss-story--' . esc_attr( $s['layout'] ?? 'image-right' ) . '">';

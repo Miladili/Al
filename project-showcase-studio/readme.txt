@@ -2,7 +2,7 @@
 Tags: projects, portfolio, elementor, woocommerce, interior design, architecture
 Requires at least: 6.3
 Requires PHP: 7.4
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 
 Manage Projects as independent data, define reusable Custom Fields, build reusable Single Project Layouts with Elementor, and display modern project cards.
 
@@ -22,6 +22,12 @@ Manage Projects as independent data, define reusable Custom Fields, build reusab
 * Elementor is recommended for the visual layout builder and widgets.
 * Elementor Pro is required by Elementor for its native active Dynamic Tags UI; the plugin also provides project widgets and a Project Custom Field widget.
 * WooCommerce is optional and only required for Project Products integration.
+
+== 3.2.0 ==
+* Before/After is a real overlay comparison: images stack, clip-path reveals, drag the handle (works in the Elementor canvas, not only after page load).
+* Gallery lightbox, Showcase filters and the Project Slider bind through delegated events / Elementor frontend hooks.
+* Timeline, Process, Team, Testimonials, Awards and Story render with connected defaults or editor placeholders instead of a blank widget.
+* Widget names/IDs are unchanged so existing layouts keep working. The Single Layout Elementor editor path is unchanged.
 
 == 3.1.0 ==
 * Project Field, Info, Stats and related widgets resolve library/core keys (`year`, `core_year`, leftover `global:year`) against actual project values.

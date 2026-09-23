@@ -17,7 +17,7 @@ class Project_Awards extends Base {
 			$repeater->add_control( 'meta', array( 'label' => 'Year / body', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'icon', array( 'label' => 'Icon', 'type' => \Elementor\Controls_Manager::ICONS, 'default' => array( 'value' => 'fas fa-award', 'library' => 'fa-solid' ) ) );
 			$repeater->add_control( 'image', array( 'label' => 'Logo', 'type' => \Elementor\Controls_Manager::MEDIA ) );
-			$this->add_control( 'items', array( 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title }}}' ) );
+			$this->add_control( 'items', array( 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title }}}', 'default' => array( array( 'title' => 'Design Award', 'meta' => '2024' ) ) ) );
 		}
 		$this->end_controls_section();
 	}
@@ -26,6 +26,7 @@ class Project_Awards extends Base {
 		$s = $this->get_settings_for_display();
 		$items = (array) ( $s['items'] ?? array() );
 		if ( ! $items ) {
+			$this->empty_state( 'Project Awards', 'Add awards in the widget repeater.' );
 			return;
 		}
 		echo '<ul class="pss-awards">';

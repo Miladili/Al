@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.0
+- Before/After no longer prints two images side by side. After sits full-bleed, Before is clipped with `clip-path`, and pointer-drag updates `--pss-ba-pos` (including Elementor preview).
+- Frontend JS for comparison, lightbox, filters and slider is delegated / hooked to `elementor/frontend/init` so widgets work after canvas re-render.
+- Landing widgets (Timeline, Process, Team, Testimonials, Awards, Story, Showcase, Slider) show defaults or editor placeholders.
+- Existing widget IDs stay registered. Library-document Single Layout flow is unchanged.
+
 ## 3.1.0
 - Widget field keys now resolve `global:` / `core:` / plain keys to stored project values (library fields, local values, and core meta).
 - Project Info reads taxonomy + core meta + per-project field values, so Year/Area/Designer no longer look empty after schema-free editing.

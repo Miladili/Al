@@ -169,6 +169,11 @@ class Project_Showcase extends Base {
 			if ( $settings['allow_year'] ) echo self::year_select();
 			echo '</div>';
 		}
+		if ( ! $posts ) {
+			$this->empty_state( 'Project Showcase', 'No projects found. Publish projects, or switch this widget to a Manual project list.' );
+			echo '</div>';
+			return;
+		}
 		$inner = \PSS\RenderCards::cards( $posts, $settings );
 		if ( in_array( $layout, array( 'horizontal', 'cinematic' ), true ) ) {
 			echo '<div class="pss-engine pss-engine--hscroll"><div class="pss-engine__track pss-showcase__grid">' . $inner . '</div></div>';

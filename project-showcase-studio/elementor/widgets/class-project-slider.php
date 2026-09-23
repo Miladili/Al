@@ -102,6 +102,7 @@ class Project_Slider extends Base {
 			$posts = \PSS\Ajax::query( array( 'limit' => absint( $s['limit'] ?? 8 ) ) );
 		}
 		if ( ! $posts ) {
+			$this->empty_state( 'Project Slider', 'Publish projects, or switch this widget to a Manual project list.' );
 			return;
 		}
 		$settings = array(

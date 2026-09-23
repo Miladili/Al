@@ -27,6 +27,7 @@ class Project_Timeline extends Base {
 		$s     = $this->get_settings_for_display();
 		$items = (array) ( $s['items'] ?? array() );
 		if ( ! $items ) {
+			$this->empty_state( 'Project Timeline', 'Add steps in the widget. Each row is a year/title/text.' );
 			return;
 		}
 		echo '<ol class="pss-timeline pss-timeline--' . esc_attr( $s['layout'] ?? 'vertical' ) . '">';

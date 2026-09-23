@@ -16,7 +16,7 @@ class Project_Team extends Base {
 			$repeater->add_control( 'name', array( 'label' => 'Name', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'role', array( 'label' => 'Role', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'image', array( 'label' => 'Portrait', 'type' => \Elementor\Controls_Manager::MEDIA ) );
-			$this->add_control( 'people', array( 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ name }}}', 'condition' => array( 'content_source' => 'manual' ) ) );
+			$this->add_control( 'people', array( 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ name }}}', 'condition' => array( 'content_source' => 'manual' ), 'default' => array( array( 'name' => 'Lead designer', 'role' => 'Design' ), array( 'name' => 'Architect', 'role' => 'Architecture' ) ) ) );
 		}
 		$this->add_responsive_control( 'columns', array( 'label' => 'Columns', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 3, 'tablet_default' => 2, 'mobile_default' => 1, 'selectors' => array( '{{WRAPPER}} .pss-team' => '--pss-cols: {{VALUE}};' ) ) );
 		$this->end_controls_section();
@@ -30,7 +30,7 @@ class Project_Team extends Base {
 			$people = (array) ( $s['people'] ?? array() );
 		} elseif ( $id ) {
 			foreach ( array( 'designer' => 'Designer', 'architect' => 'Architect', 'client' => 'Client' ) as $key => $role ) {
-				$name = \PSS\get_meta( $id, '_pss_' . $key );
+				$name = \PSS\get_project_info_value( $id, $key );
 				if ( $name && ! \PSS\is_placeholder_text( $name ) ) {
 					$people[] = array( 'name' => $name, 'role' => $role, 'image' => array() );
 				}
@@ -41,6 +41,7 @@ class Project_Team extends Base {
 			}
 		}
 		if ( ! $people ) {
+			$this->empty_state( 'Project Team', 'Add people in Manual content, or fill Designer / Architect on the project.' );
 			return;
 		}
 		echo '<div class="pss-team">';

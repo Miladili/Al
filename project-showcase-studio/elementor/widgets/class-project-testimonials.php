@@ -17,7 +17,7 @@ class Project_Testimonials extends Base {
 			$repeater->add_control( 'name', array( 'label' => 'Name', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'role', array( 'label' => 'Role', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'image', array( 'label' => 'Portrait', 'type' => \Elementor\Controls_Manager::MEDIA ) );
-			$this->add_control( 'items', array( 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ name }}}' ) );
+			$this->add_control( 'items', array( 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ name }}}', 'default' => array( array( 'quote' => 'The space feels considered in every detail.', 'name' => 'Client', 'role' => 'Homeowner' ) ) ) );
 		}
 		$this->end_controls_section();
 		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
@@ -29,6 +29,7 @@ class Project_Testimonials extends Base {
 	protected function render() {
 		$items = (array) ( $this->get_settings_for_display()['items'] ?? array() );
 		if ( ! $items ) {
+			$this->empty_state( 'Project Testimonials', 'Add quotes in the widget, or switch to Manual content.' );
 			return;
 		}
 		echo '<div class="pss-quotes">';

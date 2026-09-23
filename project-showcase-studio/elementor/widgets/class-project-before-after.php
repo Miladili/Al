@@ -13,13 +13,12 @@ class Project_Before_After extends Base {
 		$this->add_source_controls();
 
 		$this->start_controls_section( 'content', array( 'label' => 'Comparison', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );
-		$this->add_control( 'orientation', array( 'label' => 'Orientation', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'horizontal', 'options' => array( 'horizontal' => 'Horizontal', 'vertical' => 'Vertical' ) ) );
-		$this->add_control( 'start', array( 'label' => 'Start position', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 100 ) ), 'default' => array( 'size' => 50 ) ) );
+		$this->add_control( 'orientation', array( 'label' => 'Direction', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'horizontal', 'options' => array( 'horizontal' => 'Left / right', 'vertical' => 'Up / down' ) ) );
+		$this->add_control( 'start', array( 'label' => 'Start position', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 5, 'max' => 95 ) ), 'default' => array( 'size' => 50 ) ) );
 		$this->add_control( 'before_label', array( 'label' => 'Before label', 'type' => \Elementor\Controls_Manager::TEXT, 'default' => 'Before' ) );
 		$this->add_control( 'after_label', array( 'label' => 'After label', 'type' => \Elementor\Controls_Manager::TEXT, 'default' => 'After' ) );
 		$this->add_control( 'show_labels', array( 'label' => 'Show labels', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->add_icon_control( 'handle_icon', 'Handle icon', array( 'value' => 'fas fa-arrows-alt-h', 'library' => 'fa-solid' ) );
-
 		$this->add_control( 'before_image', array( 'label' => 'Before image', 'type' => \Elementor\Controls_Manager::MEDIA, 'condition' => array( 'content_source' => 'manual' ) ) );
 		$this->add_control( 'after_image', array( 'label' => 'After image', 'type' => \Elementor\Controls_Manager::MEDIA, 'condition' => array( 'content_source' => 'manual' ) ) );
 		$this->add_control( 'before_url', array( 'label' => 'Before image URL', 'type' => \Elementor\Controls_Manager::URL, 'placeholder' => 'https://', 'condition' => array( 'content_source' => 'manual' ) ) );
@@ -42,10 +41,10 @@ class Project_Before_After extends Base {
 		}
 
 		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
-		$this->add_responsive_control( 'height', array( 'label' => 'Height', 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', 'vh' ), 'range' => array( 'px' => array( 'min' => 180, 'max' => 1000 ), 'vh' => array( 'min' => 30, 'max' => 100 ) ), 'default' => array( 'size' => 520, 'unit' => 'px' ), 'tablet_default' => array( 'size' => 420, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 320, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .pss-before-after' => 'height: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_control( 'overlay', array( 'label' => 'Overlay', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-before-after__label' => 'background: {{VALUE}};' ) ) );
+		$this->add_responsive_control( 'height', array( 'label' => 'Height', 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', 'vh' ), 'range' => array( 'px' => array( 'min' => 180, 'max' => 1000 ), 'vh' => array( 'min' => 30, 'max' => 100 ) ), 'default' => array( 'size' => 560, 'unit' => 'px' ), 'tablet_default' => array( 'size' => 420, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 320, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .pss-before-after' => 'height: {{SIZE}}{{UNIT}}; --pss-ba-height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'overlay', array( 'label' => 'Label background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-before-after__label' => 'background: {{VALUE}};' ) ) );
 		$this->add_control( 'handle_color', array( 'label' => 'Handle', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-before-after__handle' => 'background: {{VALUE}};' ) ) );
-		$this->add_responsive_control( 'handle_size', array( 'label' => 'Handle size', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 18, 'max' => 72 ) ), 'selectors' => array( '{{WRAPPER}} .pss-before-after__handle i, {{WRAPPER}} .pss-before-after__handle svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'handle_size', array( 'label' => 'Handle size', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 18, 'max' => 72 ) ), 'selectors' => array( '{{WRAPPER}} .pss-before-after__knob' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_control( 'label_color', array( 'label' => 'Label color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-before-after__label' => 'color: {{VALUE}};' ) ) );
 		$this->add_typography( 'label_typo', '{{WRAPPER}} .pss-before-after__label' );
 		$this->add_responsive_control( 'radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 48 ) ), 'selectors' => array( '{{WRAPPER}} .pss-before-after' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
@@ -58,32 +57,38 @@ class Project_Before_After extends Base {
 			$s     = is_array( $s ) ? $s : array();
 			$pairs = $this->pairs( $s );
 			if ( ! $pairs ) {
+				$this->empty_state( 'Before / After', 'Add Before and After images (Manual), or set them on the preview project. Drag the handle to compare — images overlay, they are not placed side by side.' );
 				return;
 			}
 			$start = isset( $s['start']['size'] ) ? absint( $s['start']['size'] ) : 50;
-			$start = max( 0, min( 100, $start ) );
+			$start = max( 5, min( 95, $start ) );
 			$ori   = sanitize_key( $s['orientation'] ?? 'horizontal' );
 			if ( ! in_array( $ori, array( 'horizontal', 'vertical' ), true ) ) {
 				$ori = 'horizontal';
 			}
+			$printed = 0;
 			foreach ( $pairs as $pair ) {
 				$before = $this->resolve_image_src( $pair['before'] ?? '' );
 				$after  = $this->resolve_image_src( $pair['after'] ?? '' );
 				if ( ! $before || ! $after ) {
 					continue;
 				}
-				echo '<div class="pss-before-after pss-before-after--' . esc_attr( $ori ) . '" style="--pss-ba-pos:' . esc_attr( $start ) . '%">';
-				echo '<img class="pss-before-after__after" src="' . esc_url( $after ) . '" alt="' . esc_attr( $s['after_label'] ?? 'After' ) . '">';
-				echo '<div class="pss-before-after__clip" style="width:' . esc_attr( $start ) . '%"><img src="' . esc_url( $before ) . '" alt="' . esc_attr( $s['before_label'] ?? 'Before' ) . '"></div>';
+				$printed++;
+				echo '<div class="pss-before-after pss-before-after--' . esc_attr( $ori ) . '" style="--pss-ba-pos:' . esc_attr( $start ) . '%" data-pss-ba="1">';
+				echo '<img class="pss-before-after__after" src="' . esc_url( $after ) . '" alt="' . esc_attr( $s['after_label'] ?? 'After' ) . '" draggable="false">';
+				echo '<img class="pss-before-after__before" src="' . esc_url( $before ) . '" alt="' . esc_attr( $s['before_label'] ?? 'Before' ) . '" draggable="false">';
 				if ( ! empty( $s['show_labels'] ) ) {
 					echo '<span class="pss-before-after__label pss-before-after__label--before">' . esc_html( $s['before_label'] ?: 'Before' ) . '</span>';
 					echo '<span class="pss-before-after__label pss-before-after__label--after">' . esc_html( $s['after_label'] ?: 'After' ) . '</span>';
 				}
-				echo '<span class="pss-before-after__handle">';
+				echo '<span class="pss-before-after__handle" aria-hidden="true"><span class="pss-before-after__knob">';
 				$this->render_icon( is_array( $s['handle_icon'] ?? null ) ? $s['handle_icon'] : array() );
-				echo '</span>';
+				echo '</span></span>';
 				echo '<input type="range" min="0" max="100" value="' . esc_attr( $start ) . '" aria-label="Before After position">';
 				echo '</div>';
+			}
+			if ( ! $printed ) {
+				$this->empty_state( 'Before / After', 'The selected images could not be resolved. Check the media library IDs or URLs.' );
 			}
 		} catch ( \Throwable $e ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -136,6 +141,7 @@ class Project_Before_After extends Base {
 
 	private function dynamic_image( $project_id, $field_key, $fallback_slot, $fallback_src = '' ) {
 		$project_id = absint( $project_id );
+		$field_key  = \PSS\sanitize_card_field_key( $field_key );
 		if ( $field_key && $project_id ) {
 			try {
 				$data  = \PSS\get_project_card_field( $project_id, $field_key );

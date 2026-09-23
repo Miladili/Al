@@ -17,7 +17,7 @@ class Project_Process extends Base {
 			$repeater->add_control( 'title', array( 'label' => 'Title', 'type' => \Elementor\Controls_Manager::TEXT ) );
 			$repeater->add_control( 'text', array( 'label' => 'Text', 'type' => \Elementor\Controls_Manager::TEXTAREA ) );
 			$repeater->add_control( 'icon', array( 'label' => 'Icon', 'type' => \Elementor\Controls_Manager::ICONS ) );
-			$this->add_control( 'steps', array( 'label' => 'Manual steps', 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title }}}', 'condition' => array( 'content_source' => 'manual' ) ) );
+			$this->add_control( 'steps', array( 'label' => 'Manual steps', 'type' => \Elementor\Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title }}}', 'condition' => array( 'content_source' => 'manual' ), 'default' => array( array( 'title' => 'Discover', 'text' => 'Brief, site and constraints.' ), array( 'title' => 'Design', 'text' => 'Concept through detail.' ), array( 'title' => 'Deliver', 'text' => 'Build, style, photograph.' ) ) ) );
 		}
 		$this->end_controls_section();
 		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
@@ -48,6 +48,7 @@ class Project_Process extends Base {
 			}
 		}
 		if ( ! $steps ) {
+			$this->empty_state( 'Project Process', 'Switch to Manual content and add steps, or fill Features on the project.' );
 			return;
 		}
 		echo '<ol class="pss-process pss-process--' . esc_attr( sanitize_key( $s['layout'] ?? 'timeline' ) ) . '">';
