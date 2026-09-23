@@ -24,7 +24,7 @@ abstract class Base extends \Elementor\Widget_Base {
 	}
 
 	public function get_script_depends() {
-		return array( 'pss-frontend' );
+		return array();
 	}
 
 	protected function add_source_controls() {
@@ -217,15 +217,29 @@ abstract class Base extends \Elementor\Widget_Base {
 
 	protected function add_box_style( $selector ) {
 		$this->start_controls_section( 'pss_box_style', array( 'label' => 'Container', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'pss_align', array( 'label' => 'Alignment', 'type' => \Elementor\Controls_Manager::CHOOSE, 'options' => array( 'left' => array( 'title' => 'Left', 'icon' => 'eicon-text-align-left' ), 'center' => array( 'title' => 'Center', 'icon' => 'eicon-text-align-center' ), 'right' => array( 'title' => 'Right', 'icon' => 'eicon-text-align-right' ) ), 'selectors' => array( $selector => 'text-align: {{VALUE}};' ) ) );
+		$this->add_responsive_control( 'pss_maxw', array( 'label' => 'Max width', 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 120, 'max' => 1600 ), '%' => array( 'min' => 20, 'max' => 100 ) ), 'selectors' => array( $selector => 'max-width: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_responsive_control( 'pss_margin', array( 'label' => 'Margin', 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em', '%' ), 'selectors' => array( $selector => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->add_responsive_control( 'pss_pad', array( 'label' => 'Padding', 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( $selector => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->add_control( 'pss_bg', array( 'label' => 'Background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'background-color: {{VALUE}};' ) ) );
 		$this->add_control( 'pss_border_c', array( 'label' => 'Border', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'border-color: {{VALUE}}; border-style: solid; border-width: 1px;' ) ) );
 		$this->add_responsive_control( 'pss_radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 80 ) ), 'selectors' => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_control( 'pss_z', array( 'label' => 'Z-index', 'type' => \Elementor\Controls_Manager::NUMBER, 'selectors' => array( $selector => 'z-index: {{VALUE}};' ) ) );
-		if ( class_exists( '\\Elementor\\Group_Control_Box_Shadow' ) ) {
+		if ( class_exists( '\Elementor\Group_Control_Box_Shadow' ) ) {
 			$this->add_group_control( \Elementor\Group_Control_Box_Shadow::get_type(), array( 'name' => 'pss_shadow', 'selector' => $selector ) );
 		}
+		$this->add_control( 'pss_hover_heading', array( 'label' => 'Hover', 'type' => \Elementor\Controls_Manager::HEADING, 'separator' => 'before' ) );
+		$this->add_control( 'pss_hover_bg', array( 'label' => 'Hover background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector . ':hover' => 'background-color: {{VALUE}};' ) ) );
+		$this->end_controls_section();
+	}
+
+	protected function add_text_style( $prefix, $label, $selector ) {
+		$this->start_controls_section( $prefix . '_text_style', array( 'label' => $label, 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_control( $prefix . '_color', array( 'label' => 'Color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( $selector => 'color: {{VALUE}};' ) ) );
+		$this->add_control( $prefix . '_hover', array( 'label' => 'Hover color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}}:hover ' . $selector => 'color: {{VALUE}};' ) ) );
+		$this->add_typography( $prefix . '_typo', $selector );
+		$this->add_responsive_control( $prefix . '_align', array( 'label' => 'Align', 'type' => \Elementor\Controls_Manager::CHOOSE, 'options' => array( 'left' => array( 'title' => 'Left', 'icon' => 'eicon-text-align-left' ), 'center' => array( 'title' => 'Center', 'icon' => 'eicon-text-align-center' ), 'right' => array( 'title' => 'Right', 'icon' => 'eicon-text-align-right' ) ), 'selectors' => array( $selector => 'text-align: {{VALUE}};' ) ) );
+		$this->add_responsive_control( $prefix . '_space', array( 'label' => 'Spacing', 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 80 ) ), 'selectors' => array( $selector => 'margin-bottom: {{SIZE}}{{UNIT}};' ) ) );
 		$this->end_controls_section();
 	}
 

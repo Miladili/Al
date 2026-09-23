@@ -44,6 +44,7 @@ class Project_Showcase extends Base {
 				'cinematic'=>'Cinematic Hover', 'pan'=>'Image pan', 'clip'=>'Clip reveal', 'follow'=>'Cursor follow',
 			),
 		) );
+		$this->add_control( 'query_type', array( 'label' => 'Query', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'latest', 'options' => array( 'latest' => 'Latest projects', 'featured' => 'Featured projects', 'related' => 'Related to current project' ), 'condition' => array( 'content_source' => 'project' ) ) );
 		$this->add_control( 'limit', array( 'label' => 'Projects', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 9, 'min' => 1, 'max' => 100, 'condition' => array( 'content_source' => 'project' ) ) );
 		$this->add_control( 'orderby', array( 'label' => 'Order By', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'date', 'options' => array( 'date'=>'Date', 'title'=>'Title', 'modified'=>'Modified', 'menu_order'=>'Menu Order' ), 'condition' => array( 'content_source' => 'project' ) ) );
 		$this->add_control( 'order', array( 'label' => 'Order', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'DESC', 'options' => array( 'DESC'=>'Descending', 'ASC'=>'Ascending' ), 'condition' => array( 'content_source' => 'project' ) ) );
@@ -121,6 +122,8 @@ class Project_Showcase extends Base {
 		$settings = array(
 			'limit' => absint( $s['limit'] ?? 9 ),
 			'page' => 1,
+			'query_type' => sanitize_key( $s['query_type'] ?? 'latest' ),
+			'related_id' => \PSS\get_project_id(),
 			'orderby' => sanitize_key( $s['orderby'] ?? 'date' ),
 			'order' => sanitize_key( $s['order'] ?? 'DESC' ),
 			'preset' => sanitize_key( $s['preset'] ?? 'modern' ),

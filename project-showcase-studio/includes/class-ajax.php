@@ -19,28 +19,63 @@ class Ajax {
 	}
 
 	public static function query( $settings = array() ) {
-		$args = array(
+		$settings = is_array( $settings ) ? $settings : array();
+		$limit    = isset( $settings['limit'] ) ? max( 1, min( 100, absint( $settings['limit'] ) ) ) : 12;
+		$args     = array(
 			'post_type'      => PSS_PROJECT_CPT,
 			'post_status'    => 'publish',
-			'posts_per_page' => isset( $settings['limit'] ) ? max( 1, min( 100, absint( $settings['limit'] ) ) ) : 12,
+			'posts_per_page' => $limit,
 			's'              => isset( $settings['search'] ) ? sanitize_text_field( $settings['search'] ) : '',
 			'paged'          => isset( $settings['page'] ) ? max( 1, absint( $settings['page'] ) ) : 1,
 			'orderby'        => isset( $settings['orderby'] ) ? sanitize_key( $settings['orderby'] ) : 'date',
 			'order'          => isset( $settings['order'] ) && 'ASC' === strtoupper( $settings['order'] ) ? 'ASC' : 'DESC',
 		);
-		$tax_query = array();
-		$map       = array( 'category' => 'pss_project_category', 'style' => 'pss_project_style', 'location' => 'pss_project_location', 'type' => 'pss_project_type' );
-		foreach ( $map as $key => $taxonomy ) {
-			if ( ! empty( $settings[ $key ] ) ) {
-				$tax_query[] = array( 'taxonomy' => $taxonomy, 'field' => 'term_id', 'terms' => absint( $settings[ $key ] ) );
+		$query_type = sanitize_key( $settings['query_type'] ?? 'latest' );
+		if ( 'featured' === $query_type ) {
+			$args['meta_query'][] = array( 'key' => '_pss_featured', 'value' => '1' );
+		}
+		if ( ! empty( $settings['ids'] ) ) {
+			$ids = is_array( $settings['ids'] ) ? $settings['ids'] : explode( ',', (string) $settings['ids'] );
+			$ids = array_values( array_filter( array_map( 'absint', $ids ) ) );
+			if ( $ids ) {
+				$args['post__in'] = $ids;
+				$args['orderby']  = 'post__in';
 			}
 		}
-		if ( ! empty( $settings['year'] ) ) {
-			$args['meta_query'] = array( array( 'key' => '_pss_year', 'value' => absint( $settings['year'] ), 'compare' => '=' ) );
+		if ( 'related' === $query_type ) {
+			$related_id = absint( $settings['related_id'] ?? get_project_id() );
+			if ( $related_id ) {
+				$args['post__not_in'] = array( $related_id );
+				$taxq                 = array( 'relation' => 'OR' );
+				foreach ( array( 'pss_project_category', 'pss_project_style', 'pss_project_type' ) as $tax ) {
+					$terms = wp_get_post_terms( $related_id, $tax, array( 'fields' => 'ids' ) );
+					if ( ! is_wp_error( $terms ) && $terms ) {
+						$taxq[] = array( 'taxonomy' => $tax, 'field' => 'term_id', 'terms' => $terms );
+					}
+				}
+				if ( count( $taxq ) > 1 ) {
+					$args['tax_query'] = $taxq;
+				}
+			}
 		}
-		if ( $tax_query ) {
-			$tax_query['relation'] = 'AND';
-			$args['tax_query']     = $tax_query;
+		$tax_query = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+		$map       = array( 'category' => 'pss_project_category', 'style' => 'pss_project_style', 'location' => 'pss_project_location', 'type' => 'pss_project_type' );
+		$extra     = array();
+		foreach ( $map as $key => $taxonomy ) {
+			if ( ! empty( $settings[ $key ] ) ) {
+				$extra[] = array( 'taxonomy' => $taxonomy, 'field' => 'term_id', 'terms' => absint( $settings[ $key ] ) );
+			}
+		}
+		if ( $extra ) {
+			$extra['relation'] = 'AND';
+			$args['tax_query'] = $tax_query ? array( 'relation' => 'AND', $tax_query, $extra ) : $extra;
+		}
+		$meta = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+		if ( ! empty( $settings['year'] ) ) {
+			$meta[] = array( 'key' => '_pss_year', 'value' => absint( $settings['year'] ), 'compare' => '=' );
+		}
+		if ( $meta ) {
+			$args['meta_query'] = $meta;
 		}
 		return get_posts( $args );
 	}

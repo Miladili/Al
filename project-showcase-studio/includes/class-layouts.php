@@ -537,6 +537,9 @@ class Layouts {
 		if ( isset( $_POST['pss_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pss_settings_nonce'] ) ), 'pss_settings' ) && current_user_can( 'manage_options' ) ) {
 			update_option( 'pss_project_slug', sanitize_title( wp_unslash( $_POST['pss_project_slug'] ?? 'project' ) ) ?: 'project' );
 			update_option( 'pss_default_layout', absint( $_POST['pss_default_layout'] ?? 0 ) );
+			if ( isset( $_POST['pss_archive_layout'] ) ) {
+				update_option( 'pss_archive_layout', absint( $_POST['pss_archive_layout'] ) );
+			}
 			if ( isset( $_POST['pss_widgets_present'] ) ) {
 				$disabled = array_map( 'sanitize_key', (array) ( $_POST['pss_disabled_widgets'] ?? array() ) );
 				update_option( 'pss_disabled_widgets', array_values( array_filter( $disabled ) ) );
@@ -617,8 +620,9 @@ class Layouts {
 			echo '<div class="pss-empty-panel"><strong>Settings are limited.</strong><span>Ask an administrator to change the default layout and project slug.</span></div>';
 			return;
 		}
-		$current_slug   = get_option( 'pss_project_slug', 'project' );
-		$current_layout = absint( get_option( 'pss_default_layout', 0 ) );
+		$current_slug    = get_option( 'pss_project_slug', 'project' );
+		$current_layout  = absint( get_option( 'pss_default_layout', 0 ) );
+		$archive_layout  = absint( get_option( 'pss_archive_layout', 0 ) );
 		$layouts        = get_posts( array( 'post_type' => PSS_LAYOUT_CPT, 'post_status' => 'publish', 'posts_per_page' => -1 ) );
 		echo '<form method="post" class="pss-admin-card pss-hub-form">';
 		wp_nonce_field( 'pss_settings', 'pss_settings_nonce' );
@@ -628,7 +632,7 @@ class Layouts {
 			foreach ( $layouts as $layout ) {
 				echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $current_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>';
 			}
-			echo '</select></label><input type="hidden" name="pss_project_slug" value="' . esc_attr( $current_slug ) . '">';
+			echo '</select></label><input type="hidden" name="pss_project_slug" value="' . esc_attr( $current_slug ) . '"><input type="hidden" name="pss_archive_layout" value="' . esc_attr( $archive_layout ) . '">';
 		} else {
 			echo '<h2>Settings</h2>';
 			echo '<label>Project URL slug<input name="pss_project_slug" class="widefat" value="' . esc_attr( $current_slug ) . '"></label>';
@@ -637,6 +641,11 @@ class Layouts {
 				echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $current_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>';
 			}
 			echo '</select></label>';
+			echo '<label>Archive Layout<select name="pss_archive_layout" class="widefat"><option value="0">— Fallback grid —</option>';
+			foreach ( $layouts as $layout ) {
+				echo '<option value="' . esc_attr( $layout->ID ) . '" ' . selected( $archive_layout, $layout->ID, false ) . '>' . esc_html( $layout->post_title ) . '</option>';
+			}
+			echo '</select></label><p class="description">Optional. Point the project archive at a Single Layout design that contains a Project Showcase widget. This does not register a custom Elementor document type.</p>';
 			$disabled = get_option( 'pss_disabled_widgets', array() );
 			if ( ! is_array( $disabled ) ) { $disabled = array(); }
 			$widgets = array(

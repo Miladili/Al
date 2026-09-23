@@ -124,3 +124,7 @@
   .pss-admin-screen .pss-field-library-hero{flex-direction:column}
   .pss-admin-screen .pss-value-row__actions{width:100%;margin-left:0}
 }
+.pss-admin-screen .pss-unit-field{display:flex;align-items:center;gap:8px}
+.pss-admin-screen .pss-unit{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#646970}
+.pss-admin-screen .pss-choice{display:inline-flex;gap:6px;margin:0 12px 8px 0}
+.pss-admin-screen .pss-media-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}

@@ -2,9 +2,9 @@
   'use strict';
 
   const types = window.PSSFieldTypes || {
-    text:'Text', textarea:'Textarea', wysiwyg:'WYSIWYG', number:'Number', date:'Date', url:'URL', color:'Color',
+    text:'Text', textarea:'Textarea', wysiwyg:'WYSIWYG', number:'Number', date:'Date', time:'Time', url:'URL', email:'Email', phone:'Phone', color:'Color', icon:'Icon',
     image:'Image', gallery:'Gallery', file:'File', video:'Video', map:'Map / Location',
-    select:'Select', multi_select:'Multi Select', toggle:'Toggle', repeater:'Repeater',
+    select:'Select', multi_select:'Multi Select', radio:'Radio', checkbox:'Checkbox', toggle:'Toggle', relationship:'Relationship', repeater:'Repeater',
     group:'Group', table:'Table', icon_value:'Icon + Title + Value'
   };
 
@@ -84,6 +84,9 @@
     if(type==='textarea'||type==='wysiwyg') return `<textarea class="widefat" name="${esc(name)}" rows="${type==='wysiwyg'?8:4}"></textarea>`;
     if(type==='number') return `<input type="number" step="any" class="widefat" name="${esc(name)}" value="">`;
     if(type==='date') return `<input type="date" class="widefat" name="${esc(name)}" value="">`;
+    if(type==='time') return `<input type="time" class="widefat" name="${esc(name)}" value="">`;
+    if(type==='email') return `<input type="email" class="widefat" name="${esc(name)}" placeholder="name@example.com">`;
+    if(type==='phone') return `<input type="tel" class="widefat" name="${esc(name)}" value="">`;
     if(type==='url'||type==='video') return `<input type="url" class="widefat" name="${esc(name)}" placeholder="https://">`;
     if(type==='color') return `<input type="color" name="${esc(name)}" value="#B08A5A">`;
     if(type==='toggle') return `<label class="pss-switch"><input type="hidden" name="${esc(name)}" value="0"><input type="checkbox" name="${esc(name)}" value="1"><span>Enabled</span></label>`;

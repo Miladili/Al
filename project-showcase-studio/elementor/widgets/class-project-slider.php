@@ -7,6 +7,7 @@ class Project_Slider extends Base {
 	public function get_name() { return 'pss_project_slider'; }
 	public function get_title() { return 'Project Slider'; }
 	public function get_icon() { return 'eicon-slides'; }
+	public function get_script_depends() { return array( 'pss-frontend' ); }
 
 	protected function register_controls() {
 		$this->start_controls_section( 'content', array( 'label' => 'Slider', 'tab' => \Elementor\Controls_Manager::TAB_CONTENT ) );

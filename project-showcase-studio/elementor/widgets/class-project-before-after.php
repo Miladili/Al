@@ -7,6 +7,7 @@ class Project_Before_After extends Base {
 	public function get_name() { return 'pss_project_before_after'; }
 	public function get_title() { return 'Project Before / After'; }
 	public function get_icon() { return 'eicon-image-before-after'; }
+	public function get_script_depends() { return array( 'pss-frontend' ); }
 
 	protected function register_controls() {
 		$this->add_source_controls();

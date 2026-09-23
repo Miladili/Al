@@ -5,6 +5,7 @@ class Project_Products extends Base {
 	public function get_name() { return 'pss_project_products'; }
 	public function get_title() { return 'Project Products'; }
 	public function get_icon() { return 'eicon-products'; }
+	public function get_script_depends() { return array( 'pss-frontend' ); }
 	protected function register_controls() {
 		$this->add_source_controls();
 		$this->start_controls_section( 'content', array( 'label' => 'Products' ) );

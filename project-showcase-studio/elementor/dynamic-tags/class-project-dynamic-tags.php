@@ -207,3 +207,27 @@ class Project_Field extends Base {
 		}
 	}
 }
+
+class Project_Location extends Base {
+	public function get_name() { return 'pss-project-location'; }
+	public function get_title() { return esc_html__( 'Project Location', 'project-showcase-studio' ); }
+	public function get_categories() { return array( \Elementor\Modules\DynamicTags\Module::TEXT_CATEGORY ); }
+	public function render() {
+		$id = $this->project_id();
+		if ( $id ) {
+			echo esc_html( \PSS\get_project_taxonomy_value( $id, 'pss_project_location' ) );
+		}
+	}
+}
+
+class Project_Date extends Base {
+	public function get_name() { return 'pss-project-date'; }
+	public function get_title() { return esc_html__( 'Project Date', 'project-showcase-studio' ); }
+	public function get_categories() { return array( \Elementor\Modules\DynamicTags\Module::TEXT_CATEGORY ); }
+	public function render() {
+		$id = $this->project_id();
+		if ( ! $id ) { return; }
+		$year = \PSS\get_meta( $id, '_pss_year' );
+		echo esc_html( $year ? $year : get_the_date( '', $id ) );
+	}
+}

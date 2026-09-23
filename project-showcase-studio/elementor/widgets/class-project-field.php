@@ -19,10 +19,10 @@ class Project_Field extends Base {
 		$this->add_icon_control( 'icon', 'Icon', array( 'value' => '', 'library' => '' ) );
 		$this->add_control( 'empty_text', array( 'label' => 'Empty text', 'type' => \Elementor\Controls_Manager::TEXT ) );
 		$this->end_controls_section();
-		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
-		$this->add_control( 'label_color', array( 'label' => 'Label color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-project-field-widget__label' => 'color: {{VALUE}};' ) ) );
-		$this->add_typography( 'value_typo', '{{WRAPPER}} .pss-project-field-widget__value' );
-		$this->end_controls_section();
+		$this->add_box_style( '{{WRAPPER}} .pss-project-field-widget' );
+		$this->add_text_style( 'label', 'Label', '{{WRAPPER}} .pss-project-field-widget__label' );
+		$this->add_text_style( 'value', 'Value', '{{WRAPPER}} .pss-project-field-widget__value' );
+		$this->add_icon_style( '{{WRAPPER}} .pss-project-field-widget__icon' );
 	}
 
 	protected function render() {
@@ -32,18 +32,21 @@ class Project_Field extends Base {
 		if ( ! $key ) {
 			$key = sanitize_key( $s['field_key_manual'] ?? '' );
 		}
+		$html = '';
 		if ( $this->is_manual( $s ) ) {
 			$text  = (string) ( $s['manual_value'] ?? '' );
 			$label = $s['custom_label'] ?: $key;
+			$html  = esc_html( $text );
 		} else {
-			if ( ! $id || ! $key ) {
-				return;
-			}
+			if ( ! $id || ! $key ) { return; }
 			$data  = \PSS\get_project_card_field( $id, $key );
-			$text  = \PSS\field_value_text( $data['value'] ?? '' );
+			$value = $data['value'] ?? '';
 			$label = $s['custom_label'] ?: ( $data['label'] ?? $key );
+			$type  = $data['type'] ?? 'text';
+			$text  = \PSS\field_value_text( $value );
+			$html  = is_array( $value ) ? \PSS\render_field_value( $value, $type, $data['definition'] ?? array() ) : esc_html( $text );
 		}
-		if ( '' === $text ) {
+		if ( '' === trim( wp_strip_all_tags( (string) $html ) ) ) {
 			if ( '' !== ( $s['empty_text'] ?? '' ) ) {
 				echo '<span class="pss-project-field-widget__empty">' . esc_html( $s['empty_text'] ) . '</span>';
 			}
@@ -54,6 +57,6 @@ class Project_Field extends Base {
 		if ( ! empty( $s['show_label'] ) ) {
 			echo '<span class="pss-project-field-widget__label">' . esc_html( $label ) . '</span>';
 		}
-		echo '<div class="pss-project-field-widget__value">' . esc_html( $text ) . '</div></div>';
+		echo '<div class="pss-project-field-widget__value">' . $html . '</div></div>';
 	}
 }

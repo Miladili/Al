@@ -80,6 +80,11 @@ class Fields {
 				<label>Type<select class="pss-field-type" name="fields[<?php echo esc_attr( $index ); ?>][type]"><?php self::type_options( $type ); ?></select></label>
 			</div>
 			<label>Description<input type="text" name="fields[<?php echo esc_attr( $index ); ?>][description]" value="<?php echo esc_attr( $field['description'] ?? '' ); ?>"></label>
+			<div class="pss-grid-3">
+				<label>Placeholder<input type="text" name="fields[<?php echo esc_attr( $index ); ?>][placeholder]" value="<?php echo esc_attr( $field['placeholder'] ?? '' ); ?>"></label>
+				<label>Default value<input type="text" name="fields[<?php echo esc_attr( $index ); ?>][default_value]" value="<?php echo esc_attr( $field['default_value'] ?? '' ); ?>"></label>
+				<label>Unit (e.g. m²)<input type="text" name="fields[<?php echo esc_attr( $index ); ?>][unit]" value="<?php echo esc_attr( $field['unit'] ?? '' ); ?>"></label>
+			</div>
 			<label><input type="checkbox" name="fields[<?php echo esc_attr( $index ); ?>][required]" value="1" <?php checked( ! empty( $field['required'] ) ); ?>> Required</label>
 			<?php self::render_visibility_builder( $index, $field ); ?>
 			<div class="pss-field-type-options">
@@ -118,7 +123,7 @@ class Fields {
 	}
 
 	private static function render_definition_options( $index, $type, $field, $subfields ) {
-		if ( in_array( $type, array( 'select', 'multi_select' ), true ) ) : ?>
+		if ( in_array( $type, array( 'select', 'multi_select', 'radio', 'checkbox' ), true ) ) : ?>
 			<label>Options (one per line)
 				<textarea name="fields[<?php echo esc_attr( $index ); ?>][options]" rows="4"><?php echo esc_textarea( implode( "\n", (array) ( $field['options'] ?? array() ) ) ); ?></textarea>
 			</label>
@@ -228,9 +233,9 @@ class Fields {
 
 	private static function types() {
 		return array(
-			'text' => 'Text', 'textarea' => 'Textarea', 'wysiwyg' => 'WYSIWYG', 'number' => 'Number', 'date' => 'Date', 'url' => 'URL', 'color' => 'Color',
+			'text' => 'Text', 'textarea' => 'Textarea', 'wysiwyg' => 'WYSIWYG', 'number' => 'Number', 'date' => 'Date', 'time' => 'Time', 'url' => 'URL', 'email' => 'Email', 'phone' => 'Phone', 'color' => 'Color', 'icon' => 'Icon',
 			'image' => 'Image', 'gallery' => 'Gallery', 'file' => 'File', 'video' => 'Video', 'map' => 'Map / Location',
-			'select' => 'Select', 'multi_select' => 'Multi Select', 'toggle' => 'Toggle', 'repeater' => 'Repeater',
+			'select' => 'Select', 'multi_select' => 'Multi Select', 'radio' => 'Radio', 'checkbox' => 'Checkbox', 'toggle' => 'Toggle', 'relationship' => 'Relationship', 'repeater' => 'Repeater',
 			'group' => 'Group', 'table' => 'Table', 'icon_value' => 'Icon + Title + Value',
 		);
 	}
@@ -404,22 +409,38 @@ class Fields {
 
 	private static function render_editor( $name, $type, $value, $field ) {
 		$attr = ' name="' . esc_attr( $name ) . '" ';
-		if ( is_array( $value ) && ! in_array( $type, array( 'repeater', 'group', 'table', 'icon_value', 'multi_select', 'gallery', 'map' ), true ) ) {
+		$ph   = esc_attr( $field['placeholder'] ?? '' );
+		$unit = (string) ( $field['unit'] ?? '' );
+		if ( ( '' === $value || null === $value ) && isset( $field['default_value'] ) && '' !== $field['default_value'] ) {
+			$value = $field['default_value'];
+		}
+		if ( is_array( $value ) && ! in_array( $type, array( 'repeater', 'group', 'table', 'icon_value', 'multi_select', 'checkbox', 'gallery', 'map', 'relationship' ), true ) ) {
 			$value = '';
 		}
 		switch ( $type ) {
 			case 'textarea':
-				echo '<textarea' . $attr . 'rows="4" class="widefat">' . esc_textarea( is_scalar( $value ) ? $value : '' ) . '</textarea>';
+				echo '<textarea' . $attr . 'rows="4" class="widefat" placeholder="' . $ph . '">' . esc_textarea( is_scalar( $value ) ? $value : '' ) . '</textarea>';
 				break;
 			case 'number':
-				echo '<input type="number" step="any"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat">';
+				echo '<div class="pss-unit-field"><input type="number" step="any"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat" placeholder="' . $ph . '">';
+				if ( $unit ) { echo '<span class="pss-unit">' . esc_html( $unit ) . '</span>'; }
+				echo '</div>';
 				break;
 			case 'date':
 				echo '<input type="date"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat">';
 				break;
+			case 'time':
+				echo '<input type="time"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat">';
+				break;
+			case 'email':
+				echo '<input type="email"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat" placeholder="' . ( $ph ?: 'name@example.com' ) . '">';
+				break;
+			case 'phone':
+				echo '<input type="tel"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" class="widefat" placeholder="' . $ph . '">';
+				break;
 			case 'url':
 			case 'video':
-				echo '<input type="url"' . $attr . 'value="' . esc_attr( is_array( $value ) ? ( $value['url'] ?? '' ) : $value ) . '" class="widefat" placeholder="https://">';
+				echo '<input type="url"' . $attr . 'value="' . esc_attr( is_array( $value ) ? ( $value['url'] ?? '' ) : $value ) . '" class="widefat" placeholder="' . ( $ph ?: 'https://' ) . '">';
 				break;
 			case 'wysiwyg':
 				echo '<textarea' . $attr . 'rows="8" class="widefat pss-wysiwyg">' . esc_textarea( is_scalar( $value ) ? $value : '' ) . '</textarea>';
@@ -441,6 +462,25 @@ class Fields {
 				echo '<select' . $attr . ' class="widefat"><option value="">— Select —</option>';
 				foreach ( (array) ( $field['options'] ?? array() ) as $option ) {
 					echo '<option value="' . esc_attr( $option ) . '" ' . selected( $value, $option, false ) . '>' . esc_html( $option ) . '</option>';
+				}
+				echo '</select>';
+				break;
+			case 'radio':
+				foreach ( (array) ( $field['options'] ?? array() ) as $option ) {
+					echo '<label class="pss-choice"><input type="radio" name="' . esc_attr( $name ) . '" value="' . esc_attr( $option ) . '" ' . checked( (string) $value, (string) $option, false ) . '> ' . esc_html( $option ) . '</label>';
+				}
+				break;
+			case 'checkbox':
+				$vals = is_array( $value ) ? $value : array_filter( array( $value ) );
+				foreach ( (array) ( $field['options'] ?? array() ) as $option ) {
+					echo '<label class="pss-choice"><input type="checkbox" name="' . esc_attr( $name ) . '[]" value="' . esc_attr( $option ) . '" ' . checked( in_array( $option, $vals, true ), true, false ) . '> ' . esc_html( $option ) . '</label>';
+				}
+				break;
+			case 'relationship':
+				$vals = is_array( $value ) ? array_map( 'absint', $value ) : array_filter( array( absint( $value ) ) );
+				echo '<select multiple name="' . esc_attr( $name ) . '[]" class="widefat" size="6">';
+				foreach ( get_posts( array( 'post_type' => PSS_PROJECT_CPT, 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC' ) ) as $project ) {
+					echo '<option value="' . esc_attr( $project->ID ) . '" ' . selected( in_array( (int) $project->ID, $vals, true ), true, false ) . '>' . esc_html( $project->post_title ) . '</option>';
 				}
 				echo '</select>';
 				break;
@@ -478,7 +518,9 @@ class Fields {
 				self::render_icon_value( $name, $value );
 				break;
 			default:
-				echo '<input type="text" class="widefat"' . $attr . 'value="' . esc_attr( $value ) . '">';
+				echo '<div class="pss-unit-field"><input type="text" class="widefat"' . $attr . 'value="' . esc_attr( is_scalar( $value ) ? $value : '' ) . '" placeholder="' . $ph . '">';
+				if ( $unit ) { echo '<span class="pss-unit">' . esc_html( $unit ) . '</span>'; }
+				echo '</div>';
 		}
 	}
 
@@ -685,6 +727,13 @@ class Fields {
 			foreach ( $value as $key => $item ) {
 				$clean_key = is_numeric( $key ) ? (int) $key : sanitize_key( $key );
 				$out[ $clean_key ] = self::sanitize_structured( $item );
+			}
+			return $out;
+		}
+		return wp_kses_post( (string) $value );
+	}
+}
+ self::sanitize_structured( $item );
 			}
 			return $out;
 		}

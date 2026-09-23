@@ -18,11 +18,18 @@ class Render {
 			$file = PSS_PATH . 'templates/single-pss_project.php';
 			if ( file_exists( $file ) ) return $file;
 		}
+		if ( is_post_type_archive( PSS_PROJECT_CPT ) || is_tax( array( 'pss_project_category', 'pss_project_style', 'pss_project_location', 'pss_project_type' ) ) ) {
+			$file = PSS_PATH . 'templates/archive-pss_project.php';
+			if ( file_exists( $file ) ) return $file;
+		}
 		return $template;
 	}
 
 	public static function body_class( $classes ) {
 		if ( is_singular( PSS_PROJECT_CPT ) ) $classes[] = 'pss-project-single';
+		if ( is_post_type_archive( PSS_PROJECT_CPT ) || is_tax( array( 'pss_project_category', 'pss_project_style', 'pss_project_location', 'pss_project_type' ) ) ) {
+			$classes[] = 'pss-project-archive';
+		}
 		return $classes;
 	}
 
@@ -69,6 +76,26 @@ class Render {
 			?>
 		</div>
 		<?php
+	}
+
+	public static function render_archive() {
+		$layout_id  = absint( get_option( 'pss_archive_layout', 0 ) );
+		$library_id = $layout_id ? Layouts::get_elementor_template_id( $layout_id ) : 0;
+		echo '<div class="pss-archive-shell">';
+		if ( $layout_id && $library_id && class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->frontend ) ) {
+			$content = \Elementor\Plugin::$instance->frontend->get_builder_content_for_display( $library_id, true );
+			if ( $content ) {
+				echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo '</div>';
+				return;
+			}
+		}
+		$term  = get_queried_object();
+		$title = ( $term && isset( $term->name ) ) ? $term->name : __( 'Projects', 'project-showcase-studio' );
+		echo '<header class="pss-archive-fallback"><h1>' . esc_html( $title ) . '</h1></header>';
+		$posts = Ajax::query( array( 'limit' => 12 ) );
+		echo '<div class="pss-showcase pss-showcase--grid"><div class="pss-showcase__grid">' . RenderCards::cards( $posts, array( 'preset' => 'modern', 'animation' => 'reveal', 'show_title' => true, 'show_image' => true ) ) . '</div></div>';
+		echo '</div>';
 	}
 
 	public static function fallback( $project_id ) {

@@ -17,19 +17,20 @@ class Project_Image extends Base {
 		$this->add_control( 'overlay', array( 'label' => 'Overlay', 'type' => \Elementor\Controls_Manager::SWITCHER ) );
 		$this->add_control( 'caption', array( 'label' => 'Caption', 'type' => \Elementor\Controls_Manager::TEXT ) );
 		$this->end_controls_section();
-		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_box_style( '{{WRAPPER}} .pss-project-image' );
+		$this->start_controls_section( 'style', array( 'label' => 'Image', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
 		$this->add_responsive_control( 'radius', array( 'label' => 'Radius', 'type' => \Elementor\Controls_Manager::SLIDER, 'selectors' => array( '{{WRAPPER}} .pss-project-image' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'img_height', array( 'label' => 'Height', 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', 'vh' ), 'range' => array( 'px' => array( 'min' => 80, 'max' => 900 ), 'vh' => array( 'min' => 10, 'max' => 100 ) ), 'selectors' => array( '{{WRAPPER}} .pss-project-image img' => 'height: {{SIZE}}{{UNIT}}; object-fit: cover; width: 100%;' ) ) );
 		$this->add_control( 'overlay_color', array( 'label' => 'Overlay color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-project-image--overlay span' => 'background: {{VALUE}};' ) ) );
 		$this->end_controls_section();
+		$this->add_text_style( 'caption', 'Caption', '{{WRAPPER}} .pss-project-image__caption' );
 	}
 
 	protected function render() {
 		$s   = $this->get_settings_for_display();
 		$id  = $this->project_id( $s );
 		$url = $this->is_manual( $s ) ? $this->media_url( $s['image'] ?? array(), $s['image_url']['url'] ?? '' ) : $this->project_image( $id, $s['from'] ?? 'featured' );
-		if ( ! $url ) {
-			return;
-		}
+		if ( ! $url ) { return; }
 		echo '<div class="pss-project-image' . ( ! empty( $s['overlay'] ) ? ' pss-project-image--overlay' : '' ) . '"><img src="' . esc_url( $url ) . '" alt="' . esc_attr( $s['caption'] ?: ( $id ? get_the_title( $id ) : '' ) ) . '">';
 		if ( ! empty( $s['overlay'] ) ) {
 			echo '<span></span>';

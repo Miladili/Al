@@ -7,6 +7,7 @@ class Project_Gallery extends Base {
 	public function get_name() { return 'pss_project_gallery'; }
 	public function get_title() { return 'Project Gallery'; }
 	public function get_icon() { return 'eicon-gallery-grid'; }
+	public function get_script_depends() { return array( 'pss-frontend' ); }
 
 	protected function register_controls() {
 		$this->add_source_controls();

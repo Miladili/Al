@@ -15,22 +15,18 @@ class Project_CTA extends Base {
 		$this->add_icon_control( 'icon', 'Icon', array( 'value' => 'fas fa-arrow-right', 'library' => 'fa-solid' ) );
 		$this->add_control( 'link', array( 'label' => 'Custom URL', 'type' => \Elementor\Controls_Manager::URL, 'condition' => array( 'content_source' => 'manual' ) ) );
 		$this->end_controls_section();
-		$this->start_controls_section( 'style', array( 'label' => 'Style', 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
-		$this->add_control( 'color', array( 'label' => 'Color', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-project-cta' => 'color: {{VALUE}};' ) ) );
-		$this->add_control( 'bg', array( 'label' => 'Background', 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .pss-project-cta' => 'background: {{VALUE}};' ) ) );
-		$this->add_typography( 'typo', '{{WRAPPER}} .pss-project-cta' );
-		$this->add_responsive_control( 'pad', array( 'label' => 'Padding', 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'selectors' => array( '{{WRAPPER}} .pss-project-cta' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
-		$this->end_controls_section();
+		$this->add_box_style( '{{WRAPPER}} .pss-project-cta' );
+		$this->add_text_style( 'cta', 'Button', '{{WRAPPER}} .pss-project-cta' );
+		$this->add_icon_style( '{{WRAPPER}} .pss-project-cta__icon' );
 	}
 
 	protected function render() {
 		$s    = $this->get_settings_for_display();
 		$id   = $this->project_id( $s );
 		$href = $this->is_manual( $s ) ? ( $s['link']['url'] ?? '#' ) : ( $id ? get_permalink( $id ) : '' );
-		if ( ! $href ) {
-			return;
-		}
-		echo '<a class="pss-project-cta" href="' . esc_url( $href ) . '"><span>' . esc_html( $s['text'] ?? 'View project' ) . '</span>';
+		if ( ! $href ) { return; }
+		$blank = $this->is_manual( $s ) && ! empty( $s['link']['is_external'] ) ? ' target="_blank" rel="noopener"' : '';
+		echo '<a class="pss-project-cta" href="' . esc_url( $href ) . '"' . $blank . '><span>' . esc_html( $s['text'] ?? 'View project' ) . '</span>';
 		$this->render_icon( $s['icon'] ?? array(), 'pss-project-cta__icon' );
 		echo '</a>';
 	}

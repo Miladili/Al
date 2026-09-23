@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.0
+- Deepened thin Elementor widgets (Title, Description, Info, Field, Gallery, Inquiry, Breadcrumbs, Navigation, Custom Fields, Related, Tags, Location, Share, CTA, Image, Video) with connected Style controls: typography, color, hover, spacing, alignment, max-width.
+- Field types added: Email, Phone, Radio, Checkbox, Time, Relationship, Icon, plus placeholder / default / unit on field definitions.
+- Project media tab uses Media Library pickers for Before, After and Floor Plan (no raw ID-only UI).
+- Showcase query supports Latest / Featured / Related. Featured is a project checkbox, not a hardcoded industry schema.
+- Archive template uses an optional layout (Elementor library document) or a fallback project grid. No custom Elementor document type.
+- Dynamic tags: Project Location and Project Date. Project Documents widget lists file fields or manual downloads.
+- Frontend JS no longer loads on every widget; only Showcase, Slider, Gallery, Before/After, Scroll and Sticky request it.
+- Elementor library-document Single Layout flow is unchanged.
+
 ## 2.8.0
 - No mandatory universal project schema. Field Library defines reusable fields; each Project chooses its own attributes via Add Field.
 - Project editor starts empty (plus core title / featured image / gallery / taxonomies). Added fields are value-only cards with reorder, duplicate, collapse and remove.

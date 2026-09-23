@@ -349,6 +349,8 @@ class Elementor {
 				'Project_Content',
 				'Project_Meta',
 				'Project_Field',
+				'Project_Location',
+				'Project_Date',
 			);
 			foreach ( $tags as $tag_class ) {
 				$full = __NAMESPACE__ . '\\Elementor\\DynamicTags\\' . $tag_class;

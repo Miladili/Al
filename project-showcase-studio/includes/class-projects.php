@@ -155,8 +155,8 @@ class Projects {
 				<div class="pss-media-editor-grid">
 					<div class="pss-media-card"><span class="pss-editor-kicker">GALLERY</span><h3>Project gallery</h3><p>Upload and reorder the project images in the WordPress Media Library.</p><input type="hidden" id="pss_gallery" name="pss_gallery" value="<?php echo esc_attr( implode( ',', $gallery ) ); ?>"><button type="button" class="button button-primary pss-media-button" data-target="#pss_gallery">Choose gallery</button><span id="pss_gallery_preview" class="pss-media-preview"></span></div>
 					<div class="pss-media-card"><span class="pss-editor-kicker">VIDEO</span><h3>Project video</h3><p>YouTube, Vimeo or a self-hosted video URL.</p><input type="url" name="pss_video" value="<?php echo esc_attr( $video ); ?>" class="widefat" placeholder="https://…"></div>
-					<div class="pss-media-card"><span class="pss-editor-kicker">BEFORE / AFTER</span><h3>Transformation images</h3><p>Use Media Library IDs. A dedicated selector is intentionally kept simple and safe.</p><div class="pss-media-pair"><label>Before<input type="number" name="pss_before" value="<?php echo esc_attr( $before ); ?>" class="widefat"></label><label>After<input type="number" name="pss_after" value="<?php echo esc_attr( $after ); ?>" class="widefat"></label></div></div>
-					<div class="pss-media-card"><span class="pss-editor-kicker">PLAN</span><h3>Floor plan</h3><p>Store the attachment ID for the plan image.</p><input type="number" name="pss_floor_plan" value="<?php echo esc_attr( $floor_plan ); ?>" class="widefat"></div>
+					<div class="pss-media-card"><span class="pss-editor-kicker">BEFORE / AFTER</span><h3>Transformation images</h3><p>Choose images from the Media Library. These feed the Before / After widget.</p><div class="pss-media-pair"><div class="pss-media-field"><span>Before</span><input type="hidden" class="pss-media-id" name="pss_before" value="<?php echo esc_attr( absint( $before ) ); ?>"><button type="button" class="button pss-single-media">Choose image</button><span class="pss-media-current"><?php echo $before ? esc_html( 'ID ' . absint( $before ) ) : ''; ?></span></div><div class="pss-media-field"><span>After</span><input type="hidden" class="pss-media-id" name="pss_after" value="<?php echo esc_attr( absint( $after ) ); ?>"><button type="button" class="button pss-single-media">Choose image</button><span class="pss-media-current"><?php echo $after ? esc_html( 'ID ' . absint( $after ) ) : ''; ?></span></div></div></div>
+					<div class="pss-media-card"><span class="pss-editor-kicker">PLAN</span><h3>Floor plan</h3><p>Choose the plan image from the Media Library.</p><div class="pss-media-field"><input type="hidden" class="pss-media-id" name="pss_floor_plan" value="<?php echo esc_attr( absint( $floor_plan ) ); ?>"><button type="button" class="button pss-single-media">Choose image</button><span class="pss-media-current"><?php echo $floor_plan ? esc_html( 'ID ' . absint( $floor_plan ) ) : ''; ?></span></div></div>
 				</div>
 			</section>
 			<section class="pss-tab" data-tab="details">
@@ -196,6 +196,7 @@ class Projects {
 			<option value="<?php echo esc_attr( $layout->ID ); ?>" <?php selected( $selected, $layout->ID ); ?>><?php echo esc_html( $layout->post_title ); ?></option>
 			<?php endforeach; ?>
 		</select>
+		<p><label><input type="checkbox" name="pss_featured" value="1" <?php checked( (string) get_meta( $post->ID, '_pss_featured' ), '1' ); ?>> Featured project</label></p>
 		<?php
 	}
 

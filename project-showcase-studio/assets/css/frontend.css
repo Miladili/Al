@@ -443,3 +443,25 @@
   .pss-card--anim-stagger{opacity:1;transform:none;animation:none}
   .pss-card--comp-flip:hover .pss-card__flip,.pss-card--anim-pan .pss-card__media img{transform:none}
 }
+
+/* v3.0.0 widget depth, archive, documents, units */
+.pss-project-title__heading{margin:0;font-size:clamp(42px,7vw,108px);line-height:.92;letter-spacing:-.05em}
+.pss-project-title__sub{max-width:680px;font-size:clamp(16px,2vw,22px);opacity:.72;margin:18px 0 0}
+.pss-project-inquiry a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit;border:1px solid currentColor;border-radius:999px;padding:12px 18px;transition:transform .35s ease,background .35s ease}
+.pss-project-inquiry--editorial a{border-radius:0;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.pss-project-inquiry--minimal a{border:0;padding:0;border-bottom:1px solid currentColor;border-radius:0}
+.pss-project-inquiry a:hover{transform:translateY(-2px)}
+.pss-project-docs ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.pss-project-docs a{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid rgba(0,0,0,.1);border-radius:12px;color:inherit;text-decoration:none}
+.pss-project-docs__heading{margin:0 0 14px;font-size:clamp(18px,2vw,28px)}
+.pss-project-location__map{width:100%;min-height:240px;border:0;border-radius:16px;margin-top:12px;display:block}
+.pss-related-links{display:flex;flex-wrap:wrap;gap:8px}
+.pss-related-links a{padding:6px 10px;border:1px solid rgba(0,0,0,.12);border-radius:999px;color:inherit;text-decoration:none;font-size:12px}
+.pss-archive-shell{width:100%}
+.pss-archive-fallback{padding:48px 24px 12px;max-width:1240px;margin:0 auto}
+.pss-archive-fallback h1{margin:0;font-size:clamp(36px,6vw,72px);letter-spacing:-.04em}
+.pss-archive-shell .pss-showcase{max-width:1240px;margin:0 auto;padding:24px}
+.pss-choice{display:inline-flex;align-items:center;gap:6px;margin:0 12px 8px 0}
+.pss-unit-field{display:flex;align-items:center;gap:8px}
+.pss-unit{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;white-space:nowrap}
+@media(max-width:767px){.pss-project-inquiry a,.pss-project-docs a{width:100%;justify-content:center}}

@@ -531,6 +531,11 @@ function get_project_card_field( $project_id, $key ) {
 		'core:designer' => array( 'label' => 'Designer', 'value' => get_meta( $project_id, '_pss_designer' ) ),
 		'core:architect' => array( 'label' => 'Architect', 'value' => get_meta( $project_id, '_pss_architect' ) ),
 		'core:client' => array( 'label' => 'Client', 'value' => get_meta( $project_id, '_pss_client' ) ),
+		'core:contractor' => array( 'label' => 'Contractor', 'value' => get_meta( $project_id, '_pss_contractor' ) ),
+		'core:status' => array( 'label' => 'Status', 'value' => get_meta( $project_id, '_pss_status' ) ),
+		'core:budget' => array( 'label' => 'Budget', 'value' => get_meta( $project_id, '_pss_budget' ) ),
+		'core:completion' => array( 'label' => 'Completion', 'value' => get_meta( $project_id, '_pss_completion' ) ),
+		'core:photographer' => array( 'label' => 'Photographer', 'value' => get_meta( $project_id, '_pss_photographer' ) ),
 	);
 	if ( isset( $core[ $key ] ) ) { return $core[ $key ]; }
 	$field = get_field_definition( $project_id, $key );
@@ -546,6 +551,15 @@ function get_project_card_field( $project_id, $key ) {
 function render_field_value( $value, $type, $field = array() ) {
 	if ( 'toggle' === $type ) {
 		return ! empty( $value ) ? '<span class="pss-badge pss-badge--on">Yes</span>' : '<span class="pss-badge">No</span>';
+	}
+	if ( 'relationship' === $type && is_array( $value ) ) {
+		$html = '<div class="pss-related-links">';
+		foreach ( $value as $pid ) {
+			$pid = absint( $pid );
+			if ( ! $pid ) { continue; }
+			$html .= '<a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a>';
+		}
+		return $html . '</div>';
 	}
 	if ( 'image' === $type && $value ) {
 		$id = absint( $value );

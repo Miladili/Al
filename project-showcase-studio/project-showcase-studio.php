@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Project Showcase Studio
  * Description: Independent project management, custom fields, Elementor Single Project Layouts, project showcase cards, and WooCommerce product relations.
- * Version: 2.9.0
+ * Version: 3.0.0
  * Author: OpenAI
  * Requires at least: 6.3
  * Requires PHP: 7.4
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PSS_VERSION', '2.9.0' );
+define( 'PSS_VERSION', '3.0.0' );
 define( 'PSS_FILE', __FILE__ );
 define( 'PSS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'PSS_URL', plugin_dir_url( __FILE__ ) );
