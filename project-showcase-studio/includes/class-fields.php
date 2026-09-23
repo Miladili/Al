@@ -192,14 +192,17 @@ class Fields {
 			);
 			if ( ! $visibility['field_key'] ) $visibility['enabled'] = false;
 			$defs[] = array(
-				'label'       => $label,
-				'key'         => $key,
-				'type'        => $type,
-				'description' => sanitize_text_field( $field['description'] ?? '' ),
-				'required'    => ! empty( $field['required'] ),
-				'options'     => $options,
-				'subfields'   => $subfields,
-				'visibility'  => $visibility,
+				'label'         => $label,
+				'key'           => $key,
+				'type'          => $type,
+				'description'   => sanitize_text_field( $field['description'] ?? '' ),
+				'placeholder'   => sanitize_text_field( $field['placeholder'] ?? '' ),
+				'default_value' => sanitize_text_field( $field['default_value'] ?? '' ),
+				'unit'          => sanitize_text_field( $field['unit'] ?? '' ),
+				'required'      => ! empty( $field['required'] ),
+				'options'       => $options,
+				'subfields'     => $subfields,
+				'visibility'    => $visibility,
 			);
 		}
 		update_option( 'pss_field_definitions', $defs, false );
@@ -706,10 +709,14 @@ class Fields {
 			return array_values( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ) );
 		}
 		if ( in_array( $type, array( 'image', 'file' ), true ) ) return absint( is_array( $value ) ? ( $value['id'] ?? 0 ) : $value );
-		if ( 'multi_select' === $type ) return array_values( array_filter( array_map( 'sanitize_text_field', (array) $value ) ) );
+		if ( in_array( $type, array( 'multi_select', 'checkbox', 'relationship' ), true ) ) {
+			$cb = ( 'relationship' === $type ) ? 'absint' : 'sanitize_text_field';
+			return array_values( array_filter( array_map( $cb, (array) $value ) ) );
+		}
 		if ( 'toggle' === $type ) return empty( $value ) ? 0 : 1;
 		if ( in_array( $type, array( 'number' ), true ) ) return is_numeric( $value ) ? (float) $value : '';
-		if ( in_array( $type, array( 'date', 'color' ), true ) ) return sanitize_text_field( $value );
+		if ( 'email' === $type ) return sanitize_email( is_scalar( $value ) ? $value : '' );
+		if ( in_array( $type, array( 'date', 'time', 'color', 'phone', 'icon' ), true ) ) return sanitize_text_field( is_scalar( $value ) ? $value : '' );
 		if ( in_array( $type, array( 'url', 'video' ), true ) ) return esc_url_raw( is_array( $value ) ? ( $value['url'] ?? '' ) : $value );
 		if ( 'map' === $type ) {
 			$map = is_array( $value ) ? $value : array( 'address' => (string) $value );
@@ -727,13 +734,6 @@ class Fields {
 			foreach ( $value as $key => $item ) {
 				$clean_key = is_numeric( $key ) ? (int) $key : sanitize_key( $key );
 				$out[ $clean_key ] = self::sanitize_structured( $item );
-			}
-			return $out;
-		}
-		return wp_kses_post( (string) $value );
-	}
-}
- self::sanitize_structured( $item );
 			}
 			return $out;
 		}

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+- Activation parse error: leftover merge fragment after `class Fields` in `includes/class-fields.php` (fatal on plugin include). Removed.
+- Field library save again stores placeholder, default value, and unit.
+
 ## 3.0.0
 - Deepened thin Elementor widgets (Title, Description, Info, Field, Gallery, Inquiry, Breadcrumbs, Navigation, Custom Fields, Related, Tags, Location, Share, CTA, Image, Video) with connected Style controls: typography, color, hover, spacing, alignment, max-width.
 - Field types added: Email, Phone, Radio, Checkbox, Time, Relationship, Icon, plus placeholder / default / unit on field definitions.
