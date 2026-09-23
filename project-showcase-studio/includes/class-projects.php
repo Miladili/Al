@@ -97,8 +97,14 @@ class Projects {
 
 	public static function activate() {
 		self::register_content_types();
-		Layouts::register_cpt();
-		Layouts::ensure_seed_layouts();
+		if ( class_exists( __NAMESPACE__ . '\\Layouts' ) ) {
+			Layouts::register_cpt();
+			try {
+				Layouts::ensure_seed_layouts();
+			} catch ( \Throwable $e ) {
+				error_log( '[PSS] Seed layouts during activation: ' . $e->getMessage() );
+			}
+		}
 		flush_rewrite_rules();
 	}
 

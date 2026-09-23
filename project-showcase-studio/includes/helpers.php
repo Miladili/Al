@@ -623,6 +623,14 @@ function render_field_value( $value, $type, $field = array() ) {
 		}
 		return $html . '</div>';
 	}
-	if ( is_array( $value ) ) $value = implode( ', ', array_map( 'strval', $value ) );
-	return esc_html( (string) $value );
+	if ( is_array( $value ) ) {
+		$flat = array();
+		foreach ( $value as $item ) {
+			if ( is_scalar( $item ) ) {
+				$flat[] = (string) $item;
+			}
+		}
+		$value = implode( ', ', $flat );
+	}
+	return esc_html( is_scalar( $value ) ? (string) $value : '' );
 }

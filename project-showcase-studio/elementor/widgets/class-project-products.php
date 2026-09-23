@@ -1,6 +1,8 @@
 <?php
 namespace PSS\Elementor\Widgets;
 
+defined( 'ABSPATH' ) || exit;
+
 class Project_Products extends Base {
 	public function get_name() { return 'pss_project_products'; }
 	public function get_title() { return 'Project Products'; }

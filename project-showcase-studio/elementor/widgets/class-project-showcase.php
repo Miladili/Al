@@ -71,7 +71,7 @@ class Project_Showcase extends Base {
 		$this->add_control( 'manual_card_fields', array( 'label' => 'Field keys', 'type' => \Elementor\Controls_Manager::SELECT2, 'multiple' => true, 'options' => self::field_options(), 'condition' => array( 'card_data_mode' => 'manual' ) ) );
 		$this->end_controls_section();
 
-		$this->start_controls_section( 'responsive', array( 'label' => 'Responsive', 'tab' => \Elementor\Controls_Manager::TAB_LAYOUT ) );
+		$this->start_controls_section( 'responsive', array( 'label' => 'Responsive', 'tab' => $this->layout_tab() ) );
 		$this->add_responsive_control( 'columns', array( 'label' => 'Columns', 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 3, 'tablet_default' => 2, 'mobile_default' => 1, 'min' => 1, 'max' => 6, 'selectors' => array( '{{WRAPPER}} .pss-showcase' => '--pss-cols: {{VALUE}};' ) ) );
 		$this->add_responsive_control( 'gap', array( 'label' => 'Gap', 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 120 ) ), 'default' => array( 'size' => 22, 'unit' => 'px' ), 'tablet_default' => array( 'size' => 16, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 12, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .pss-showcase' => '--pss-gap: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_responsive_control( 'image_ratio', array( 'label' => 'Image ratio', 'type' => \Elementor\Controls_Manager::SELECT, 'default' => '4 / 5', 'tablet_default' => '4 / 5', 'mobile_default' => '4 / 5', 'options' => array( '1 / 1'=>'1:1', '4 / 5'=>'4:5', '3 / 4'=>'3:4', '16 / 11'=>'16:11', '16 / 9'=>'16:9', '3 / 2'=>'3:2' ), 'selectors' => array( '{{WRAPPER}} .pss-card__media' => 'aspect-ratio: {{VALUE}};' ) ) );

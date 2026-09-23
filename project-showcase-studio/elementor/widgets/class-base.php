@@ -301,6 +301,44 @@ abstract class Base extends \Elementor\Widget_Base {
 		return $ids ? wp_get_attachment_image_url( $ids[0], 'full' ) : '';
 	}
 
+	protected function layout_tab() {
+		if ( class_exists( '\\Elementor\\Controls_Manager' ) && defined( 'Elementor\\Controls_Manager::TAB_LAYOUT' ) ) {
+			return \Elementor\Controls_Manager::TAB_LAYOUT;
+		}
+		return \Elementor\Controls_Manager::TAB_CONTENT;
+	}
+
+	/**
+	 * Isolate a broken widget so it cannot empty the entire Elementor panel.
+	 *
+	 * @param bool $with_common_controls Include common controls.
+	 * @return array
+	 */
+	public function get_stack( $with_common_controls = true ) {
+		try {
+			return parent::get_stack( $with_common_controls );
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] Widget controls failed (' . $this->get_name() . '): ' . $e->getMessage() );
+			return array(
+				'controls' => array(),
+				'tabs'     => array(),
+			);
+		}
+	}
+
+	/**
+	 * Isolate render fatals so Elementor preview does not become a critical-error page.
+	 *
+	 * @return void
+	 */
+	public function render_content() {
+		try {
+			parent::render_content();
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] Widget render failed (' . $this->get_name() . '): ' . $e->getMessage() );
+		}
+	}
+
 	protected function control_label() {
 		return 'Style';
 	}

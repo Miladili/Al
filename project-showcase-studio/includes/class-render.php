@@ -43,6 +43,15 @@ class Render {
 	}
 
 	public static function render_single() {
+		try {
+			self::render_single_inner();
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] Single project render: ' . $e->getMessage() );
+			echo '<div class="pss-single-shell"><p>This project layout could not be rendered.</p></div>';
+		}
+	}
+
+	private static function render_single_inner() {
 		$project_id = get_the_ID();
 		if ( ! $project_id || PSS_PROJECT_CPT !== get_post_type( $project_id ) ) {
 			return;
@@ -79,6 +88,15 @@ class Render {
 	}
 
 	public static function render_archive() {
+		try {
+			self::render_archive_inner();
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] Archive render: ' . $e->getMessage() );
+			echo '<div class="pss-archive-shell"><p>Projects could not be listed.</p></div>';
+		}
+	}
+
+	private static function render_archive_inner() {
 		$layout_id  = absint( get_option( 'pss_archive_layout', 0 ) );
 		$library_id = $layout_id ? Layouts::get_elementor_template_id( $layout_id ) : 0;
 		echo '<div class="pss-archive-shell">';

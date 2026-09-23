@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.2
+- Plugin boot, activation, layout Elementor URLs and widget controls/render are isolated so one PHP error cannot white-screen WordPress or empty the Elementor panel.
+- Single Layouts now create a real `elementor_library` document directly (no WP Page create/delete detour).
+- Frontend widget JS is no longer enqueued on every Elementor frontend request.
+
 ## 3.0.1
 - Activation parse error: leftover merge fragment after `class Fields` in `includes/class-fields.php` (fatal on plugin include). Removed.
 - Field library save again stores placeholder, default value, and unit.

@@ -48,7 +48,7 @@ class Project_Scroll extends Base {
 		$this->add_control( 'show_progress', array( 'label' => 'Progress bar', 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes' ) );
 		$this->end_controls_section();
 
-		$this->start_controls_section( 'layout', array( 'label' => 'Panel layout', 'tab' => \Elementor\Controls_Manager::TAB_LAYOUT ) );
+		$this->start_controls_section( 'layout', array( 'label' => 'Panel layout', 'tab' => $this->layout_tab() ) );
 		$this->add_responsive_control( 'visible_panels', array(
 			'label' => 'Visible panels', 'type' => \Elementor\Controls_Manager::NUMBER,
 			'default' => 1.35, 'tablet_default' => 1.15, 'mobile_default' => 1, 'min' => 1, 'max' => 3, 'step' => 0.05,

@@ -318,35 +318,6 @@ class Layouts {
 		$title      = get_the_title( $layout_id );
 		$post_title = $title ? $title . ' — Design' : 'Project Layout Design';
 
-		if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->documents ) ) {
-			try {
-				$document = \Elementor\Plugin::$instance->documents->create(
-					'page',
-					array(
-						'post_title'  => $post_title,
-						'post_status' => 'publish',
-					)
-				);
-				if ( $document && ! is_wp_error( $document ) && method_exists( $document, 'get_main_id' ) ) {
-					$id = absint( $document->get_main_id() );
-					if ( $id && 'elementor_library' !== get_post_type( $id ) ) {
-						wp_delete_post( $id, true );
-						$id = 0;
-					}
-					if ( $id ) {
-						if ( method_exists( $document, 'set_is_built_with_elementor' ) ) {
-							$document->set_is_built_with_elementor( true );
-						}
-						return $id;
-					}
-				}
-			} catch ( \Throwable $e ) {
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					error_log( '[PSS] Elementor document create failed: ' . $e->getMessage() );
-				}
-			}
-		}
-
 		if ( ! post_type_exists( 'elementor_library' ) ) {
 			return 0;
 		}
@@ -364,6 +335,18 @@ class Layouts {
 		}
 
 		self::prepare_library_document( $template_id );
+
+		if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->documents ) ) {
+			try {
+				$document = \Elementor\Plugin::$instance->documents->get( absint( $template_id ), false );
+				if ( $document && method_exists( $document, 'set_is_built_with_elementor' ) ) {
+					$document->set_is_built_with_elementor( true );
+				}
+			} catch ( \Throwable $e ) {
+				error_log( '[PSS] Could not mark library document: ' . $e->getMessage() );
+			}
+		}
+
 		return absint( $template_id );
 	}
 
@@ -402,6 +385,15 @@ class Layouts {
 	 * template. The manager record itself is never opened as an Elementor document.
 	 */
 	public static function ensure_elementor_document( $layout_id ) {
+		try {
+			return self::ensure_elementor_document_inner( $layout_id );
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] ensure_elementor_document: ' . $e->getMessage() );
+			return 0;
+		}
+	}
+
+	private static function ensure_elementor_document_inner( $layout_id ) {
 		$layout_id = absint( $layout_id );
 		if ( ! $layout_id || PSS_LAYOUT_CPT !== get_post_type( $layout_id ) ) {
 			return 0;
@@ -449,6 +441,15 @@ class Layouts {
 	}
 
 	public static function get_elementor_edit_url( $layout_id ) {
+		try {
+			return self::get_elementor_edit_url_inner( $layout_id );
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] get_elementor_edit_url: ' . $e->getMessage() );
+			return '';
+		}
+	}
+
+	private static function get_elementor_edit_url_inner( $layout_id ) {
 		$layout_id = absint( $layout_id );
 		if ( ! $layout_id || PSS_LAYOUT_CPT !== get_post_type( $layout_id ) ) {
 			return '';
@@ -457,7 +458,10 @@ class Layouts {
 			return '';
 		}
 
-		$template_id = self::ensure_elementor_document( $layout_id );
+		$template_id = absint( get_post_meta( $layout_id, '_pss_elementor_template_id', true ) );
+		if ( ! $template_id || 'elementor_library' !== get_post_type( $template_id ) ) {
+			$template_id = self::ensure_elementor_document( $layout_id );
+		}
 		if ( ! $template_id ) {
 			return '';
 		}
@@ -680,8 +684,12 @@ class Layouts {
 		if ( get_option( 'pss_starter_upgrade_version', '' ) === '2.6.0' ) {
 			return;
 		}
-		self::ensure_seed_layouts();
-		update_option( 'pss_starter_upgrade_version', '2.6.0', false );
+		try {
+			self::ensure_seed_layouts();
+			update_option( 'pss_starter_upgrade_version', '2.6.0', false );
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] starter upgrade: ' . $e->getMessage() );
+		}
 	}
 
 	public static function ensure_seed_layouts() {
@@ -724,8 +732,23 @@ class Layouts {
 	}
 
 	private static function find_title( $title ) {
-		$post = get_page_by_title( $title, OBJECT, PSS_LAYOUT_CPT );
-		return $post ? $post->ID : 0;
+		$found = get_posts(
+			array(
+				'post_type'      => PSS_LAYOUT_CPT,
+				'title'          => $title,
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+			)
+		);
+		if ( $found ) {
+			return absint( $found[0] );
+		}
+		if ( function_exists( 'get_page_by_title' ) ) {
+			$post = get_page_by_title( $title, OBJECT, PSS_LAYOUT_CPT );
+			return $post ? $post->ID : 0;
+		}
+		return 0;
 	}
 
 	private static function create_seed( $title, $style ) {

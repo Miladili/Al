@@ -35,7 +35,6 @@ class Elementor {
 		add_action( 'elementor/editor/after_enqueue_styles', array( __CLASS__, 'enqueue_canvas_styles' ) );
 		add_action( 'elementor/preview/enqueue_styles', array( __CLASS__, 'enqueue_canvas_styles' ) );
 		add_action( 'elementor/preview/enqueue_scripts', array( __CLASS__, 'enqueue_canvas_scripts' ) );
-		add_action( 'elementor/frontend/after_enqueue_scripts', array( __CLASS__, 'enqueue_canvas_scripts' ) );
 
 		add_filter( 'elementor/utils/is_post_support', array( __CLASS__, 'filter_post_support' ), 999, 3 );
 		add_action( 'admin_bar_menu', array( __CLASS__, 'admin_bar' ), 999 );
@@ -85,6 +84,17 @@ class Elementor {
 	 * linked library document's real editor. Never rewrite Pages/Posts.
 	 */
 	public static function block_unsupported_elementor_editor() {
+		if ( ! is_admin() ) {
+			return;
+		}
+		try {
+			self::block_unsupported_elementor_editor_inner();
+		} catch ( \Throwable $e ) {
+			error_log( '[PSS] Elementor editor gate: ' . $e->getMessage() );
+		}
+	}
+
+	private static function block_unsupported_elementor_editor_inner() {
 		if ( ! is_admin() ) {
 			return;
 		}
@@ -244,7 +254,13 @@ class Elementor {
 			return;
 		}
 
-		require_once PSS_PATH . 'elementor/widgets/class-base.php';
+		try {
+			require_once PSS_PATH . 'elementor/widgets/class-base.php';
+		} catch ( \Throwable $e ) {
+			self::$widget_errors['base'] = $e->getMessage();
+			error_log( '[PSS] Widget base failed: ' . $e->getMessage() );
+			return;
+		}
 
 		$files = array(
 			'project-title'          => 'Project_Title',

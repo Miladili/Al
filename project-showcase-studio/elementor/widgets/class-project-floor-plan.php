@@ -1,6 +1,8 @@
 <?php
 namespace PSS\Elementor\Widgets;
 
+defined( 'ABSPATH' ) || exit;
+
 class Project_Floor_Plan extends Base {
 	public function get_name() { return 'pss_project_floor_plan'; }
 	public function get_title() { return 'Project Floor Plan'; }
