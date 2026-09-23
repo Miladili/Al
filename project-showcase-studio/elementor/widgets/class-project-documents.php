@@ -37,7 +37,10 @@ class Project_Documents extends Base {
 			}
 		} else {
 			$id = $this->project_id( $s );
-			if ( ! $id ) { return; }
+			if ( ! $id ) {
+				$this->empty_state( 'Project Documents', 'Choose a preview project, or switch this widget to Manual content.' );
+				return;
+			}
 			foreach ( \PSS\get_field_definitions( $id ) as $field ) {
 				if ( 'file' !== ( $field['type'] ?? '' ) ) { continue; }
 				$file_id = absint( \PSS\get_field_value( $id, $field['key'], 0 ) );

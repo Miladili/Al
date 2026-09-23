@@ -21,8 +21,11 @@ class Project_Video extends Base {
 	protected function render() {
 		$s   = $this->get_settings_for_display();
 		$id  = $this->project_id( $s );
-		$url = $this->is_manual( $s ) ? ( $s['manual_url'] ?? '' ) : ( $id ? \PSS\get_meta( $id, '_pss_video' ) : '' );
-		if ( ! $url ) { return; }
+		$url = $this->is_manual( $s ) ? ( $s['manual_url'] ?? '' ) : ( $id ? ( \PSS\get_meta( $id, '_pss_video' ) ?: \PSS\get_field_value( $id, 'video', '' ) ) : '' );
+		if ( ! $url ) {
+			$this->empty_state( 'Project Video', 'Add a video URL on the project, or switch this widget to Manual content.' );
+			return;
+		}
 		$html = wp_oembed_get( $url );
 		if ( ! $html ) {
 			$poster = $this->media_url( $s['poster'] ?? array() );

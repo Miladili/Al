@@ -41,8 +41,7 @@ class Project_Stats extends Base {
 			}
 		} elseif ( $id ) {
 			$keys = array_filter( array_map( function( $key ) {
-				$key = trim( (string) $key );
-				return 0 === strpos( $key, 'core:' ) ? 'core:' . sanitize_key( substr( $key, 5 ) ) : sanitize_key( $key );
+				return \PSS\sanitize_card_field_key( trim( (string) $key ) );
 			}, preg_split( '/[,\n]+/', (string) ( $s['fields'] ?? '' ) ) ) );
 			if ( ! $keys ) {
 				$keys = array( 'core:year', 'core:area', 'core:location', 'core:type' );
@@ -57,6 +56,7 @@ class Project_Stats extends Base {
 			}
 		}
 		if ( ! $items ) {
+			$this->empty_state( 'Project Stats', 'No values found. Add Year/Area on the project, or switch this widget to Manual content.' );
 			return;
 		}
 		echo '<div class="pss-project-stats">';

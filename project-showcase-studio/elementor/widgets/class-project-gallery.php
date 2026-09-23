@@ -46,6 +46,7 @@ class Project_Gallery extends Base {
 			}
 		}
 		if ( ! $urls ) {
+			$this->empty_state( 'Project Gallery', 'Add gallery images on the project, or switch this widget to Manual content and pick images.' );
 			return;
 		}
 		echo '<div class="pss-gallery pss-gallery--' . esc_attr( $s['layout'] ) . ' pss-gallery--hover-' . esc_attr( $s['hover'] ?? 'zoom' ) . '">';

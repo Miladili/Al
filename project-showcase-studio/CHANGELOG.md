@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0
+- Widget field keys now resolve `global:` / `core:` / plain keys to stored project values (library fields, local values, and core meta).
+- Project Info reads taxonomy + core meta + per-project field values, so Year/Area/Designer no longer look empty after schema-free editing.
+- Empty widgets print an Elementor-editor placeholder (`.pss-el-empty`); frontend stays blank until there is data.
+- Field Library JS “Add Field” matches the PHP form: placeholder, default, unit, required, visibility, radio/checkbox options.
+- Gallery masonry is a real column layout; hover-lift is wired. Plugin-only admin field cards show type/key chips.
+- Elementor library-document Single Layout flow is unchanged.
+
 ## 3.0.2
 - Plugin boot, activation, layout Elementor URLs and widget controls/render are isolated so one PHP error cannot white-screen WordPress or empty the Elementor panel.
 - Single Layouts now create a real `elementor_library` document directly (no WP Page create/delete detour).

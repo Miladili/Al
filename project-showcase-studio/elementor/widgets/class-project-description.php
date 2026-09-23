@@ -25,11 +25,17 @@ class Project_Description extends Base {
 			$content = $s['manual_text'] ?? '';
 		} else {
 			$id = $this->project_id( $s );
-			if ( ! $id ) { return; }
+			if ( ! $id ) {
+				$this->empty_state( 'Project Description', 'Choose a preview project in Single Layout settings, or switch this widget to Manual content.' );
+				return;
+			}
 			$content = 'excerpt' === ( $s['source'] ?? 'content' ) ? get_the_excerpt( $id ) : get_post_field( 'post_content', $id );
 			$content = 'content' === ( $s['source'] ?? 'content' ) ? apply_filters( 'the_content', $content ) : wpautop( $content );
 		}
-		if ( ! $content ) { return; }
+		if ( ! $content ) {
+			$this->empty_state( 'Project Description', 'No description on this project. Write one on the project, or switch the widget to Manual content.' );
+			return;
+		}
 		echo '<div class="pss-project-description' . ( ! empty( $s['dropcap'] ) ? ' pss-project-description--dropcap' : '' ) . '">' . wp_kses_post( $content ) . '</div>';
 	}
 }

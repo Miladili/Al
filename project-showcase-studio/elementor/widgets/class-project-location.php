@@ -37,7 +37,10 @@ class Project_Location extends Base {
 				$text = \PSS\field_value_text( $value );
 			}
 		}
-		if ( '' === trim( $text ) && empty( $map['lat'] ) ) { return; }
+		if ( '' === trim( $text ) && empty( $map['lat'] ) ) {
+			$this->empty_state( 'Project Location', 'Set a Location taxonomy term or a map field on the project.' );
+			return;
+		}
 		$style = sanitize_key( $settings['style'] ?? 'clean' );
 		echo '<div class="pss-project-simple-widget pss-project-location pss-project-location--' . esc_attr( $style ) . '">';
 		echo '<span class="pss-project-simple-widget__label">Location</span>';

@@ -17,7 +17,10 @@ class Project_Features extends Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 		$project_id = $this->project_id( $settings );
-		if ( ! $project_id ) return;
+		if ( ! $project_id ) {
+			$this->empty_state( 'Project Features', 'Choose a preview project in Single Layout settings.' );
+			return;
+		}
 		$key = sanitize_key( (string) ( $settings['field_key'] ?? '' ) );
 		$value = $key ? \PSS\get_field_value( $project_id, $key, array() ) : \PSS\get_meta( $project_id, '_pss_features', '' );
 		if ( is_string( $value ) ) {
@@ -29,7 +32,10 @@ class Project_Features extends Base {
 			$text = \PSS\field_value_text( $item );
 			if ( '' !== trim( $text ) ) $items[] = $text;
 		}
-		if ( ! $items ) return;
+		if ( ! $items ) {
+			$this->empty_state( 'Project Features', 'Add a Features field on the project, or set a custom field key in this widget.' );
+			return;
+		}
 		$style = sanitize_key( $settings['style'] ?? 'check' );
 		echo '<ul class="pss-project-features pss-project-features--' . esc_attr( $style ) . '">';
 		foreach ( $items as $item ) echo '<li><span aria-hidden="true">' . ( 'check' === $style ? '✓' : '•' ) . '</span><span>' . esc_html( $item ) . '</span></li>';

@@ -25,33 +25,29 @@ class Project_Meta extends Base {
 	protected function render() {
 		$s  = $this->get_settings_for_display();
 		$id = $this->project_id( $s );
-		if ( ! $id ) { return; }
+		if ( ! $id ) {
+			$this->empty_state( 'Project Info', 'Choose a preview project in Single Layout settings, or switch this widget to Manual content.' );
+			return;
+		}
 		$fields = $s['fields'] ?? array();
-		$values = array(
-			'type'       => \PSS\get_project_taxonomy_value( $id, 'pss_project_type' ),
-			'location'   => \PSS\get_project_taxonomy_value( $id, 'pss_project_location' ),
-			'year'       => \PSS\get_meta( $id, '_pss_year' ),
-			'area'       => \PSS\get_meta( $id, '_pss_area' ),
-			'style'      => \PSS\get_project_taxonomy_value( $id, 'pss_project_style' ),
-			'designer'   => \PSS\get_meta( $id, '_pss_designer' ),
-			'architect'  => \PSS\get_meta( $id, '_pss_architect' ),
-			'client'     => \PSS\get_meta( $id, '_pss_client' ),
-			'duration'   => \PSS\get_meta( $id, '_pss_duration' ),
-			'status'     => \PSS\get_meta( $id, '_pss_status' ),
-			'budget'     => \PSS\get_meta( $id, '_pss_budget' ),
-			'completion' => \PSS\get_meta( $id, '_pss_completion' ),
-			'services'   => \PSS\get_meta( $id, '_pss_services' ),
-			'materials'  => \PSS\get_meta( $id, '_pss_materials' ),
-		);
 		$labels = array( 'type' => 'Type', 'location' => 'Location', 'year' => 'Year', 'area' => 'Area', 'style' => 'Style', 'designer' => 'Designer', 'architect' => 'Architect', 'client' => 'Client', 'duration' => 'Duration', 'status' => 'Status', 'budget' => 'Budget', 'completion' => 'Completion', 'services' => 'Services', 'materials' => 'Materials' );
-		echo '<div class="pss-project-meta pss-project-meta--' . esc_attr( $s['layout'] ?? 'inline' ) . '">';
+		$items = array();
 		foreach ( (array) $fields as $key ) {
-			if ( empty( $values[ $key ] ) ) { continue; }
+			$value = \PSS\get_project_info_value( $id, $key );
+			if ( '' === trim( (string) $value ) ) { continue; }
+			$items[] = array( 'label' => $labels[ $key ] ?? $key, 'value' => $value );
+		}
+		if ( ! $items ) {
+			$this->empty_state( 'Project Info', 'No matching values on this project. Add Year, Area or other fields on the project, then pick them here.' );
+			return;
+		}
+		echo '<div class="pss-project-meta pss-project-meta--' . esc_attr( $s['layout'] ?? 'inline' ) . '">';
+		foreach ( $items as $item ) {
 			echo '<div class="pss-meta-item">';
 			if ( ! empty( $s['show_labels'] ) ) {
-				echo '<span>' . esc_html( $labels[ $key ] ?? $key ) . '</span>';
+				echo '<span>' . esc_html( $item['label'] ) . '</span>';
 			}
-			echo '<strong>' . esc_html( $values[ $key ] ) . '</strong></div>';
+			echo '<strong>' . esc_html( $item['value'] ) . '</strong></div>';
 		}
 		echo '</div>';
 	}

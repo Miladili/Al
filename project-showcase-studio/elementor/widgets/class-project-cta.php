@@ -24,7 +24,10 @@ class Project_CTA extends Base {
 		$s    = $this->get_settings_for_display();
 		$id   = $this->project_id( $s );
 		$href = $this->is_manual( $s ) ? ( $s['link']['url'] ?? '#' ) : ( $id ? get_permalink( $id ) : '' );
-		if ( ! $href ) { return; }
+		if ( ! $href ) {
+			$this->empty_state( 'Project CTA', 'Choose a preview project, or switch this widget to Manual content and set a URL.' );
+			return;
+		}
 		$blank = $this->is_manual( $s ) && ! empty( $s['link']['is_external'] ) ? ' target="_blank" rel="noopener"' : '';
 		echo '<a class="pss-project-cta" href="' . esc_url( $href ) . '"' . $blank . '><span>' . esc_html( $s['text'] ?? 'View project' ) . '</span>';
 		$this->render_icon( $s['icon'] ?? array(), 'pss-project-cta__icon' );

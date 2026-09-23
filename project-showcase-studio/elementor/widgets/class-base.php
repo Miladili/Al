@@ -157,10 +157,55 @@ abstract class Base extends \Elementor\Widget_Base {
 			return self::$field_options;
 		}
 		self::$field_options = array();
-		foreach ( \PSS\get_project_field_library_options() as $key => $field ) {
-			self::$field_options[ $key ] = (string) ( $field['label'] ?? $key );
+		try {
+			foreach ( \PSS\get_project_field_library_options() as $token => $field ) {
+				$value = (string) ( $field['record_key'] ?? $field['key'] ?? $token );
+				if ( 0 === strpos( $value, 'global:' ) ) {
+					$value = substr( $value, 7 );
+				}
+				$value = \PSS\sanitize_card_field_key( $value );
+				if ( ! $value ) {
+					continue;
+				}
+				$label = (string) ( $field['label'] ?? $value );
+				$type  = (string) ( $field['type'] ?? 'text' );
+				self::$field_options[ $value ] = $label . ' — ' . $type;
+			}
+		} catch ( \Throwable $e ) {
+			return array();
 		}
 		return self::$field_options;
+	}
+
+	protected function is_editor() {
+		try {
+			return class_exists( '\\Elementor\\Plugin' )
+				&& isset( \Elementor\Plugin::$instance->editor )
+				&& method_exists( \Elementor\Plugin::$instance->editor, 'is_edit_mode' )
+				&& \Elementor\Plugin::$instance->editor->is_edit_mode();
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+	}
+
+	protected function empty_state( $title, $hint = '' ) {
+		if ( ! $this->is_editor() ) {
+			return;
+		}
+		echo '<div class="pss-el-empty">';
+		echo '<strong>' . esc_html( $title ) . '</strong>';
+		if ( $hint ) {
+			echo '<span>' . esc_html( $hint ) . '</span>';
+		}
+		echo '</div>';
+	}
+
+	protected function resolve_field_key( $settings ) {
+		$key = (string) ( $settings['field_key'] ?? '' );
+		if ( '' === $key ) {
+			$key = (string) ( $settings['field_key_manual'] ?? '' );
+		}
+		return \PSS\sanitize_card_field_key( $key );
 	}
 
 	protected function project_id( $settings = array() ) {

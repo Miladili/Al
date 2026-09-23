@@ -73,7 +73,13 @@ class Fields {
 		$subfields = is_array( $field['subfields'] ?? null ) ? $field['subfields'] : array();
 		?>
 		<div class="pss-field-builder" data-index="<?php echo esc_attr( $index ); ?>">
-			<div class="pss-field-builder__head"><strong>Field</strong><button type="button" class="button-link-delete pss-remove-field">Remove</button></div>
+			<div class="pss-field-builder__head">
+				<span class="pss-drag-handle" aria-hidden="true">⋮⋮</span>
+				<strong><?php echo esc_html( $field['label'] ?? 'Field' ); ?></strong>
+				<span class="pss-field-type-pill"><?php echo esc_html( $type ); ?></span>
+				<code class="pss-field-key-chip"><?php echo esc_html( $field['key'] ?? '' ); ?></code>
+				<button type="button" class="button-link-delete pss-remove-field">Remove</button>
+			</div>
 			<div class="pss-grid-3">
 				<label>Label<input type="text" name="fields[<?php echo esc_attr( $index ); ?>][label]" value="<?php echo esc_attr( $field['label'] ?? '' ); ?>"></label>
 				<label>Key<input type="text" name="fields[<?php echo esc_attr( $index ); ?>][key]" value="<?php echo esc_attr( $field['key'] ?? '' ); ?>" placeholder="cabinet_material"></label>

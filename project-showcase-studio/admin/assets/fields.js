@@ -81,21 +81,24 @@
   }
 
   function scalarControl(name, type, def){
-    if(type==='textarea'||type==='wysiwyg') return `<textarea class="widefat" name="${esc(name)}" rows="${type==='wysiwyg'?8:4}"></textarea>`;
-    if(type==='number') return `<input type="number" step="any" class="widefat" name="${esc(name)}" value="">`;
-    if(type==='date') return `<input type="date" class="widefat" name="${esc(name)}" value="">`;
-    if(type==='time') return `<input type="time" class="widefat" name="${esc(name)}" value="">`;
-    if(type==='email') return `<input type="email" class="widefat" name="${esc(name)}" placeholder="name@example.com">`;
-    if(type==='phone') return `<input type="tel" class="widefat" name="${esc(name)}" value="">`;
-    if(type==='url'||type==='video') return `<input type="url" class="widefat" name="${esc(name)}" placeholder="https://">`;
-    if(type==='color') return `<input type="color" name="${esc(name)}" value="#B08A5A">`;
+    const ph = esc(def?.placeholder||'');
+    const val = esc(def?.default_value||'');
+    const unit = def?.unit ? `<span class="pss-unit">${esc(def.unit)}</span>` : '';
+    if(type==='textarea'||type==='wysiwyg') return `<textarea class="widefat" name="${esc(name)}" rows="${type==='wysiwyg'?8:4}" placeholder="${ph}">${val}</textarea>`;
+    if(type==='number') return `<div class="pss-unit-field"><input type="number" step="any" class="widefat" name="${esc(name)}" value="${val}" placeholder="${ph}">${unit}</div>`;
+    if(type==='date') return `<input type="date" class="widefat" name="${esc(name)}" value="${val}">`;
+    if(type==='time') return `<input type="time" class="widefat" name="${esc(name)}" value="${val}">`;
+    if(type==='email') return `<input type="email" class="widefat" name="${esc(name)}" placeholder="${ph||'name@example.com'}" value="${val}">`;
+    if(type==='phone') return `<input type="tel" class="widefat" name="${esc(name)}" value="${val}" placeholder="${ph}">`;
+    if(type==='url'||type==='video') return `<input type="url" class="widefat" name="${esc(name)}" placeholder="${ph||'https://'}" value="${val}">`;
+    if(type==='color') return `<input type="color" name="${esc(name)}" value="${val||'#B08A5A'}">`;
     if(type==='toggle') return `<label class="pss-switch"><input type="hidden" name="${esc(name)}" value="0"><input type="checkbox" name="${esc(name)}" value="1"><span>Enabled</span></label>`;
-    if(type==='select') return `<select class="widefat" name="${esc(name)}"><option value="">— Select —</option>${(def?.options||[]).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select>`;
+    if(type==='select') return `<select class="widefat" name="${esc(name)}"><option value="">— Select —</option>${(def?.options||[]).map(o=>`<option value="${esc(o)}" ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
     if(type==='image') return `<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="${esc(name)}" value=""><button type="button" class="button pss-single-media">Choose Image</button><span class="pss-media-current"></span></div>`;
     if(type==='gallery') return `<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="${esc(name)}" value=""><button type="button" class="button pss-gallery-media">Choose Gallery</button><span class="pss-media-current"></span></div>`;
     if(type==='file') return `<div class="pss-media-field"><input type="hidden" class="pss-media-id" name="${esc(name)}" value=""><button type="button" class="button pss-file-media">Choose file</button><span class="pss-media-current"></span></div>`;
     if(type==='map') return `<div class="pss-map-field"><input type="text" class="widefat" name="${esc(name)}[address]" placeholder="Address"><div class="pss-grid-3" style="margin-top:8px"><input type="text" name="${esc(name)}[lat]" placeholder="Lat"><input type="text" name="${esc(name)}[lng]" placeholder="Lng"></div></div>`;
-    return `<input type="text" class="widefat" name="${esc(name)}" value="">`;
+    return `<div class="pss-unit-field"><input type="text" class="widefat" name="${esc(name)}" value="${val}" placeholder="${ph}">${unit}</div>`;
   }
 
   function extraRow(idx, def, token){
@@ -331,7 +334,7 @@
     const type=builder.querySelector('.pss-field-type')?.value||'text', area=builder.querySelector('.pss-field-type-options'); if(!area) return;
     let data=[]; try{data=JSON.parse(area.querySelector('.pss-subfields-json')?.value||'[]')||[]}catch(e){}
     let html='';
-    if(type==='select'||type==='multi_select') html+=`<label>Options (one per line)<textarea name="fields[${builder.dataset.index}][options]" rows="4"></textarea></label>`;
+    if(['select','multi_select','radio','checkbox'].includes(type)) html+=`<label>Options (one per line)<textarea name="fields[${builder.dataset.index}][options]" rows="4"></textarea></label>`;
     if(['repeater','group','table'].includes(type)){
       html+=`<div class="pss-subfields-builder"><div class="pss-subfields-builder__head"><strong>${type==='table'?'Table Columns':'Subfields'}</strong><button type="button" class="button pss-add-subfield">+ Add</button></div><input type="hidden" class="pss-subfields-json" name="fields[${builder.dataset.index}][subfields]" value="${esc(json(data))}"><div class="pss-subfields-list">${data.map(r=>fieldLibrarySubfieldRow(type,r)).join('')}</div></div>`;
     }
@@ -340,11 +343,22 @@
   }
   function bindFieldLibraryPage(){
     const list=document.getElementById('pss-field-list'); if(!list) return;
-    document.querySelectorAll('.pss-field-builder').forEach(b=>{ b.querySelector('.pss-field-type')?.addEventListener('change',()=>refreshDefinition(b)); });
+    const bindType = (b)=>{
+      b.querySelector('.pss-field-type')?.addEventListener('change',()=>{
+        refreshDefinition(b);
+        const pill=b.querySelector('.pss-field-type-pill');
+        if(pill) pill.textContent=b.querySelector('.pss-field-type')?.value||'text';
+      });
+      b.querySelector('input[name*="[label]"]')?.addEventListener('input',e=>{
+        const title=b.querySelector('.pss-field-builder__head strong');
+        if(title) title.textContent=e.target.value||'Field';
+      });
+    };
+    document.querySelectorAll('.pss-field-builder').forEach(bindType);
     document.getElementById('pss-add-field')?.addEventListener('click',()=>{
       const idx=list.children.length; const d=document.createElement('div'); d.className='pss-field-builder'; d.dataset.index=idx;
-      d.innerHTML=`<div class="pss-field-builder__head"><strong>Field</strong><button type="button" class="button-link-delete pss-remove-field">Remove</button></div><div class="pss-grid-3"><label>Label<input type="text" name="fields[${idx}][label]"></label><label>Key<input type="text" name="fields[${idx}][key]"></label><label>Type<select class="pss-field-type" name="fields[${idx}][type]">${optionHtml('text')}</select></label></div><label>Description<input type="text" name="fields[${idx}][description]"></label><label><input type="checkbox" name="fields[${idx}][required]" value="1"> Required</label><div class="pss-field-type-options"></div>`;
-      list.appendChild(d); d.querySelector('.pss-field-type')?.addEventListener('change',()=>refreshDefinition(d));
+      d.innerHTML=`<div class="pss-field-builder__head"><span class="pss-drag-handle" aria-hidden="true">⋮⋮</span><strong>New field</strong><span class="pss-field-type-pill">text</span><button type="button" class="button-link-delete pss-remove-field">Remove</button></div><div class="pss-grid-3"><label>Label<input type="text" name="fields[${idx}][label]"></label><label>Key<input type="text" name="fields[${idx}][key]" placeholder="cabinet_material"></label><label>Type<select class="pss-field-type" name="fields[${idx}][type]">${optionHtml('text')}</select></label></div><label>Description<input type="text" name="fields[${idx}][description]"></label><div class="pss-grid-3"><label>Placeholder<input type="text" name="fields[${idx}][placeholder]"></label><label>Default value<input type="text" name="fields[${idx}][default_value]"></label><label>Unit (e.g. m²)<input type="text" name="fields[${idx}][unit]"></label></div><label><input type="checkbox" name="fields[${idx}][required]" value="1"> Required</label><div class="pss-field-visibility"><strong>Conditional visibility</strong><label><input type="checkbox" class="pss-visibility-enabled" name="fields[${idx}][visibility][enabled]" value="1"> Show this field only when another field matches</label><div class="pss-visibility-rule" style="display:none"><select name="fields[${idx}][visibility][field_key]"><option value="">Choose field</option></select><select name="fields[${idx}][visibility][operator]"><option value="equals">Equals</option><option value="not_equals">Does not equal</option><option value="contains">Contains</option><option value="not_contains">Does not contain</option><option value="empty">Is empty</option><option value="not_empty">Is not empty</option></select><input type="text" name="fields[${idx}][visibility][value]" placeholder="Value"></div></div><div class="pss-field-type-options"></div>`;
+      list.appendChild(d); bindType(d);
     });
     const search=document.getElementById('pss-field-library-search');
     search?.addEventListener('input',()=>{

@@ -39,14 +39,19 @@ class Project_Hero extends Base {
 		} else {
 			$id       = $this->project_id( $s );
 			if ( ! $id ) {
+				$this->empty_state( 'Project Hero', 'Choose a preview project in Single Layout settings, or switch this widget to Manual content.' );
 				return;
 			}
 			$title    = get_the_title( $id );
 			$subtitle = \PSS\get_meta( $id, '_pss_subtitle' );
+			if ( ! $subtitle ) {
+				$subtitle = \PSS\get_field_value( $id, 'subtitle', '' );
+			}
 			$image    = get_the_post_thumbnail_url( $id, 'full' );
 			$link     = get_permalink( $id );
 		}
 		if ( ! $title && ! $image ) {
+			$this->empty_state( 'Project Hero', 'This project needs a title or featured image.' );
 			return;
 		}
 		echo '<section class="pss-project-hero">';

@@ -30,7 +30,10 @@ class Project_Image extends Base {
 		$s   = $this->get_settings_for_display();
 		$id  = $this->project_id( $s );
 		$url = $this->is_manual( $s ) ? $this->media_url( $s['image'] ?? array(), $s['image_url']['url'] ?? '' ) : $this->project_image( $id, $s['from'] ?? 'featured' );
-		if ( ! $url ) { return; }
+		if ( ! $url ) {
+			$this->empty_state( 'Project Image', 'Add a featured image to the preview project, or switch this widget to Manual content.' );
+			return;
+		}
 		echo '<div class="pss-project-image' . ( ! empty( $s['overlay'] ) ? ' pss-project-image--overlay' : '' ) . '"><img src="' . esc_url( $url ) . '" alt="' . esc_attr( $s['caption'] ?: ( $id ? get_the_title( $id ) : '' ) ) . '">';
 		if ( ! empty( $s['overlay'] ) ) {
 			echo '<span></span>';

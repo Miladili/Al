@@ -32,11 +32,20 @@ class Project_Title extends Base {
 			$subtitle = $s['manual_subtitle'] ?? '';
 		} else {
 			$id = $this->project_id( $s );
-			if ( ! $id ) { return; }
+			if ( ! $id ) {
+				$this->empty_state( 'Project Title', 'Choose a preview project in Single Layout settings, or switch this widget to Manual content.' );
+				return;
+			}
 			$title    = get_the_title( $id );
 			$subtitle = \PSS\get_meta( $id, '_pss_subtitle' );
+			if ( ! $subtitle ) {
+				$subtitle = \PSS\get_field_value( $id, 'subtitle', '' );
+			}
 		}
-		if ( ! $title ) { return; }
+		if ( ! $title ) {
+			$this->empty_state( 'Project Title', 'This project has no title yet.' );
+			return;
+		}
 		$tag = in_array( $s['html_tag'] ?? 'h1', array( 'h1', 'h2', 'h3', 'h4', 'p', 'div' ), true ) ? $s['html_tag'] : 'h1';
 		echo '<div class="pss-project-title pss-project-title--' . esc_attr( $s['style'] ?? 'editorial' ) . '">';
 		if ( ! empty( $s['show_kicker'] ) ) {

@@ -127,4 +127,12 @@
 .pss-admin-screen .pss-unit-field{display:flex;align-items:center;gap:8px}
 .pss-admin-screen .pss-unit{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#646970}
 .pss-admin-screen .pss-choice{display:inline-flex;gap:6px;margin:0 12px 8px 0}
+.pss-admin-screen .pss-fields-admin .pss-field-builder{padding:0;overflow:hidden}
+.pss-admin-screen .pss-fields-admin .pss-field-builder__head{margin:0;padding:12px 16px;background:#f6f4ef;border-bottom:1px solid #e6e0d6;gap:10px}
+.pss-admin-screen .pss-fields-admin .pss-field-builder__head strong{flex:1}
+.pss-admin-screen .pss-fields-admin .pss-field-builder .pss-grid-3,
+.pss-admin-screen .pss-fields-admin .pss-field-builder>label,
+.pss-admin-screen .pss-fields-admin .pss-field-builder .pss-field-visibility,
+.pss-admin-screen .pss-fields-admin .pss-field-builder .pss-field-type-options{padding:0 16px}
+.pss-admin-screen .pss-fields-admin .pss-field-builder .pss-field-type-options{padding-bottom:16px}
 .pss-admin-screen .pss-media-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}

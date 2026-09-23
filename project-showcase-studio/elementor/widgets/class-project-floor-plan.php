@@ -17,12 +17,21 @@ class Project_Floor_Plan extends Base {
 	protected function render() {
 		$s = $this->get_settings_for_display();
 		$id = $this->project_id( $s );
-		if ( ! $id ) return;
+		if ( ! $id ) {
+			$this->empty_state( 'Project Floor Plan', 'Choose a preview project in Single Layout settings.' );
+			return;
+		}
 		$image_id = absint( \PSS\get_meta( $id, '_pss_floor_plan', 0 ) );
-		if ( ! $image_id ) return;
-		$url = wp_get_attachment_image_url( $image_id, $s['image_size'] ?? 'full' );
-		$full = wp_get_attachment_image_url( $image_id, 'full' ) ?: $url;
-		if ( ! $url ) return;
+		if ( ! $image_id ) {
+			$maybe = \PSS\get_field_value( $id, 'floor_plan', 0 );
+			$image_id = absint( is_array( $maybe ) ? ( $maybe['id'] ?? 0 ) : $maybe );
+		}
+		$url = $image_id ? wp_get_attachment_image_url( $image_id, $s['image_size'] ?? 'full' ) : '';
+		$full = $image_id ? ( wp_get_attachment_image_url( $image_id, 'full' ) ?: $url ) : '';
+		if ( ! $url ) {
+			$this->empty_state( 'Project Floor Plan', 'Upload a floor plan on the project (Floor Plan meta or a floor_plan image field).' );
+			return;
+		}
 		if ( 'yes' === ( $s['lightbox'] ?? '' ) ) {
 			echo '<a class="pss-floor-plan pss-lightbox-link" href="' . esc_url( $full ) . '"><img src="' . esc_url( $url ) . '" alt=""></a>';
 		} else {

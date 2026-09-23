@@ -26,7 +26,10 @@ class Project_Tags extends Base {
 			$terms = array_filter( array_map( 'trim', preg_split( '/\\r\\n|\\r|\\n|,/', (string) ( $settings['manual_tags'] ?? '' ) ) ) );
 		} else {
 			$project_id = $this->project_id( $settings );
-			if ( ! $project_id ) { return; }
+			if ( ! $project_id ) {
+				$this->empty_state( 'Project Tags', 'Choose a preview project in Single Layout settings, or switch this widget to Manual content.' );
+				return;
+			}
 			$map      = array( 'category' => 'pss_project_category', 'style' => 'pss_project_style', 'location' => 'pss_project_location', 'type' => 'pss_project_type' );
 			$selected = sanitize_key( $settings['taxonomies'] ?? 'all' );
 			$taxes    = 'all' === $selected ? $map : array( $selected => $map[ $selected ] ?? '' );
@@ -40,7 +43,10 @@ class Project_Tags extends Base {
 			}
 			$terms = array_values( array_unique( $terms ) );
 		}
-		if ( ! $terms ) { return; }
+		if ( ! $terms ) {
+			$this->empty_state( 'Project Tags', 'Assign Type, Style, Location or Category on the project.' );
+			return;
+		}
 		$animation = sanitize_key( $settings['animation'] ?? 'soft' );
 		echo '<div class="pss-project-tags pss-project-tags--anim-' . esc_attr( $animation ) . '">';
 		foreach ( $terms as $term ) {

@@ -34,7 +34,10 @@ class Project_Specifications extends Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 		$project_id = $this->project_id( $settings );
-		if ( ! $project_id ) return;
+		if ( ! $project_id ) {
+			$this->empty_state( 'Project Specifications', 'Choose a preview project in Single Layout settings.' );
+			return;
+		}
 		$keys = preg_split( '/\r\n|\r|\n/', (string) ( $settings['field_keys'] ?? '' ) );
 		$keys = array_values( array_filter( array_map( 'sanitize_key', $keys ) ) );
 		if ( ! $keys ) {
@@ -66,7 +69,10 @@ class Project_Specifications extends Base {
 		if ( '' === trim( $text ) ) continue;
 		$items[] = array( 'key' => $key, 'label' => $label, 'value' => $text );
 	}
-	if ( ! $items ) return;
+	if ( ! $items ) {
+		$this->empty_state( 'Project Specifications', 'No specification values on this project. Add fields, or list field keys in the widget.' );
+		return;
+	}
 	$layout = sanitize_key( $settings['layout'] ?? 'grid' );
 	$animation = sanitize_key( $settings['animation'] ?? 'soft' );
 	echo '<div class="pss-project-specs pss-project-specs--' . esc_attr( $layout ) . ' pss-project-specs--anim-' . esc_attr( $animation ) . '">';

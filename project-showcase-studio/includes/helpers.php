@@ -502,6 +502,9 @@ function get_project_field_library_options() {
 
 function sanitize_card_field_key( $key ) {
 	$key = strtolower( trim( (string) $key ) );
+	if ( 0 === strpos( $key, 'global:' ) ) {
+		return sanitize_key( substr( $key, 7 ) );
+	}
 	if ( 0 === strpos( $key, 'core:' ) ) {
 		return 'core:' . sanitize_key( substr( $key, 5 ) );
 	}
@@ -537,15 +540,78 @@ function get_project_card_field( $project_id, $key ) {
 		'core:completion' => array( 'label' => 'Completion', 'value' => get_meta( $project_id, '_pss_completion' ) ),
 		'core:photographer' => array( 'label' => 'Photographer', 'value' => get_meta( $project_id, '_pss_photographer' ) ),
 	);
-	if ( isset( $core[ $key ] ) ) { return $core[ $key ]; }
-	$field = get_field_definition( $project_id, $key );
-	if ( empty( $field ) ) { return array( 'label' => '', 'value' => '' ); }
+	if ( isset( $core[ $key ] ) ) {
+		return array_merge( $core[ $key ], array( 'type' => 'text', 'definition' => array() ) );
+	}
+	$plain = $key;
+	if ( 0 === strpos( $key, 'core_' ) ) {
+		$plain = substr( $key, 5 );
+		$alias = 'core:' . $plain;
+		if ( isset( $core[ $alias ] ) ) {
+			return array_merge( $core[ $alias ], array( 'type' => 'text', 'definition' => array() ) );
+		}
+	} elseif ( 0 === strpos( $key, 'core:' ) ) {
+		$plain = substr( $key, 5 );
+	}
+	$field = get_field_definition( $project_id, $plain );
+	if ( empty( $field ) && $plain !== $key ) {
+		$field = get_field_definition( $project_id, $key );
+	}
+	if ( ! empty( $field ) ) {
+		$lookup = sanitize_key( $field['key'] ?? $plain );
+		$value  = get_field_value( $project_id, $lookup, '' );
+		if ( ( '' === $value || null === $value ) && isset( $core[ 'core:' . $plain ] ) ) {
+			$value = $core[ 'core:' . $plain ]['value'];
+		}
+		return array(
+			'label'      => (string) ( $field['label'] ?? $lookup ),
+			'value'      => $value,
+			'type'       => sanitize_key( $field['type'] ?? 'text' ),
+			'definition' => $field,
+		);
+	}
+	if ( isset( $core[ 'core:' . $plain ] ) ) {
+		return array_merge( $core[ 'core:' . $plain ], array( 'type' => 'text', 'definition' => array() ) );
+	}
+	$value = get_field_value( $project_id, $plain, '' );
+	if ( '' === $value || null === $value ) {
+		return array( 'label' => '', 'value' => '' );
+	}
 	return array(
-		'label' => (string) ( $field['label'] ?? $key ),
-		'value' => get_field_value( $project_id, $key, '' ),
-		'type' => sanitize_key( $field['type'] ?? 'text' ),
-		'definition' => $field,
+		'label'      => $plain,
+		'value'      => $value,
+		'type'       => 'text',
+		'definition' => array(),
 	);
+}
+
+function get_project_info_value( $project_id, $key ) {
+	$key = sanitize_key( $key );
+	$tax = array(
+		'type'     => 'pss_project_type',
+		'location' => 'pss_project_location',
+		'style'    => 'pss_project_style',
+		'category' => 'pss_project_category',
+	);
+	if ( isset( $tax[ $key ] ) ) {
+		$text = get_project_taxonomy_value( $project_id, $tax[ $key ] );
+		if ( '' !== $text ) {
+			return $text;
+		}
+	}
+	$core = get_project_core_field_library();
+	if ( isset( $core[ $key ]['meta_key'] ) ) {
+		$meta = get_meta( $project_id, $core[ $key ]['meta_key'] );
+		if ( '' !== $meta && null !== $meta ) {
+			return field_value_text( $meta );
+		}
+	}
+	$text = field_value_text( get_field_value( $project_id, $key, '' ) );
+	if ( '' !== $text ) {
+		return $text;
+	}
+	$data = get_project_card_field( $project_id, $key );
+	return field_value_text( $data['value'] ?? '' );
 }
 
 function render_field_value( $value, $type, $field = array() ) {

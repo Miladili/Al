@@ -28,27 +28,34 @@ class Project_Field extends Base {
 	protected function render() {
 		$s   = $this->get_settings_for_display();
 		$id  = $this->project_id( $s );
-		$key = sanitize_text_field( $s['field_key'] ?? '' );
-		if ( ! $key ) {
-			$key = sanitize_key( $s['field_key_manual'] ?? '' );
-		}
+		$key = $this->resolve_field_key( $s );
 		$html = '';
+		$unit = '';
+		$label = $s['custom_label'] ?: $key;
 		if ( $this->is_manual( $s ) ) {
 			$text  = (string) ( $s['manual_value'] ?? '' );
-			$label = $s['custom_label'] ?: $key;
 			$html  = esc_html( $text );
 		} else {
-			if ( ! $id || ! $key ) { return; }
+			if ( ! $id || ! $key ) {
+				$this->empty_state( 'Project Field', $key ? 'Choose a preview project in Single Layout settings, or switch this widget to Manual content.' : 'Select a field in the widget panel.' );
+				return;
+			}
 			$data  = \PSS\get_project_card_field( $id, $key );
 			$value = $data['value'] ?? '';
 			$label = $s['custom_label'] ?: ( $data['label'] ?? $key );
 			$type  = $data['type'] ?? 'text';
+			$unit  = (string) ( ( $data['definition']['unit'] ?? '' ) );
 			$text  = \PSS\field_value_text( $value );
 			$html  = is_array( $value ) ? \PSS\render_field_value( $value, $type, $data['definition'] ?? array() ) : esc_html( $text );
+			if ( $unit && ! is_array( $value ) && '' !== $text ) {
+				$html .= ' <span class="pss-unit">' . esc_html( $unit ) . '</span>';
+			}
 		}
 		if ( '' === trim( wp_strip_all_tags( (string) $html ) ) ) {
 			if ( '' !== ( $s['empty_text'] ?? '' ) ) {
 				echo '<span class="pss-project-field-widget__empty">' . esc_html( $s['empty_text'] ) . '</span>';
+			} else {
+				$this->empty_state( 'Project Field', 'No value for this field on the preview project.' );
 			}
 			return;
 		}

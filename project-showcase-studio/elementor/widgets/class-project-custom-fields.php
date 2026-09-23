@@ -24,9 +24,15 @@ class Project_Custom_Fields extends Base {
 	protected function render() {
 		$s  = $this->get_settings_for_display();
 		$id = $this->project_id( $s );
-		if ( ! $id ) { return; }
+		if ( ! $id ) {
+			$this->empty_state( 'Project Custom Fields', 'Choose a preview project in Single Layout settings.' );
+			return;
+		}
 		$defs = \PSS\get_field_definitions( $id );
-		if ( ! $defs ) { return; }
+		if ( ! $defs ) {
+			$this->empty_state( 'Project Custom Fields', 'This project has no extra fields yet. Add fields on the project editor.' );
+			return;
+		}
 		$only = array_filter( array_map( 'sanitize_key', preg_split( '/[,\\s]+/', (string) ( $s['include_keys'] ?? '' ) ) ) );
 		echo '<div class="pss-custom-fields pss-custom-fields--' . esc_attr( $s['layout'] ?? 'grid' ) . '">';
 		foreach ( $defs as $field ) {
